@@ -156,19 +156,11 @@ const App = {
         }
 
         nav.innerHTML = menuItems.map(item => `
-            <a href="#" class="nav-item" data-page="${item.page}">
+            <a href="#" class="nav-item" data-page="${item.page}" onclick="App.navigate('${item.page}'); return false;">
                 <i class="fas ${item.icon}"></i>
                 <span>${item.label}</span>
             </a>
         `).join('');
-
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const page = item.dataset.page;
-                this.navigate(page);
-            });
-        });
     },
 
     setupEventListeners() {
@@ -184,7 +176,10 @@ const App = {
     navigate(page) {
         this.currentPage = page;
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.page === page);
+            item.classList.remove('active');
+            if (item.getAttribute('data-page') === page) {
+                item.classList.add('active');
+            }
         });
         this.renderPage(page);
     },
