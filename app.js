@@ -21,7 +21,9 @@ const App = {
         starPoints: [],
         moods: [],
         goals: [],
-        rewards: []
+        rewards: [],
+        trialExams: [],
+        trialResults: []
     },
     currentUser: null,
     currentPage: 'dashboard',
@@ -92,6 +94,8 @@ const App = {
                 if (!this.data.moods) this.data.moods = [];
                 if (!this.data.goals) this.data.goals = [];
                 if (!this.data.rewards) this.data.rewards = [];
+            if (!this.data.trialExams) this.data.trialExams = [];
+            if (!this.data.trialResults) this.data.trialResults = [];
             } catch(e) {
                 this.data = defaultData;
             }
@@ -146,6 +150,7 @@ const App = {
                 { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                 { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
+                { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
@@ -165,6 +170,7 @@ const App = {
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
                 { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
+                { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
                 { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
@@ -182,6 +188,7 @@ const App = {
                 { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
                 { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
                 { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
+                { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                 { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
@@ -257,6 +264,8 @@ const App = {
             gradeanalysis: () => this.renderGradeAnalysis(),
             schedule: () => this.renderSchedule(),
             exams: () => this.renderExams(),
+            trialresults: () => this.renderTrialResults(),
+            mytrialresults: () => this.renderMyTrialResults(),
             attendance: () => this.renderAttendance(),
             settings: () => this.renderSettings(),
             announcements: () => this.renderAnnouncements(),
@@ -3800,6 +3809,456 @@ const App = {
         if (confirm(`${reward.name} ödülünü ${reward.cost} yıldız karşılığında almak istiyor musun?`)) {
             this.showToast(`${reward.name} ödülünü aldın! 🎉 Ödülünü öğretmenine göster.`, 'success');
         }
+    },
+
+    renderTrialResults() {
+        const exams = this.data.trialExams || [];
+        const allResults = this.data.trialResults || [];
+        
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📊 Deneme Sonuçları Yönetimi</h1>
+                <button class="btn btn-primary" onclick="App.showTrialExamModal()">
+                    <i class="fas fa-plus"></i> Yeni Deneme Ekle
+                </button>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Deneme Listesi</span>
+                </div>
+                ${exams.length > 0 ? exams.map(exam => this.renderTrialExamCard(exam, allResults)).join('') : '<p class="empty-state">Henüz deneme eklenmedi. Yeni deneme ekleyerek başlayın.</p>'}
+            </div>
+        `;
+    },
+
+    renderTrialExamCard(exam, allResults) {
+        const examResults = allResults.filter(r => r.examId === exam.id);
+        const date = new Date(exam.date);
+        
+        return `
+            <div class="exam-card" style="margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="exam-date">
+                        <div class="day">${date.getDate()}</div>
+                        <div class="month">${['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'][date.getMonth()]}</div>
+                    </div>
+                    <div class="exam-info" style="flex: 1;">
+                        <h4>${exam.name}</h4>
+                        <p>${exam.subjects.join(', ')}</p>
+                        <p style="font-size: 12px; color: var(--gray-500);">${examResults.length} öğrenci sonuç girdi</p>
+                    </div>
+                    <div class="action-btns">
+                        <button class="action-btn view" onclick="App.viewTrialExamResults('${exam.id}')" title="Sonuçları Gör">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                        <button class="action-btn edit" onclick="App.showTrialExamResultsModal('${exam.id}')" title="Sonuç Gir">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete" onclick="App.deleteTrialExam('${exam.id}')" title="Sil">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    showTrialExamModal() {
+        const subjects = ['Türkçe', 'Matematik', 'Fen', 'Sosyal', 'İngilizce', 'Din Kültürü'];
+        
+        const content = `
+            <form id="trialExamForm">
+                <div class="form-group">
+                    <label>Deneme Adı *</label>
+                    <input type="text" name="name" placeholder="örn: 1. Deneme Sınavı" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Toplam Soru</label>
+                        <input type="number" name="totalQuestions" value="100" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Dersler (Ctrl ile seç)</label>
+                    <select name="subjects" multiple style="height: 120px;">
+                        ${subjects.map(s => `<option value="${s}" selected>${s}</option>`).join('')}
+                    </select>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveTrialExam()' }
+        ];
+        this.showModal('Yeni Deneme', content, buttons);
+    },
+
+    saveTrialExam() {
+        const form = document.getElementById('trialExamForm');
+        const formData = new FormData(form);
+        
+        const subjects = [];
+        const select = form.querySelector('[name="subjects"]');
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].selected) {
+                subjects.push(select.options[i].value);
+            }
+        }
+
+        if (!this.data.trialExams) this.data.trialExams = [];
+        
+        this.data.trialExams.push({
+            id: this.generateId(),
+            name: formData.get('name'),
+            date: formData.get('date'),
+            totalQuestions: parseInt(formData.get('totalQuestions')) || 100,
+            subjects: subjects,
+            createdBy: this.currentUser.name
+        });
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Deneme eklendi!');
+    },
+
+    deleteTrialExam(examId) {
+        if (confirm('Bu denemeyi ve tüm sonuçlarını silmek istediğinize emin misiniz?')) {
+            this.data.trialExams = (this.data.trialExams || []).filter(e => e.id !== examId);
+            this.data.trialResults = (this.data.trialResults || []).filter(r => r.examId !== examId);
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast('Deneme silindi!');
+        }
+    },
+
+    showTrialExamResultsModal(examId) {
+        const exam = this.data.trialExams.find(e => e.id === examId);
+        if (!exam) return;
+
+        const students = this.data.students;
+        
+        let html = `<div style="max-height: 400px; overflow-y: auto;">
+            <p style="margin-bottom: 15px; color: var(--gray-500);">${exam.name} - Sonuç Girişi</p>
+            <form id="trialResultsForm">
+                <input type="hidden" name="examId" value="${examId}">
+                <div class="form-group">
+                    <label>Öğrenci Seç *</label>
+                    <select name="studentId" required onchange="App.loadStudentTrialResult('${examId}')">
+                        <option value="">Seçin...</option>
+                        ${students.map(s => `<option value="${s.id}">${s.name} (${s.number})</option>`).join('')}
+                    </select>
+                </div>`;
+        
+        exam.subjects.forEach(subject => {
+            html += `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>${subject} Doğru</label>
+                        <input type="number" name="correct_${subject.replace(/ /g, '_')}" min="0" placeholder="Doğru">
+                    </div>
+                    <div class="form-group">
+                        <label>${subject} Yanlış</label>
+                        <input type="number" name="wrong_${subject.replace(/ /g, '_')}" min="0" placeholder="Yanlış">
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sınıf Sıralaması</label>
+                        <input type="number" name="classRank" placeholder="Sınıf sırası">
+                    </div>
+                    <div class="form-group">
+                        <label>Okul Sıralaması</label>
+                        <input type="number" name="schoolRank" placeholder="Okul sırası">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sınıf Mevcudu</label>
+                        <input type="number" name="classSize" placeholder="Sınıf mevcudu">
+                    </div>
+                    <div class="form-group">
+                        <label>Okul Mevcudu</label>
+                        <input type="number" name="schoolSize" placeholder="Okul mevcudu">
+                    </div>
+                </div>
+            </form>
+        </div>`;
+
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: `App.saveTrialResult('${examId}')` }
+        ];
+        this.showModal('Deneme Sonuç Girişi', html, buttons);
+    },
+
+    loadStudentTrialResult(examId) {
+        const form = document.getElementById('trialResultsForm');
+        const studentId = form.querySelector('[name="studentId"]').value;
+        const exam = this.data.trialExams.find(e => e.id === examId);
+        
+        const existingResult = (this.data.trialResults || []).find(r => r.examId === examId && r.studentId === studentId);
+        
+        if (existingResult) {
+            exam.subjects.forEach(subject => {
+                const correctInput = form.querySelector(`[name="correct_${subject.replace(/ /g, '_')}"]`);
+                const wrongInput = form.querySelector(`[name="wrong_${subject.replace(/ /g, '_')}"]`);
+                if (correctInput && existingResult.subjects[subject]) {
+                    correctInput.value = existingResult.subjects[subject].correct || '';
+                    wrongInput.value = existingResult.subjects[subject].wrong || '';
+                }
+            });
+            form.querySelector('[name="classRank"]').value = existingResult.classRank || '';
+            form.querySelector('[name="schoolRank"]').value = existingResult.schoolRank || '';
+            form.querySelector('[name="classSize"]').value = existingResult.classSize || '';
+            form.querySelector('[name="schoolSize"]').value = existingResult.schoolSize || '';
+        }
+    },
+
+    saveTrialResult(examId) {
+        const form = document.getElementById('trialResultsForm');
+        const formData = new FormData(form);
+        const exam = this.data.trialExams.find(e => e.id === examId);
+        
+        const studentId = formData.get('studentId');
+        if (!studentId) {
+            this.showToast('Lütfen öğrenci seçin!', 'error');
+            return;
+        }
+
+        const subjects = {};
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        
+        exam.subjects.forEach(subject => {
+            const correct = parseInt(formData.get(`correct_${subject.replace(/ /g, '_')}`)) || 0;
+            const wrong = parseInt(formData.get(`wrong_${subject.replace(/ /g, '_')}`)) || 0;
+            subjects[subject] = { correct, wrong };
+            totalCorrect += correct;
+            totalWrong += wrong;
+        });
+
+        const totalNet = totalCorrect - (totalWrong / 4);
+        const totalQuestions = exam.totalQuestions || 100;
+        const netPercent = ((totalNet / totalQuestions) * 100).toFixed(1);
+
+        const resultData = {
+            examId,
+            studentId,
+            subjects,
+            totalCorrect,
+            totalWrong,
+            totalNet: Math.max(0, totalNet),
+            totalPercent: netPercent,
+            classRank: parseInt(formData.get('classRank')) || null,
+            schoolRank: parseInt(formData.get('schoolRank')) || null,
+            classSize: parseInt(formData.get('classSize')) || null,
+            schoolSize: parseInt(formData.get('schoolSize')) || null,
+            date: exam.date
+        };
+
+        if (!this.data.trialResults) this.data.trialResults = [];
+        
+        const existingIndex = this.data.trialResults.findIndex(r => r.examId === examId && r.studentId === studentId);
+        if (existingIndex >= 0) {
+            this.data.trialResults[existingIndex] = { ...this.data.trialResults[existingIndex], ...resultData };
+        } else {
+            this.data.trialResults.push(resultData);
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.showToast('Sonuç kaydedildi!');
+    },
+
+    viewTrialExamResults(examId) {
+        const exam = this.data.trialExams.find(e => e.id === examId);
+        if (!exam) return;
+
+        const results = (this.data.trialResults || []).filter(r => r.examId === examId);
+        
+        const resultsWithStudents = results.map(r => {
+            const student = this.data.students.find(s => s.id === r.studentId);
+            return { ...r, student };
+        }).sort((a, b) => (b.totalNet || 0) - (a.totalNet || 0));
+
+        const content = `
+            <div style="max-height: 500px; overflow-y: auto;">
+                <h3 style="margin-bottom: 15px;">${exam.name}</h3>
+                <p style="color: var(--gray-500); margin-bottom: 20px;">Tarih: ${exam.date} | Dersler: ${exam.subjects.join(', ')}</p>
+                
+                <table style="width: 100%; font-size: 13px;">
+                    <thead>
+                        <tr style="background: var(--gray-100);">
+                            <th>Öğrenci</th>
+                            <th>Net</th>
+                            <th>%</th>
+                            <th>Sınıf Sıra</th>
+                            <th>Okul Sıra</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${resultsWithStudents.map((r, i) => `
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#d97706' : 'inherit'}">#${i + 1}</span>
+                                        <div class="student-avatar" style="width: 28px; height: 28px; font-size: 11px;">${r.student?.name?.charAt(0) || '?'}</div>
+                                        ${r.student?.name || 'Bilinmiyor'}
+                                    </div>
+                                </td>
+                                <td><strong>${(r.totalNet || 0).toFixed(1)}</strong></td>
+                                <td>${r.totalPercent || 0}%</td>
+                                <td>${r.classRank ? `${r.classRank}/${r.classSize || '-'}` : '-'}</td>
+                                <td>${r.schoolRank ? `${r.schoolRank}/${r.schoolSize || '-'}` : '-'}</td>
+                                <td>
+                                    <button class="action-btn view" onclick="App.viewStudentTrialDetail('${examId}', '${r.studentId}')" title="Detay">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                ${resultsWithStudents.length === 0 ? '<p class="empty-state">Henüz sonuç girilmedi</p>' : ''}
+            </div>
+        `;
+        
+        this.showModal('Deneme Sonuçları', content, [
+            { text: 'Kapat', action: 'App.closeModal()' }
+        ]);
+    },
+
+    viewStudentTrialDetail(examId, studentId) {
+        const exam = this.data.trialExams.find(e => e.id === examId);
+        const result = (this.data.trialResults || []).find(r => r.examId === examId && r.studentId === studentId);
+        const student = this.data.students.find(s => s.id === studentId);
+
+        let html = `<h3 style="margin-bottom: 15px;">${student?.name || 'Öğrenci'}</h3>`;
+        
+        exam.subjects.forEach(subject => {
+            const data = result.subjects[subject] || { correct: 0, wrong: 0 };
+            const net = data.correct - (data.wrong / 4);
+            html += `
+                <div style="padding: 12px; background: var(--gray-100); border-radius: var(--radius); margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                        <span>${subject}</span>
+                        <span>Net: ${net.toFixed(1)}</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--gray-500); margin-top: 5px;">
+                        Doğru: ${data.correct} | Yanlış: ${data.wrong}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <div style="padding: 15px; background: #dbeafe; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: var(--info);">#${result.classRank || '-'}</div>
+                    <div style="font-size: 12px; color: var(--gray-500);">Sınıf Sıralaması</div>
+                </div>
+                <div style="padding: 15px; background: #f3e8ff; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #a855f7;">#${result.schoolRank || '-'}</div>
+                    <div style="font-size: 12px; color: var(--gray-500);">Okul Sıralaması</div>
+                </div>
+            </div>
+        `;
+
+        this.showModal('Öğrenci Sonuç Detayı', html, [{ text: 'Kapat', action: 'App.closeModal()' }]);
+    },
+
+    renderMyTrialResults() {
+        const studentId = this.currentUser.studentId;
+        const myResults = (this.data.trialResults || []).filter(r => r.studentId === studentId);
+        
+        const resultsWithExams = myResults.map(r => {
+            const exam = this.data.trialExams.find(e => e.id === r.examId);
+            return { ...r, exam };
+        }).filter(r => r.exam).sort((a, b) => new Date(b.exam.date) - new Date(a.exam.date));
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📊 Deneme Sonuçlarım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-info">
+                        <h4>${resultsWithExams.length}</h4>
+                        <p>Girilen Deneme</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-info">
+                        <h4>${resultsWithExams.length > 0 ? (resultsWithExams[0]?.totalNet || 0).toFixed(1) : '-'}</h4>
+                        <p>Son Net</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Deneme Sonuçlarım</span>
+                </div>
+                ${resultsWithExams.length > 0 ? resultsWithExams.map(r => `
+                    <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <h4>${r.exam.name}</h4>
+                                <p style="font-size: 13px; color: var(--gray-500);">${r.exam.date}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 28px; font-weight: bold; color: var(--primary);">${(r.totalNet || 0).toFixed(1)}</div>
+                                <div style="font-size: 13px; color: var(--gray-500);">NET</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                            <div style="padding: 12px; background: var(--gray-100); border-radius: var(--radius); text-align: center;">
+                                <div style="font-size: 18px; font-weight: bold;">${r.totalPercent || 0}%</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Başarı</div>
+                            </div>
+                            <div style="padding: 12px; background: #dbeafe; border-radius: var(--radius); text-align: center;">
+                                <div style="font-size: 18px; font-weight: bold; color: var(--info);">#${r.classRank || '-'}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Sınıf Sırası</div>
+                            </div>
+                            <div style="padding: 12px; background: #f3e8ff; border-radius: var(--radius); text-align: center;">
+                                <div style="font-size: 18px; font-weight: bold; color: #a855f7;">#${r.schoolRank || '-'}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Okul Sırası</div>
+                            </div>
+                        </div>
+
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: var(--primary); font-size: 14px;">Ders Bazlı Detay</summary>
+                            <div style="margin-top: 10px; padding: 10px; background: var(--gray-100); border-radius: var(--radius);">
+                                ${Object.entries(r.subjects || {}).map(([subject, data]) => {
+                                    const net = (data.correct || 0) - ((data.wrong || 0) / 4);
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-200);">
+                                            <span>${subject}</span>
+                                            <span><strong>${net.toFixed(1)} net</strong> (D: ${data.correct}, Y: ${data.wrong})</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </details>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz deneme sonucu girilmedi</p>'}
+            </div>
+        `;
     }
 };
 
