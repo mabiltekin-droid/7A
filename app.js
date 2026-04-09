@@ -12,13 +12,42 @@ const App = {
         grades: [],
         schedule: [],
         exams: [],
-        attendance: []
+        attendance: [],
+        announcements: [],
+        assignments: [],
+        clubs: [],
+        library: []
     },
     currentUser: null,
     currentPage: 'dashboard',
 
     init() {
         this.checkAuth();
+        this.initDarkMode();
+    },
+
+    initDarkMode() {
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            this.updateDarkModeToggle();
+        }
+    },
+
+    toggleDarkMode() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        this.updateDarkModeToggle();
+    },
+
+    updateDarkModeToggle() {
+        const isDark = document.body.classList.contains('dark-mode');
+        const toggle = document.getElementById('darkModeToggle');
+        if (toggle) {
+            toggle.innerHTML = isDark 
+                ? '<i class="fas fa-sun"></i><span>Aydınlık</span>'
+                : '<i class="fas fa-moon"></i><span>Karanlık</span>';
+        }
     },
 
     checkAuth() {
@@ -79,30 +108,43 @@ const App = {
         if (role === 'admin') {
             menuItems = [
                 { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
                 { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
                 { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
                 { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
                 { page: 'grades', icon: 'fa-chart-line', label: 'Notlar' },
+                { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Not Analizi' },
+                { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                 { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
+                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                 { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
             ];
         } else if (role === 'teacher') {
             menuItems = [
                 { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
                 { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
+                { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
-                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' }
+                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
+                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' }
             ];
         } else if (role === 'student') {
             menuItems = [
                 { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
                 { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
+                { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Gelişimim' },
+                { page: 'myassignments', icon: 'fa-tasks', label: 'Ödevlerim' },
                 { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
                 { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
-                { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' }
+                { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
+                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                { page: 'library', icon: 'fa-book', label: 'Kütüphane' }
             ];
         } else if (role === 'parent') {
             menuItems = [
@@ -156,10 +198,16 @@ const App = {
             students: () => this.renderStudents(),
             teachers: () => this.renderTeachers(),
             grades: () => this.renderGrades(),
+            gradeanalysis: () => this.renderGradeAnalysis(),
             schedule: () => this.renderSchedule(),
             exams: () => this.renderExams(),
             attendance: () => this.renderAttendance(),
             settings: () => this.renderSettings(),
+            announcements: () => this.renderAnnouncements(),
+            assignments: () => this.renderAssignments(),
+            myassignments: () => this.renderMyAssignments(),
+            clubs: () => this.renderClubs(),
+            library: () => this.renderLibrary(),
             mygrades: () => this.renderMyGrades(),
             myschedule: () => this.renderMySchedule(),
             myattendance: () => this.renderMyAttendance(),
@@ -2021,12 +2069,798 @@ const App = {
             localStorage.removeItem('schoolData');
             this.data = {
                 settings: { className: '', classLevel: '', term: '', schoolYear: '' },
-                students: [], teachers: [], subjects: [], grades: [], schedule: [], exams: [], attendance: []
+                students: [], teachers: [], subjects: [], grades: [], schedule: [], exams: [], attendance: [],
+                announcements: [], assignments: [], clubs: [], library: []
             };
             this.updateClassInfo();
             this.renderPage(this.currentPage);
             this.showToast('Tüm veriler silindi!');
         }
+    },
+
+    renderAnnouncements() {
+        const announcements = this.data.announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Duyurular</h1>
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                    <button class="btn btn-primary" onclick="App.showAnnouncementModal()">
+                        <i class="fas fa-plus"></i> Yeni Duyuru
+                    </button>
+                ` : ''}
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Önemli Duyurular</span>
+                </div>
+                ${announcements.filter(a => a.priority === 'high').map(a => this.renderAnnouncementCard(a)).join('') || '<p class="empty-state">Önemli duyuru yok</p>'}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Tüm Duyurular</span>
+                </div>
+                ${announcements.length > 0 ? announcements.map(a => this.renderAnnouncementCard(a)).join('') : '<p class="empty-state">Henüz duyuru eklenmedi</p>'}
+            </div>
+        `;
+    },
+
+    renderAnnouncementCard(announcement) {
+        const date = new Date(announcement.date);
+        const isNew = (new Date() - date) < 86400000 * 3;
+        
+        return `
+            <div class="announcement-card" onclick="App.viewAnnouncement('${announcement.id}')">
+                <div class="announcement-header">
+                    <div>
+                        <span class="announcement-priority ${announcement.priority}">${announcement.priority === 'high' ? 'Önemli' : announcement.priority === 'normal' ? 'Normal' : 'Bilgi'}</span>
+                        ${isNew ? '<span class="badge badge-success" style="margin-left: 8px;">Yeni</span>' : ''}
+                    </div>
+                    <span class="announcement-date">${date.toLocaleDateString('tr-TR')}</span>
+                </div>
+                <h3 class="announcement-title">${announcement.title}</h3>
+                <p class="announcement-content">${announcement.content.substring(0, 150)}${announcement.content.length > 150 ? '...' : ''}</p>
+                ${announcement.author ? `<p style="font-size: 12px; color: var(--gray-400); margin-top: 10px;">Yazar: ${announcement.author}</p>` : ''}
+            </div>
+        `;
+    },
+
+    showAnnouncementModal(id = null) {
+        const announcement = id ? this.data.announcements.find(a => a.id === id) : null;
+        
+        const content = `
+            <form id="announcementForm">
+                <div class="form-group">
+                    <label>Başlık *</label>
+                    <input type="text" name="title" value="${announcement?.title || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>İçerik *</label>
+                    <textarea name="content" rows="5" required>${announcement?.content || ''}</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Öncelik</label>
+                        <select name="priority">
+                            <option value="low" ${announcement?.priority === 'low' ? 'selected' : ''}>Bilgi</option>
+                            <option value="normal" ${announcement?.priority === 'normal' || !announcement ? 'selected' : ''}>Normal</option>
+                            <option value="high" ${announcement?.priority === 'high' ? 'selected' : ''}>Önemli</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" name="date" value="${announcement?.date || new Date().toISOString().split('T')[0]}">
+                    </div>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: id ? 'Sil' : 'Kaydet', class: id ? 'btn-danger' : 'btn-primary', action: id ? `App.deleteAnnouncement('${id}')` : `App.saveAnnouncement()` }
+        ];
+        if (!id) {
+            buttons.push({ text: 'Kaydet', class: 'btn-primary', action: 'App.saveAnnouncement()' });
+            buttons.splice(1, 1);
+        }
+        this.showModal(id ? 'Duyuru Düzenle' : 'Yeni Duyuru', content, buttons);
+    },
+
+    saveAnnouncement(id = null) {
+        const form = document.getElementById('announcementForm');
+        const formData = new FormData(form);
+        
+        const announcementData = {
+            title: formData.get('title'),
+            content: formData.get('content'),
+            priority: formData.get('priority'),
+            date: formData.get('date') || new Date().toISOString().split('T')[0],
+            author: this.currentUser.name
+        };
+
+        if (id) {
+            const index = this.data.announcements.findIndex(a => a.id === id);
+            this.data.announcements[index] = { ...this.data.announcements[index], ...announcementData };
+        } else {
+            this.data.announcements.push({ id: this.generateId(), ...announcementData });
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast(id ? 'Duyuru güncellendi!' : 'Duyuru eklendi!');
+    },
+
+    deleteAnnouncement(id) {
+        if (confirm('Bu duyuruyu silmek istediğinize emin misiniz?')) {
+            this.data.announcements = this.data.announcements.filter(a => a.id !== id);
+            this.saveData();
+            this.closeModal();
+            this.renderPage(this.currentPage);
+            this.showToast('Duyuru silindi!');
+        }
+    },
+
+    viewAnnouncement(id) {
+        const announcement = this.data.announcements.find(a => a.id === id);
+        const date = new Date(announcement.date);
+        
+        const content = `
+            <div style="margin-bottom: 20px;">
+                <span class="announcement-priority ${announcement.priority}">${announcement.priority === 'high' ? 'Önemli' : announcement.priority === 'normal' ? 'Normal' : 'Bilgi'}</span>
+            </div>
+            <h2 style="margin-bottom: 15px;">${announcement.title}</h2>
+            <p style="color: var(--gray-500); font-size: 13px; margin-bottom: 20px;">
+                ${date.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} - ${announcement.author}
+            </p>
+            <div style="line-height: 1.8; white-space: pre-wrap;">${announcement.content}</div>
+        `;
+        
+        if (this.currentUser.role === 'admin' || this.currentUser.role === 'teacher') {
+            this.showModal('Duyuru Detay', content, [
+                { text: 'Kapat', action: 'App.closeModal()' },
+                { text: 'Düzenle', class: 'btn-secondary', action: `App.showAnnouncementModal('${id}')` }
+            ]);
+        } else {
+            this.showModal('Duyuru Detay', content, [{ text: 'Kapat', action: 'App.closeModal()' }]);
+        }
+    },
+
+    renderGradeAnalysis() {
+        const role = this.currentUser.role;
+        let studentId = role === 'student' ? this.currentUser.studentId : null;
+        
+        const subjects = [...new Set(this.data.grades.map(g => g.subject))];
+        const subjectAnalysis = subjects.map(subject => {
+            const subjectGrades = this.data.grades
+                .filter(g => g.subject === subject && (!studentId || g.studentId === studentId))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            if (subjectGrades.length < 2) return null;
+            
+            const firstHalf = subjectGrades.slice(0, Math.floor(subjectGrades.length / 2));
+            const secondHalf = subjectGrades.slice(Math.floor(subjectGrades.length / 2));
+            
+            const firstAvg = firstHalf.reduce((a, g) => a + parseFloat(g.score), 0) / firstHalf.length;
+            const secondAvg = secondHalf.reduce((a, g) => a + parseFloat(g.score), 0) / secondHalf.length;
+            const change = ((secondAvg - firstAvg) / firstAvg * 100).toFixed(1);
+            
+            const recentGrades = subjectGrades.slice(-5);
+            const trend = recentGrades.map(g => parseFloat(g.score));
+            
+            return {
+                subject,
+                avg: (subjectGrades.reduce((a, g) => a + parseFloat(g.score), 0) / subjectGrades.length).toFixed(1),
+                count: subjectGrades.length,
+                change,
+                trend,
+                labels: recentGrades.map(g => g.date.split('-')[2] + '/' + g.date.split('-')[1])
+            };
+        }).filter(Boolean);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Not Analizi</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 25px;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-book"></i></div>
+                    <div class="stat-info">
+                        <h4>${subjects.length}</h4>
+                        <p>Toplam Ders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-info">
+                        <h4>${subjectAnalysis.filter(s => s && parseFloat(s.change) > 0).length}</h4>
+                        <p>İyileşen Ders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-arrow-down"></i></div>
+                    <div class="stat-info">
+                        <h4>${subjectAnalysis.filter(s => s && parseFloat(s.change) < 0).length}</h4>
+                        <p>Gerileyen Ders</p>
+                    </div>
+                </div>
+            </div>
+
+            ${subjectAnalysis.length > 0 ? `
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <span class="card-title">Ders Bazlı Analiz</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                        ${subjectAnalysis.map(s => `
+                            <div style="padding: 15px; background: var(--gray-100); border-radius: var(--radius);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <strong>${s.subject}</strong>
+                                    <span class="development-indicator ${parseFloat(s.change) > 0 ? 'up' : parseFloat(s.change) < 0 ? 'down' : 'stable'}">
+                                        %${Math.abs(s.change)}
+                                    </span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--gray-500); margin-bottom: 10px;">
+                                    <span>Ortalama: ${s.avg}</span>
+                                    <span>${s.count} sınav</span>
+                                </div>
+                                <div class="grade-progress">
+                                    <div class="grade-progress-bar">
+                                        <div class="grade-progress-fill ${parseFloat(s.avg) >= 70 ? 'high' : parseFloat(s.avg) >= 50 ? 'medium' : 'low'}" style="width: ${s.avg}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Not Grafikleri</span>
+                    </div>
+                    <div style="padding: 20px;">
+                        <canvas id="gradeChart" height="300"></canvas>
+                    </div>
+                </div>
+            ` : '<div class="card"><p class="empty-state">Analiz için en az 2 sınav gerekli</p></div>'}
+        `;
+    },
+
+    attachPageListeners(page) {
+        if (page === 'settings') {
+            document.getElementById('settingsForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                this.data.settings = {
+                    className: formData.get('className'),
+                    classLevel: formData.get('classLevel'),
+                    term: formData.get('term'),
+                    schoolYear: formData.get('schoolYear')
+                };
+                this.saveData();
+                this.updateClassInfo();
+                this.showToast('Ayarlar kaydedildi!');
+            });
+        }
+        
+        if (page === 'gradeanalysis') {
+            this.initGradeChart();
+        }
+    },
+
+    initGradeChart() {
+        const role = this.currentUser.role;
+        let studentId = role === 'student' ? this.currentUser.studentId : null;
+        
+        const ctx = document.getElementById('gradeChart');
+        if (!ctx) return;
+        
+        const subjects = [...new Set(this.data.grades.map(g => g.subject))];
+        const datasets = subjects.map((subject, index) => {
+            const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#a855f7'];
+            const subjectGrades = this.data.grades
+                .filter(g => g.subject === subject && (!studentId || g.studentId === studentId))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            return {
+                label: subject,
+                data: subjectGrades.map(g => parseFloat(g.score)),
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length] + '20',
+                tension: 0.4,
+                fill: true
+            };
+        });
+
+        if (window.gradeChartInstance) {
+            window.gradeChartInstance.destroy();
+        }
+
+        window.gradeChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels: ['1', '2', '3', '4', '5'], datasets },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Not Gelişimi' }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
+    },
+
+    renderAssignments() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Ödev Yönetimi</h1>
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                    <button class="btn btn-primary" onclick="App.showAssignmentModal()">
+                        <i class="fas fa-plus"></i> Yeni Ödev
+                    </button>
+                ` : ''}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Ödevler</span>
+                </div>
+                ${this.renderAssignmentsList()}
+            </div>
+        `;
+    },
+
+    renderAssignmentsList() {
+        const assignments = this.data.assignments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+        
+        if (assignments.length === 0) {
+            return '<p class="empty-state">Henüz ödev eklenmedi</p>';
+        }
+
+        return assignments.map(a => {
+            const isOverdue = new Date(a.dueDate) < new Date() && a.status !== 'submitted';
+            const statusClass = a.status === 'submitted' ? 'submitted' : isOverdue ? 'pending' : 'pending';
+            
+            return `
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">
+                            <i class="fas fa-tasks"></i>
+                            ${a.title}
+                        </div>
+                        <span class="assignment-status ${statusClass}">
+                            ${a.status === 'submitted' ? 'Teslim Edildi' : isOverdue ? 'Süresi Geçti' : 'Bekliyor'}
+                        </span>
+                    </div>
+                    <p style="color: var(--gray-500); font-size: 14px; margin-bottom: 10px;">${a.description}</p>
+                    <div class="assignment-meta">
+                        <span><i class="fas fa-book"></i> ${a.subject}</span>
+                        <span><i class="fas fa-calendar"></i> ${new Date(a.dueDate).toLocaleDateString('tr-TR')}</span>
+                        ${a.grade !== null ? `<span><i class="fas fa-star"></i> ${a.grade}/100</span>` : ''}
+                    </div>
+                    ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="App.showAssignmentModal('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
+                                <i class="fas fa-edit"></i> Düzenle
+                            </button>
+                            <button class="btn btn-danger" onclick="App.deleteAssignment('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    },
+
+    showAssignmentModal(id = null) {
+        const assignment = id ? this.data.assignments.find(a => a.id === id) : null;
+        
+        const content = `
+            <form id="assignmentForm">
+                <div class="form-group">
+                    <label>Ödev Başlığı *</label>
+                    <input type="text" name="title" value="${assignment?.title || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3">${assignment?.description || ''}</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ders *</label>
+                        <input type="text" name="subject" value="${assignment?.subject || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Son Teslim Tarihi *</label>
+                        <input type="date" name="dueDate" value="${assignment?.dueDate || ''}" required>
+                    </div>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveAssignment('${id || ''}')` }
+        ];
+        this.showModal(id ? 'Ödev Düzenle' : 'Yeni Ödev', content, buttons);
+    },
+
+    saveAssignment(id) {
+        const form = document.getElementById('assignmentForm');
+        const formData = new FormData(form);
+        
+        const assignmentData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            subject: formData.get('subject'),
+            dueDate: formData.get('dueDate'),
+            status: 'pending',
+            grade: null
+        };
+
+        if (id) {
+            const index = this.data.assignments.findIndex(a => a.id === id);
+            this.data.assignments[index] = { ...this.data.assignments[index], ...assignmentData };
+        } else {
+            this.data.assignments.push({ id: this.generateId(), ...assignmentData });
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast(id ? 'Ödev güncellendi!' : 'Ödev eklendi!');
+    },
+
+    deleteAssignment(id) {
+        if (confirm('Bu ödevi silmek istediğinize emin misiniz?')) {
+            this.data.assignments = this.data.assignments.filter(a => a.id !== id);
+            this.saveData();
+            this.closeModal();
+            this.renderPage(this.currentPage);
+            this.showToast('Ödev silindi!');
+        }
+    },
+
+    renderMyAssignments() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Ödevlerim</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Ödevlerim</span>
+                </div>
+                ${this.renderAssignmentsList()}
+            </div>
+        `;
+    },
+
+    renderClubs() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Kulüpler</h1>
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                    <button class="btn btn-primary" onclick="App.showClubModal()">
+                        <i class="fas fa-plus"></i> Yeni Kulüp
+                    </button>
+                ` : ''}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                ${this.renderClubsList()}
+            </div>
+        `;
+    },
+
+    renderClubsList() {
+        if (this.data.clubs.length === 0) {
+            return '<div class="card" style="grid-column: 1/-1;"><p class="empty-state">Henüz kulüp eklenmedi</p></div>';
+        }
+
+        const icons = ['blue', 'green', 'orange', 'purple', 'pink', 'red'];
+        
+        return this.data.clubs.map((club, i) => `
+            <div class="club-card" onclick="App.viewClub('${club.id}')">
+                <div class="club-icon ${icons[i % icons.length]}">
+                    <i class="fas fa-${club.icon || 'users'}"></i>
+                </div>
+                <h3 class="club-name">${club.name}</h3>
+                <p class="club-members">${club.members?.length || 0} üye</p>
+                ${club.description ? `<p style="font-size: 12px; color: var(--gray-500); margin-top: 10px;">${club.description.substring(0, 60)}...</p>` : ''}
+            </div>
+        `).join('');
+    },
+
+    showClubModal(id = null) {
+        const club = id ? this.data.clubs.find(c => c.id === id) : null;
+        const icons = ['users', 'music', 'book', 'palette', 'football', 'science', 'laptop', 'camera', 'plane'];
+        
+        const content = `
+            <form id="clubForm">
+                <div class="form-group">
+                    <label>Kulüp Adı *</label>
+                    <input type="text" name="name" value="${club?.name || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3">${club?.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>İkon</label>
+                    <select name="icon">
+                        ${icons.map(icon => `<option value="${icon}" ${club?.icon === icon ? 'selected' : ''}>${icon}</option>`).join('')}
+                    </select>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: id ? 'Sil' : 'Kaydet', class: id ? 'btn-danger' : 'btn-primary', action: id ? `App.deleteClub('${id}')` : 'App.saveClub()' }
+        ];
+        if (!id) {
+            buttons.push({ text: 'Kaydet', class: 'btn-primary', action: 'App.saveClub()' });
+            buttons.splice(1, 1);
+        }
+        this.showModal(id ? 'Kulüp Düzenle' : 'Yeni Kulüp', content, buttons);
+    },
+
+    saveClub(id = null) {
+        const form = document.getElementById('clubForm');
+        const formData = new FormData(form);
+        
+        const clubData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            icon: formData.get('icon'),
+            members: id ? (this.data.clubs.find(c => c.id === id)?.members || []) : []
+        };
+
+        if (id) {
+            const index = this.data.clubs.findIndex(c => c.id === id);
+            this.data.clubs[index] = { ...this.data.clubs[index], ...clubData };
+        } else {
+            this.data.clubs.push({ id: this.generateId(), ...clubData });
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast(id ? 'Kulüp güncellendi!' : 'Kulüp eklendi!');
+    },
+
+    deleteClub(id) {
+        if (confirm('Bu kulübü silmek istediğinize emin misiniz?')) {
+            this.data.clubs = this.data.clubs.filter(c => c.id !== id);
+            this.saveData();
+            this.closeModal();
+            this.renderPage(this.currentPage);
+            this.showToast('Kulüp silindi!');
+        }
+    },
+
+    viewClub(id) {
+        const club = this.data.clubs.find(c => c.id === id);
+        const isMember = club.members?.includes(this.currentUser.id);
+        
+        const content = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="club-icon blue" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto;">
+                    <i class="fas fa-${club.icon || 'users'}"></i>
+                </div>
+                <h2 style="margin-top: 15px;">${club.name}</h2>
+                <p style="color: var(--gray-500);">${club.members?.length || 0} üye</p>
+            </div>
+            <p style="line-height: 1.6;">${club.description || 'Açıklama yok'}</p>
+            ${this.currentUser.role === 'student' ? `
+                <button class="btn ${isMember ? 'btn-danger' : 'btn-primary'}" style="width: 100%; margin-top: 20px;" onclick="App.toggleClubMembership('${id}')">
+                    <i class="fas fa-${isMember ? 'sign-out-alt' : 'user-plus'}"></i> 
+                    ${isMember ? 'Kulüpten Ayrıl' : 'Kulübe Katıl'}
+                </button>
+            ` : ''}
+        `;
+        this.showModal('Kulüp Detay', content, [{ text: 'Kapat', action: 'App.closeModal()' }]);
+    },
+
+    toggleClubMembership(clubId) {
+        const club = this.data.clubs.find(c => c.id === clubId);
+        if (!club.members) club.members = [];
+        
+        const index = club.members.indexOf(this.currentUser.id);
+        if (index > -1) {
+            club.members.splice(index, 1);
+            this.showToast('Kulüpten ayrıldınız!');
+        } else {
+            club.members.push(this.currentUser.id);
+            this.showToast('Kulübe katıldınız!');
+        }
+        
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+    },
+
+    renderLibrary() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Kütüphane</h1>
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                    <button class="btn btn-primary" onclick="App.showBookModal()">
+                        <i class="fas fa-plus"></i> Kitap Ekle
+                    </button>
+                ` : ''}
+            </div>
+
+            <div class="search-filter" style="margin-bottom: 20px;">
+                <input type="text" id="bookSearch" placeholder="Kitap veya yazar ara..." oninput="App.filterBooks()">
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Mevcut Kitaplar</span>
+                </div>
+                <div id="booksList">
+                    ${this.renderBooksList()}
+                </div>
+            </div>
+        `;
+    },
+
+    renderBooksList() {
+        if (this.data.library.length === 0) {
+            return '<p class="empty-state">Henüz kitap eklenmedi</p>';
+        }
+
+        return this.data.library.map(book => `
+            <div class="library-book">
+                <div class="library-book-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="library-book-info">
+                    <h4 class="library-book-title">${book.title}</h4>
+                    <p class="library-book-author">${book.author} - ${book.publisher || ''}</p>
+                </div>
+                <span class="library-status ${book.borrower ? 'borrowed' : 'available'}">
+                    ${book.borrower ? 'Ödünçte' : 'Mevcut'}
+                </span>
+                ${!book.borrower && this.currentUser.role === 'student' ? `
+                    <button class="btn btn-secondary" style="padding: 5px 15px; margin-left: 10px;" onclick="App.borrowBook('${book.id}')">
+                        Ödünç Al
+                    </button>
+                ` : book.borrower === this.currentUser.id ? `
+                    <button class="btn btn-success" style="padding: 5px 15px; margin-left: 10px;" onclick="App.returnBook('${book.id}')">
+                        İade Et
+                    </button>
+                ` : ''}
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                    <button class="action-btn delete" onclick="App.deleteBook('${book.id}')" style="margin-left: 10px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ` : ''}
+            </div>
+        `).join('');
+    },
+
+    filterBooks() {
+        const query = document.getElementById('bookSearch').value.toLowerCase();
+        const filtered = this.data.library.filter(b => 
+            b.title.toLowerCase().includes(query) || 
+            b.author.toLowerCase().includes(query)
+        );
+        document.getElementById('booksList').innerHTML = filtered.length > 0 
+            ? filtered.map(book => this.renderSingleBook(book)).join('')
+            : '<p class="empty-state">Sonuç bulunamadı</p>';
+    },
+
+    renderSingleBook(book) {
+        return `
+            <div class="library-book">
+                <div class="library-book-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="library-book-info">
+                    <h4 class="library-book-title">${book.title}</h4>
+                    <p class="library-book-author">${book.author}</p>
+                </div>
+                <span class="library-status ${book.borrower ? 'borrowed' : 'available'}">
+                    ${book.borrower ? 'Ödünçte' : 'Mevcut'}
+                </span>
+            </div>
+        `;
+    },
+
+    showBookModal(id = null) {
+        const book = id ? this.data.library.find(b => b.id === id) : null;
+        
+        const content = `
+            <form id="bookForm">
+                <div class="form-group">
+                    <label>Kitap Adı *</label>
+                    <input type="text" name="title" value="${book?.title || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Yazar *</label>
+                    <input type="text" name="author" value="${book?.author || ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Yayınevi</label>
+                    <input type="text" name="publisher" value="${book?.publisher || ''}">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ISBN</label>
+                        <input type="text" name="isbn" value="${book?.isbn || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Sayfa Sayısı</label>
+                        <input type="number" name="pages" value="${book?.pages || ''}">
+                    </div>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveBook('${id || ''}')` }
+        ];
+        this.showModal(id ? 'Kitap Düzenle' : 'Yeni Kitap', content, buttons);
+    },
+
+    saveBook(id) {
+        const form = document.getElementById('bookForm');
+        const formData = new FormData(form);
+        
+        const bookData = {
+            title: formData.get('title'),
+            author: formData.get('author'),
+            publisher: formData.get('publisher'),
+            isbn: formData.get('isbn'),
+            pages: formData.get('pages'),
+            borrower: id ? (this.data.library.find(b => b.id === id)?.borrower || null) : null,
+            borrowDate: id ? (this.data.library.find(b => b.id === id)?.borrowDate || null) : null
+        };
+
+        if (id) {
+            const index = this.data.library.findIndex(b => b.id === id);
+            this.data.library[index] = { ...this.data.library[index], ...bookData };
+        } else {
+            this.data.library.push({ id: this.generateId(), ...bookData });
+        }
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast(id ? 'Kitap güncellendi!' : 'Kitap eklendi!');
+    },
+
+    deleteBook(id) {
+        if (confirm('Bu kitabı silmek istediğinize emin misiniz?')) {
+            this.data.library = this.data.library.filter(b => b.id !== id);
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast('Kitap silindi!');
+        }
+    },
+
+    borrowBook(id) {
+        const book = this.data.library.find(b => b.id === id);
+        book.borrower = this.currentUser.id;
+        book.borrowDate = new Date().toISOString().split('T')[0];
+        this.saveData();
+        this.renderPage(this.currentPage);
+        this.showToast('Kitap ödünç alındı!');
+    },
+
+    returnBook(id) {
+        const book = this.data.library.find(b => b.id === id);
+        book.borrower = null;
+        book.borrowDate = null;
+        this.saveData();
+        this.renderPage(this.currentPage);
+        this.showToast('Kitap iade edildi!');
     }
 };
 
