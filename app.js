@@ -823,8 +823,12 @@ const App = {
 
     showStudentModal(id = null) {
         const student = id ? this.data.students.find(s => s.id === id) : null;
+        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
+        const existingUser = student ? users.find(u => u.studentId === student.id && u.role === 'student') : null;
+        
         const content = `
             <form id="studentForm">
+                <div class="form-section-title"><i class="fas fa-user-graduate"></i> Öğrenci Bilgileri</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Öğrenci No *</label>
@@ -866,16 +870,39 @@ const App = {
                     <label>Adres</label>
                     <textarea name="address" rows="2">${student?.address || ''}</textarea>
                 </div>
+                
+                <div class="form-section-title" style="margin-top: 20px;"><i class="fas fa-user-circle"></i> Giriş Hesabı</div>
+                <div class="form-toggle">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="createStudentAccount" ${!id || existingUser ? 'checked' : ''} onchange="document.getElementById('studentAccountFields').style.display = this.checked ? 'block' : 'none'">
+                        <span>Öğrenci giriş hesabı oluştur</span>
+                    </label>
+                </div>
+                <div id="studentAccountFields" style="${!id || existingUser ? '' : 'display: none;'}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kullanıcı Adı</label>
+                            <input type="text" name="studentUsername" value="${existingUser?.username || ''}" placeholder="ogrenci123">
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre ${id ? '(değiştirmek için)' : '*'}</label>
+                            <input type="password" name="studentPassword" ${!id ? 'required' : ''} placeholder="${id ? 'Değiştirmek istemiyorsanız boş bırakın' : 'Min. 6 karakter'}">
+                        </div>
+                    </div>
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i> Öğrenci bu bilgilerle sisteme giriş yapabilecek
+                    </div>
+                </div>
             </form>
         `;
         const buttons = [
             { text: 'İptal', action: 'App.closeModal()' },
-            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveStudent('${id || ''}')` }
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveStudent('${id || ''}', ${JSON.stringify(existingUser?.id || '')})` }
         ];
         this.showModal(id ? 'Öğrenci Düzenle' : 'Yeni Öğrenci', content, buttons);
     },
 
-    saveStudent(id) {
+    saveStudent(id, existingUserId = null) {
         const form = document.getElementById('studentForm');
         const formData = new FormData(form);
         const studentData = {
@@ -889,15 +916,65 @@ const App = {
             address: formData.get('address')
         };
 
+        const createAccount = document.getElementById('createStudentAccount')?.checked;
+        const username = formData.get('studentUsername');
+        const password = formData.get('studentPassword');
+
         if (id) {
             const index = this.data.students.findIndex(s => s.id === id);
             this.data.students[index] = { ...this.data.students[index], ...studentData };
+            
+            if (createAccount) {
+                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+                if (!users.users) users.users = [];
+                
+                if (existingUserId) {
+                    const userIndex = users.users.findIndex(u => u.id === existingUserId);
+                    users.users[userIndex] = {
+                        ...users.users[userIndex],
+                        username: username,
+                        name: studentData.name,
+                        studentId: id
+                    };
+                    if (password) users.users[userIndex].password = password;
+                } else {
+                    if (!users.users.some(u => u.username === username)) {
+                        users.users.push({
+                            id: this.generateId(),
+                            username: username,
+                            password: password || '123456',
+                            name: studentData.name,
+                            role: 'student',
+                            studentId: id
+                        });
+                    }
+                }
+                localStorage.setItem('schoolUsers', JSON.stringify(users));
+            }
         } else {
             if (this.data.students.some(s => s.number === studentData.number)) {
                 this.showToast('Bu öğrenci numarası zaten kullanılıyor!', 'error');
                 return;
             }
-            this.data.students.push({ id: this.generateId(), ...studentData });
+            const newStudentId = this.generateId();
+            this.data.students.push({ id: newStudentId, ...studentData });
+            
+            if (createAccount && username) {
+                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+                if (!users.users) users.users = [];
+                
+                if (!users.users.some(u => u.username === username)) {
+                    users.users.push({
+                        id: this.generateId(),
+                        username: username,
+                        password: password || '123456',
+                        name: studentData.name,
+                        role: 'student',
+                        studentId: newStudentId
+                    });
+                    localStorage.setItem('schoolUsers', JSON.stringify(users));
+                }
+            }
         }
 
         this.saveData();
@@ -1728,9 +1805,12 @@ const App = {
     showTeacherModal(id = null) {
         const teacher = id ? this.data.teachers.find(t => t.id === id) : null;
         const branches = ['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce', 'Almanca', 'Din Kültürü', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi', 'Teknoloji', 'Resim'];
+        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
+        const existingUser = teacher ? users.find(u => u.teacherId === teacher.id && u.role === 'teacher') : null;
         
         const content = `
             <form id="teacherForm">
+                <div class="form-section-title"><i class="fas fa-chalkboard-teacher"></i> Öğretmen Bilgileri</div>
                 <div class="form-group">
                     <label>Ad Soyad *</label>
                     <input type="text" name="name" value="${teacher?.name || ''}" required>
@@ -1752,16 +1832,39 @@ const App = {
                     <label>E-posta</label>
                     <input type="email" name="email" value="${teacher?.email || ''}">
                 </div>
+                
+                <div class="form-section-title" style="margin-top: 20px;"><i class="fas fa-user-circle"></i> Giriş Hesabı</div>
+                <div class="form-toggle">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="createTeacherAccount" ${!id || existingUser ? 'checked' : ''} onchange="document.getElementById('teacherAccountFields').style.display = this.checked ? 'block' : 'none'">
+                        <span>Öğretmen giriş hesabı oluştur</span>
+                    </label>
+                </div>
+                <div id="teacherAccountFields" style="${!id || existingUser ? '' : 'display: none;'}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kullanıcı Adı</label>
+                            <input type="text" name="teacherUsername" value="${existingUser?.username || ''}" placeholder="ogretmen123">
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre ${id ? '(değiştirmek için)' : '*'}</label>
+                            <input type="password" name="teacherPassword" ${!id ? 'required' : ''} placeholder="${id ? 'Değiştirmek istemiyorsanız boş bırakın' : 'Min. 6 karakter'}">
+                        </div>
+                    </div>
+                    <div class="form-hint">
+                        <i class="fas fa-info-circle"></i> Öğretmen bu bilgilerle sisteme giriş yapabilecek
+                    </div>
+                </div>
             </form>
         `;
         const buttons = [
             { text: 'İptal', action: 'App.closeModal()' },
-            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveTeacher('${id || ''}')` }
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveTeacher('${id || ''}', ${JSON.stringify(existingUser?.id || '')})` }
         ];
         this.showModal(id ? 'Öğretmen Düzenle' : 'Yeni Öğretmen', content, buttons);
     },
 
-    saveTeacher(id) {
+    saveTeacher(id, existingUserId = null) {
         const form = document.getElementById('teacherForm');
         const formData = new FormData(form);
         const teacherData = {
@@ -1771,11 +1874,61 @@ const App = {
             email: formData.get('email')
         };
 
+        const createAccount = document.getElementById('createTeacherAccount')?.checked;
+        const username = formData.get('teacherUsername');
+        const password = formData.get('teacherPassword');
+
         if (id) {
             const index = this.data.teachers.findIndex(t => t.id === id);
             this.data.teachers[index] = { ...this.data.teachers[index], ...teacherData };
+            
+            if (createAccount) {
+                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+                if (!users.users) users.users = [];
+                
+                if (existingUserId) {
+                    const userIndex = users.users.findIndex(u => u.id === existingUserId);
+                    users.users[userIndex] = {
+                        ...users.users[userIndex],
+                        username: username,
+                        name: teacherData.name,
+                        teacherId: id
+                    };
+                    if (password) users.users[userIndex].password = password;
+                } else {
+                    if (!users.users.some(u => u.username === username)) {
+                        users.users.push({
+                            id: this.generateId(),
+                            username: username,
+                            password: password || '123456',
+                            name: teacherData.name,
+                            role: 'teacher',
+                            teacherId: id
+                        });
+                    }
+                }
+                localStorage.setItem('schoolUsers', JSON.stringify(users));
+            }
         } else {
-            this.data.teachers.push({ id: this.generateId(), ...teacherData });
+            const newTeacherId = this.generateId();
+            this.data.teachers.push({ id: newTeacherId, ...teacherData });
+            
+            if (createAccount && username) {
+                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+                if (!users.users) users.users = [];
+                
+                if (!users.users.some(u => u.username === username)) {
+                    users.users.push({
+                        id: this.generateId(),
+                        username: username,
+                        password: password || '123456',
+                        name: teacherData.name,
+                        role: 'teacher',
+                        teacherId: newTeacherId
+                    });
+                    localStorage.setItem('schoolUsers', JSON.stringify(users));
+                }
+            }
         }
 
         this.saveData();
