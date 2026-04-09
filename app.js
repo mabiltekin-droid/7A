@@ -16,7 +16,12 @@ const App = {
         announcements: [],
         assignments: [],
         clubs: [],
-        library: []
+        library: [],
+        badges: [],
+        starPoints: [],
+        moods: [],
+        goals: [],
+        rewards: []
     },
     currentUser: null,
     currentPage: 'dashboard',
@@ -67,23 +72,10 @@ const App = {
 
     loadData() {
         const defaultData = {
-            settings: {
-                className: '',
-                classLevel: '',
-                term: '',
-                schoolYear: ''
-            },
-            students: [],
-            teachers: [],
-            subjects: [],
-            grades: [],
-            schedule: [],
-            exams: [],
-            attendance: [],
-            announcements: [],
-            assignments: [],
-            clubs: [],
-            library: []
+            settings: { className: '', classLevel: '', term: '', schoolYear: '' },
+            students: [], teachers: [], subjects: [], grades: [], schedule: [], exams: [], attendance: [],
+            announcements: [], assignments: [], clubs: [], library: [],
+            badges: [], starPoints: [], moods: [], goals: [], rewards: []
         };
         
         const saved = localStorage.getItem('schoolData');
@@ -95,6 +87,11 @@ const App = {
                 if (!this.data.assignments) this.data.assignments = [];
                 if (!this.data.clubs) this.data.clubs = [];
                 if (!this.data.library) this.data.library = [];
+                if (!this.data.badges) this.data.badges = [];
+                if (!this.data.starPoints) this.data.starPoints = [];
+                if (!this.data.moods) this.data.moods = [];
+                if (!this.data.goals) this.data.goals = [];
+                if (!this.data.rewards) this.data.rewards = [];
             } catch(e) {
                 this.data = defaultData;
             }
@@ -152,6 +149,11 @@ const App = {
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
+                { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
+                { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
+                { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' },
+                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
+                { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' },
                 { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
             ];
         } else if (role === 'teacher') {
@@ -163,26 +165,37 @@ const App = {
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                 { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
                 { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
-                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' }
+                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
+                { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
+                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' }
             ];
         } else if (role === 'student') {
             menuItems = [
                 { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
                 { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
+                { page: 'mood', icon: 'fa-smile', label: 'Bugün Nasılım?' },
                 { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
                 { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Gelişimim' },
+                { page: 'lgsanalysis', icon: 'fa-graduation-cap', label: 'LGS Analiz' },
                 { page: 'myassignments', icon: 'fa-tasks', label: 'Ödevlerim' },
                 { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
                 { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
                 { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
-                { page: 'library', icon: 'fa-book', label: 'Kütüphane' }
+                { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
+                { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
+                { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' },
+                { page: 'mygoals', icon: 'fa-bullseye', label: 'Hedeflerim' },
+                { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
+                { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' }
             ];
         } else if (role === 'parent') {
             menuItems = [
                 { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
                 { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
                 { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
+                { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' },
                 { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' }
             ];
         }
@@ -256,7 +269,18 @@ const App = {
             myattendance: () => this.renderMyAttendance(),
             myexams: () => this.renderMyExams(),
             childgrades: () => this.renderChildGrades(),
-            childattendance: () => this.renderChildAttendance()
+            childattendance: () => this.renderChildAttendance(),
+            badges: () => this.renderBadges(),
+            mybadges: () => this.renderMyBadges(),
+            leaderboard: () => this.renderLeaderboard(),
+            stars: () => this.renderStars(),
+            mystars: () => this.renderMyStars(),
+            mood: () => this.renderMood(),
+            childmood: () => this.renderChildMood(),
+            goals: () => this.renderGoals(),
+            mygoals: () => this.renderMyGoals(),
+            lgsanalysis: () => this.renderLGSAnalysis(),
+            rewards: () => this.renderRewards()
         };
 
         const renderFn = pages[page];
@@ -2909,6 +2933,873 @@ const App = {
         this.saveData();
         this.renderPage(this.currentPage);
         this.showToast('Kitap iade edildi!');
+    },
+
+    renderBadges() {
+        const badges = [
+            { id: 'bookworm', name: 'Kitap Kurdu', icon: 'fa-book-open', color: '#8b5cf6', desc: '10 kitap oku' },
+            { id: 'homework', name: 'Ödev Canavarı', icon: 'fa-tasks', color: '#10b981', desc: '10 ödevi zamanında teslim et' },
+            { id: 'punctual', name: 'Dakik Öğrenci', icon: 'fa-clock', color: '#f59e0b', desc: 'Bir ay boyunca geç kalma' },
+            { id: 'star', name: 'Yıldız Öğrenci', icon: 'fa-star', color: '#fbbf24', desc: '50 yıldız puan topla' },
+            { id: 'helper', name: 'Süper Yardımcı', icon: 'fa-hands-helping', color: '#3b82f6', desc: '10 kez arkadaşlarına yardım et' },
+            { id: 'reader', name: 'Okuma Ustası', icon: 'fa-glasses', color: '#ec4899', desc: '20 kitap oku' },
+            { id: 'scientist', name: 'Bilim İnsanı', icon: 'fa-flask', color: '#06b6d4', desc: 'Fen dersinde 5 ödev yap' },
+            { id: 'math', name: 'Matematik Dehası', icon: 'fa-calculator', color: '#ef4444', desc: 'Matematik notunu 90 üzerine çıkar' },
+            { id: 'perfect', name: 'Mükemmel Ay', icon: 'fa-crown', color: '#fbbf24', desc: 'Bir ay boyunca hiç devamsızlık yapma' },
+            { id: 'social', name: 'Sosyal Kelebek', icon: 'fa-comments', color: '#a855f7', desc: '10 soru sor veya cevapla' }
+        ];
+        this.data.badges = badges;
+        this.saveData();
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Rozet Sistemi</h1>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Kazanılabilecek Rozetler</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 15px;">
+                    ${badges.map(b => `
+                        <div style="text-align: center; padding: 20px; background: var(--gray-100); border-radius: var(--radius); transition: all 0.3s;">
+                            <div style="width: 60px; height: 60px; background: ${b.color}; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas ${b.icon}" style="color: white; font-size: 24px;"></i>
+                            </div>
+                            <h4 style="margin-bottom: 5px; font-size: 14px;">${b.name}</h4>
+                            <p style="font-size: 12px; color: var(--gray-500);">${b.desc}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Rozet Ver</span>
+                </div>
+                <form id="giveBadgeForm" style="padding: 15px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Öğrenci Seç</label>
+                            <select name="studentId" required>
+                                <option value="">Seçin...</option>
+                                ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rozet Seç</label>
+                            <select name="badgeId" required>
+                                <option value="">Seçin...</option>
+                                ${badges.map(b => `<option value="${b.id}">${b.name}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="App.giveBadge()">
+                        <i class="fas fa-award"></i> Rozet Ver
+                    </button>
+                </form>
+            </div>
+        `;
+    },
+
+    giveBadge() {
+        const form = document.getElementById('giveBadgeForm');
+        const studentId = form.querySelector('[name="studentId"]').value;
+        const badgeId = form.querySelector('[name="badgeId"]').value;
+
+        if (!studentId || !badgeId) {
+            this.showToast('Lütfen öğrenci ve rozet seçin!', 'error');
+            return;
+        }
+
+        const student = this.data.students.find(s => s.id === studentId);
+        if (!student.badges) student.badges = [];
+
+        if (student.badges.includes(badgeId)) {
+            this.showToast('Bu öğrenci bu rozeti zaten kazandı!', 'error');
+            return;
+        }
+
+        student.badges.push(badgeId);
+        this.saveData();
+        this.showToast(`${student.name} rozet kazandı! 🎉`);
+        this.renderPage(this.currentPage);
+    },
+
+    renderMyBadges() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+        const earnedBadges = student?.badges || [];
+        
+        const allBadges = [
+            { id: 'bookworm', name: 'Kitap Kurdu', icon: 'fa-book-open', color: '#8b5cf6' },
+            { id: 'homework', name: 'Ödev Canavarı', icon: 'fa-tasks', color: '#10b981' },
+            { id: 'punctual', name: 'Dakik Öğrenci', icon: 'fa-clock', color: '#f59e0b' },
+            { id: 'star', name: 'Yıldız Öğrenci', icon: 'fa-star', color: '#fbbf24' },
+            { id: 'helper', name: 'Süper Yardımcı', icon: 'fa-hands-helping', color: '#3b82f6' },
+            { id: 'reader', name: 'Okuma Ustası', icon: 'fa-glasses', color: '#ec4899' }
+        ];
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Rozetlerim 🏆</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-award"></i></div>
+                    <div class="stat-info">
+                        <h4>${earnedBadges.length}</h4>
+                        <p>Kazanılan Rozet</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-medal"></i></div>
+                    <div class="stat-info">
+                        <h4>${allBadges.length - earnedBadges.length}</h4>
+                        <p>Kalan Rozet</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Rozetlerim</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 15px;">
+                    ${allBadges.map(b => {
+                        const earned = earnedBadges.includes(b.id);
+                        return `
+                            <div style="text-align: center; padding: 20px; background: ${earned ? 'var(--gray-100)' : 'var(--gray-50)'}; border-radius: var(--radius); opacity: ${earned ? '1' : '0.4'}; ${earned ? 'border: 2px solid ' + b.color : ''}">
+                                <div style="width: 50px; height: 50px; background: ${earned ? b.color : '#ccc'}; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas ${b.icon}" style="color: white; font-size: 20px;"></i>
+                                </div>
+                                <h4 style="font-size: 13px;">${b.name}</h4>
+                                ${earned ? '<span class="badge badge-success" style="font-size: 10px;">Kazanıldı!</span>' : '<span style="font-size: 10px; color: var(--gray-400);">🔒 Kilitli</span>'}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    },
+
+    renderLeaderboard() {
+        const studentPoints = this.data.students.map(s => {
+            const stars = (this.data.starPoints || []).filter(p => p.studentId === s.id).reduce((a, p) => a + p.points, 0);
+            const books = (this.data.library || []).filter(b => b.borrower === s.id).length;
+            const badges = s.badges?.length || 0;
+            return { ...s, stars, books, badges, total: stars + (books * 5) + (badges * 10) };
+        }).sort((a, b) => b.total - a.total);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">🏆 Liderlik Tablosu</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-star"></i></div>
+                    <div class="stat-info">
+                        <h4>${studentPoints[0]?.stars || 0}</h4>
+                        <p>En Çok Yıldız</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-book"></i></div>
+                    <div class="stat-info">
+                        <h4>${studentPoints[0]?.books || 0}</h4>
+                        <p>En Çok Kitap</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Haftalık Sıralama</span>
+                </div>
+                <div style="padding: 15px;">
+                    ${studentPoints.slice(0, 10).map((s, i) => {
+                        const medals = ['🥇', '🥈', '🥉'];
+                        const bg = i === 0 ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : i === 1 ? 'linear-gradient(135deg, #f3f4f6, #e5e7eb)' : i === 2 ? 'linear-gradient(135deg, #fef3c7, #fcd34d)' : '';
+                        return `
+                            <div style="display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: ${bg || 'var(--gray-100)'}; border-radius: var(--radius);">
+                                <div style="width: 35px; height: 35px; background: ${i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : i === 2 ? '#d97706' : 'var(--gray-300)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px;">
+                                    ${i < 3 ? medals[i] : i + 1}
+                                </div>
+                                <div class="student-avatar" style="margin-right: 15px;">${s.name.charAt(0)}</div>
+                                <div style="flex: 1;">
+                                    <strong>${s.name}</strong>
+                                    <div style="font-size: 12px; color: var(--gray-500);">
+                                        ⭐ ${s.stars} yıldız | 📚 ${s.books} kitap | 🏅 ${s.badges} rozet
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <strong style="font-size: 18px; color: var(--primary);">${s.total}</strong>
+                                    <div style="font-size: 11px; color: var(--gray-500);">puan</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                    ${studentPoints.length === 0 ? '<p class="empty-state">Henüz veri yok</p>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    renderStars() {
+        const recentStars = (this.data.starPoints || []).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">⭐ Yıldız Puanı Sistemi</h1>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Yıldız Ver</span>
+                </div>
+                <form id="giveStarForm" style="padding: 15px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Öğrenci Seç</label>
+                            <select name="studentId" required>
+                                <option value="">Seçin...</option>
+                                ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Puan Miktarı</label>
+                            <select name="points" required>
+                                <option value="1">⭐ 1 Yıldız</option>
+                                <option value="2">⭐⭐ 2 Yıldız</option>
+                                <option value="5">⭐⭐⭐⭐⭐ 5 Yıldız</option>
+                                <option value="10">🌟 10 Yıldız</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sebep</label>
+                        <select name="reason" required>
+                            <option value="dakika">✅ Dakik geldi</option>
+                            <option value="soru">❓ Soru sordu</option>
+                            <option value="yardim">🤝 Arkadaşına yardım etti</option>
+                            <option value="sorumluluk">📋 Sorumluluk sahibi</option>
+                            <option value="basari">🎯 Başarılı sunum</option>
+                            <option value="diger">⭐ Diğer</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="App.giveStar()">
+                        <i class="fas fa-star"></i> Yıldız Ver
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Son Verilen Yıldızlar</span>
+                </div>
+                <div style="padding: 15px;">
+                    ${recentStars.length > 0 ? recentStars.map(s => {
+                        const student = this.data.students.find(st => st.id === s.studentId);
+                        return `
+                            <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                                <div>
+                                    <strong>${student?.name || 'Bilinmiyor'}</strong>
+                                    <span style="color: var(--gray-500); font-size: 13px; margin-left: 10px;">${s.reason}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #fbbf24; font-size: 18px;">${'⭐'.repeat(s.points)}</span>
+                                    <span style="color: var(--gray-400); font-size: 12px; margin-left: 10px;">${s.date}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : '<p class="empty-state">Henüz yıldız verilmedi</p>'}
+                </div>
+            </div>
+        `;
+    },
+
+    giveStar() {
+        const form = document.getElementById('giveStarForm');
+        const studentId = form.querySelector('[name="studentId"]').value;
+        const points = parseInt(form.querySelector('[name="points"]').value);
+        const reason = form.querySelector('[name="reason"]').value;
+
+        if (!studentId) {
+            this.showToast('Lütfen öğrenci seçin!', 'error');
+            return;
+        }
+
+        if (!this.data.starPoints) this.data.starPoints = [];
+        this.data.starPoints.push({
+            id: this.generateId(),
+            studentId,
+            points,
+            reason,
+            date: new Date().toISOString().split('T')[0],
+            givenBy: this.currentUser.name
+        });
+
+        const student = this.data.students.find(s => s.id === studentId);
+        this.saveData();
+        this.showToast(`${student?.name} ${points} yıldız kazandı! ⭐`);
+        this.renderPage(this.currentPage);
+    },
+
+    renderMyStars() {
+        const studentId = this.currentUser.studentId;
+        const myStars = (this.data.starPoints || []).filter(p => p.studentId === studentId);
+        const totalStars = myStars.reduce((a, p) => a + p.points, 0);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">⭐ Yıldızlarım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-star"></i></div>
+                    <div class="stat-info">
+                        <h4>${totalStars}</h4>
+                        <p>Toplam Yıldız</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <h4>${myStars.length}</h4>
+                        <p>Kazanma Sayısı</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Yıldız Kazanma Geçmişim</span>
+                </div>
+                <div style="padding: 15px;">
+                    ${myStars.sort((a, b) => new Date(b.date) - new Date(a.date)).map(s => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--gray-200);">
+                            <div>
+                                <span style="font-size: 18px; color: #fbbf24;">${'⭐'.repeat(s.points)}</span>
+                            </div>
+                            <div style="flex: 1; margin-left: 15px;">
+                                <strong>${this.getStarReasonText(s.reason)}</strong>
+                                <div style="font-size: 12px; color: var(--gray-500);">${s.date} - ${s.givenBy}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${myStars.length === 0 ? '<p class="empty-state">Henüz yıldız kazanmadın</p>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    getStarReasonText(reason) {
+        const reasons = {
+            dakika: 'Dakik geldi',
+            soru: 'Soru sordu',
+            yardim: 'Yardımsever davranış',
+            sorumluluk: 'Sorumluluk sahibi',
+            basari: 'Başarılı sunum',
+            diger: 'Özel katkı'
+        };
+        return reasons[reason] || reason;
+    },
+
+    renderMood() {
+        const today = new Date().toISOString().split('T')[0];
+        const todayMood = (this.data.moods || []).find(m => m.studentId === this.currentUser.studentId && m.date === today);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">😊 Bugün Nasıl Hissediyorsun?</h1>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                <div style="padding: 30px;">
+                    ${todayMood ? `
+                        <div style="font-size: 80px; margin-bottom: 20px;">${this.getMoodEmoji(todayMood.mood)}</div>
+                        <h2>${todayMood.mood === 'great' ? 'Harika!' : todayMood.mood === 'good' ? 'İyi!' : todayMood.mood === 'okay' ? 'Fena değil' : todayMood.mood === 'bad' ? 'Kötü' : 'Çok Kötü'}</h2>
+                        <p style="color: var(--gray-500); margin-top: 10px;">Bugün bu ruh halini seçtin</p>
+                        <button class="btn btn-secondary" style="margin-top: 20px;" onclick="App.updateMood()">
+                            <i class="fas fa-edit"></i> Değiştir
+                        </button>
+                    ` : `
+                        <p style="margin-bottom: 20px; color: var(--gray-500);">Şu an nasıl hissediyorsun?</p>
+                        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
+                            <button class="mood-btn" onclick="App.saveMood('great')" style="font-size: 50px; background: none; border: none; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">😍</button>
+                            <button class="mood-btn" onclick="App.saveMood('good')" style="font-size: 50px; background: none; border: none; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">😊</button>
+                            <button class="mood-btn" onclick="App.saveMood('okay')" style="font-size: 50px; background: none; border: none; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">😐</button>
+                            <button class="mood-btn" onclick="App.saveMood('bad')" style="font-size: 50px; background: none; border: none; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">😔</button>
+                            <button class="mood-btn" onclick="App.saveMood('terrible')" style="font-size: 50px; background: none; border: none; cursor: pointer; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">😢</button>
+                        </div>
+                        <p style="font-size: 14px; color: var(--gray-400);">Bugün nasıl hissetiğini seçersen rehberlik servisi seni daha iyi anlayabilir</p>
+                    `}
+                </div>
+            </div>
+        `;
+    },
+
+    getMoodEmoji(mood) {
+        const emojis = { great: '😍', good: '😊', okay: '😐', bad: '😔', terrible: '😢' };
+        return emojis[mood] || '😐';
+    },
+
+    saveMood(mood) {
+        const today = new Date().toISOString().split('T')[0];
+        if (!this.data.moods) this.data.moods = [];
+        
+        const existingIndex = this.data.moods.findIndex(m => m.studentId === this.currentUser.studentId && m.date === today);
+        const moodEntry = {
+            id: this.generateId(),
+            studentId: this.currentUser.studentId,
+            mood,
+            date: today
+        };
+
+        if (existingIndex >= 0) {
+            this.data.moods[existingIndex] = moodEntry;
+        } else {
+            this.data.moods.push(moodEntry);
+        }
+
+        this.saveData();
+        this.showToast('Ruh halin kaydedildi! 💙');
+        this.renderPage(this.currentPage);
+    },
+
+    updateMood() {
+        this.renderMood();
+    },
+
+    renderChildMood() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+        const moods = (this.data.moods || []).filter(m => m.studentId === studentId).slice(-7).reverse();
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">😊 ${student?.name || 'Çocuğunuz'}un Ruh Hali</h1>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Son 7 Gün</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; padding: 20px;">
+                    ${['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'].map((day, i) => {
+                        const mood = moods[i];
+                        return `
+                            <div style="text-align: center;">
+                                <div style="font-size: 30px; margin-bottom: 5px;">${mood ? this.getMoodEmoji(mood.mood) : '❓'}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">${day.substring(0, 3)}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Son Ruht Hali Kayıtları</span>
+                </div>
+                <div style="padding: 15px;">
+                    ${moods.map(m => `
+                        <div style="display: flex; align-items: center; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                            <span style="font-size: 30px; margin-right: 15px;">${this.getMoodEmoji(m.mood)}</span>
+                            <div>
+                                <strong>${this.getMoodText(m.mood)}</strong>
+                                <div style="font-size: 12px; color: var(--gray-500);">${m.date}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${moods.length === 0 ? '<p class="empty-state">Henüz ruh hali kaydı yok</p>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    getMoodText(mood) {
+        const texts = { great: 'Harika hissediyor', good: 'İyi hissediyor', okay: 'Normal', bad: 'Kötü hissediyor', terrible: 'Çok kötü hissediyor' };
+        return texts[mood] || 'Bilinmiyor';
+    },
+
+    renderGoals() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">🎯 Hedefler</h1>
+                <button class="btn btn-primary" onclick="App.showGoalModal()">
+                    <i class="fas fa-plus"></i> Yeni Hedef
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Aktif Hedefler</span>
+                </div>
+                ${this.renderGoalsList('active')}
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Tamamlanan Hedefler</span>
+                </div>
+                ${this.renderGoalsList('completed')}
+            </div>
+        `;
+    },
+
+    renderGoalsList(status) {
+        const goals = (this.data.goals || []).filter(g => {
+            const isCompleted = g.completed;
+            return status === 'completed' ? isCompleted : !isCompleted;
+        });
+
+        if (goals.length === 0) {
+            return '<p class="empty-state">' + (status === 'completed' ? 'Henüz tamamlanan hedef yok' : 'Henüz hedef eklenmedi') + '</p>';
+        }
+
+        return goals.map(g => `
+            <div style="padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${g.title}</strong>
+                        <p style="font-size: 13px; color: var(--gray-500); margin-top: 5px;">${g.description}</p>
+                        <div style="margin-top: 10px;">
+                            <div class="grade-progress">
+                                <div class="grade-progress-bar">
+                                    <div class="grade-progress-fill ${g.progress >= 100 ? 'high' : 'medium'}" style="width: ${Math.min(g.progress, 100)}%"></div>
+                                </div>
+                            </div>
+                            <span style="font-size: 12px; color: var(--gray-500);">${g.progress}% tamamlandı - Hedef: ${g.targetDate}</span>
+                        </div>
+                    </div>
+                    <div>
+                        ${status === 'active' ? `
+                            <button class="btn btn-success btn-sm" onclick="App.updateGoalProgress('${g.id}')" style="padding: 5px 15px;">
+                                <i class="fas fa-plus"></i> İlerleme
+                            </button>
+                        ` : `
+                            <span class="badge badge-success">✓ Tamamlandı</span>
+                        `}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    showGoalModal() {
+        const content = `
+            <form id="goalForm">
+                <div class="form-group">
+                    <label>Hedef Başlığı *</label>
+                    <input type="text" name="title" placeholder="örn: Bu ay 5 kitap okuyacağım" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="2" placeholder="Hedefini açıkla..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Hedef Tarihi</label>
+                        <input type="date" name="targetDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select name="category">
+                            <option value="reading">📚 Kitap Okuma</option>
+                            <option value="grade">📝 Not Hedefi</option>
+                            <option value="attendance">✓ Devamsızlık</option>
+                            <option value="homework">📋 Ödev</option>
+                            <option value="other">⭐ Diğer</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveGoal()' }
+        ];
+        this.showModal('Yeni Hedef Belirle', content, buttons);
+    },
+
+    saveGoal() {
+        const form = document.getElementById('goalForm');
+        const formData = new FormData(form);
+
+        if (!this.data.goals) this.data.goals = [];
+        this.data.goals.push({
+            id: this.generateId(),
+            studentId: this.currentUser.role === 'student' ? this.currentUser.studentId : null,
+            title: formData.get('title'),
+            description: formData.get('description'),
+            targetDate: formData.get('targetDate'),
+            category: formData.get('category'),
+            progress: 0,
+            completed: false,
+            createdAt: new Date().toISOString().split('T')[0]
+        });
+
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Hedef eklendi! 🎯');
+    },
+
+    updateGoalProgress(goalId) {
+        const goal = this.data.goals.find(g => g.id === goalId);
+        if (goal) {
+            goal.progress = Math.min(goal.progress + 10, 100);
+            if (goal.progress >= 100) {
+                goal.completed = true;
+                this.showToast('🎉 Tebrikler! Hedef tamamlandı!');
+            } else {
+                this.showToast(`İlerleme: ${goal.progress}%`);
+            }
+            this.saveData();
+            this.renderPage(this.currentPage);
+        }
+    },
+
+    renderMyGoals() {
+        const studentId = this.currentUser.studentId;
+        const myGoals = (this.data.goals || []).filter(g => !g.studentId || g.studentId === studentId);
+        const active = myGoals.filter(g => !g.completed);
+        const completed = myGoals.filter(g => g.completed);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">🎯 Hedeflerim</h1>
+                <button class="btn btn-primary" onclick="App.showGoalModal()">
+                    <i class="fas fa-plus"></i> Yeni Hedef
+                </button>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-bullseye"></i></div>
+                    <div class="stat-info">
+                        <h4>${active.length}</h4>
+                        <p>Aktif Hedef</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${completed.length}</h4>
+                        <p>Tamamlanan</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Aktif Hedeflerim</span>
+                </div>
+                ${active.length > 0 ? active.map(g => `
+                    <div style="padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>${g.title}</strong>
+                                <p style="font-size: 12px; color: var(--gray-500);">${g.description || ''}</p>
+                            </div>
+                            <button class="btn btn-success" onclick="App.updateGoalProgress('${g.id}')" style="padding: 5px 15px;">
+                                +10% İlerle
+                            </button>
+                        </div>
+                        <div class="grade-progress" style="margin-top: 10px;">
+                            <div class="grade-progress-bar">
+                                <div class="grade-progress-fill ${g.progress >= 70 ? 'high' : 'medium'}" style="width: ${g.progress}%"></div>
+                            </div>
+                        </div>
+                        <span style="font-size: 11px; color: var(--gray-500);">${g.progress}% - Hedef: ${g.targetDate}</span>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz aktif hedef yok</p>'}
+            </div>
+
+            ${completed.length > 0 ? `
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <span class="card-title">🏆 Tamamlanan Hedefler</span>
+                    </div>
+                    ${completed.map(g => `
+                        <div style="padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 15px;">
+                            <span style="font-size: 30px;">🎉</span>
+                            <div>
+                                <strong style="text-decoration: line-through; color: var(--gray-500);">${g.title}</strong>
+                                <p style="font-size: 12px; color: var(--gray-400);">${g.targetDate}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+        `;
+    },
+
+    renderLGSAnalysis() {
+        const studentId = this.currentUser.studentId;
+        const studentGrades = (this.data.grades || []).filter(g => g.studentId === studentId && g.examType === 'Deneme');
+        
+        const subjectAnalysis = {};
+        studentGrades.forEach(g => {
+            if (!subjectAnalysis[g.subject]) {
+                subjectAnalysis[g.subject] = { scores: [], avg: 0 };
+            }
+            subjectAnalysis[g.subject].scores.push(parseFloat(g.score));
+        });
+
+        Object.keys(subjectAnalysis).forEach(subj => {
+            const scores = subjectAnalysis[subj].scores;
+            subjectAnalysis[subj].avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+            subjectAnalysis[subj].trend = scores.length > 1 ? scores[scores.length - 1] - scores[0] : 0;
+        });
+
+        const weakSubjects = Object.entries(subjectAnalysis)
+            .filter(([_, data]) => data.avg < 50)
+            .sort((a, b) => a[1].avg - b[1].avg);
+
+        const strongSubjects = Object.entries(subjectAnalysis)
+            .filter(([_, data]) => data.avg >= 70)
+            .sort((a, b) => b[1].avg - a[1].avg);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📊 LGS Analiz</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info">
+                        <h4>${weakSubjects.length}</h4>
+                        <p>Zayıf Konu</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${strongSubjects.length}</h4>
+                        <p>Güçlü Konu</p>
+                    </div>
+                </div>
+            </div>
+
+            ${weakSubjects.length > 0 ? `
+                <div class="card" style="margin-bottom: 20px; border-left: 4px solid #ef4444;">
+                    <div class="card-header">
+                        <span class="card-title" style="color: #ef4444;">⚠️ İyileştirilmesi Gereken Konular</span>
+                    </div>
+                    <div style="padding: 15px;">
+                        ${weakSubjects.map(([subj, data]) => `
+                            <div style="padding: 12px; background: #fef2f2; border-radius: var(--radius); margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <strong>${subj}</strong>
+                                    <span class="badge badge-danger">${data.avg.toFixed(1)} ort.</span>
+                                </div>
+                                <p style="font-size: 13px; color: var(--gray-600);">Bu konuda daha fazla soru çözmen önerilir.</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            ${strongSubjects.length > 0 ? `
+                <div class="card" style="margin-bottom: 20px; border-left: 4px solid #10b981;">
+                    <div class="card-header">
+                        <span class="card-title" style="color: #10b981;">💪 Güçlü Olduğun Konular</span>
+                    </div>
+                    <div style="padding: 15px;">
+                        ${strongSubjects.map(([subj, data]) => `
+                            <div style="padding: 12px; background: #f0fdf4; border-radius: var(--radius); margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <strong>${subj}</strong>
+                                    <span class="badge badge-success">${data.avg.toFixed(1)} ort.</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📈 Tüm Derslerin Analizi</span>
+                </div>
+                <div style="padding: 15px;">
+                    ${Object.entries(subjectAnalysis).map(([subj, data]) => `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <strong>${subj}</strong>
+                                <span>${data.avg.toFixed(1)}</span>
+                            </div>
+                            <div class="grade-progress">
+                                <div class="grade-progress-bar">
+                                    <div class="grade-progress-fill ${data.avg >= 70 ? 'high' : data.avg >= 50 ? 'medium' : 'low'}" style="width: ${data.avg}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${Object.keys(subjectAnalysis).length === 0 ? '<p class="empty-state">Deneme sınavı notu girilmemiş</p>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    renderRewards() {
+        const rewards = this.data.rewards || [
+            { id: '1', name: 'Kantin İndirimi %10', cost: 20, icon: 'fa-coffee' },
+            { id: '2', name: 'Serbest Kıyafet Günü', cost: 30, icon: 'fa-tshirt' },
+            { id: '3', name: 'Öğretmen Seçimi Hakkı', cost: 50, icon: 'fa-user-astronaut' },
+            { id: '4', name: 'Bir Gün Geç Kalma Hakkı', cost: 15, icon: 'fa-clock' },
+            { id: '5', name: 'Partide Öncelik', cost: 40, icon: 'fa-birthday-cake' }
+        ];
+        this.data.rewards = rewards;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">🎁 Ödül Marketi</h1>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title">Kullanılabilir Ödüller</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 15px;">
+                    ${rewards.map(r => `
+                        <div style="text-align: center; padding: 20px; background: var(--gray-100); border-radius: var(--radius);">
+                            <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas ${r.icon}" style="color: white; font-size: 24px;"></i>
+                            </div>
+                            <h4 style="font-size: 14px; margin-bottom: 5px;">${r.name}</h4>
+                            <p style="font-size: 18px; color: #fbbf24; margin-bottom: 10px;">⭐ ${r.cost}</p>
+                            <button class="btn btn-secondary btn-sm" onclick="App.redeemReward('${r.id}')">
+                                Almak İstiyorum
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    },
+
+    redeemReward(rewardId) {
+        const reward = this.data.rewards.find(r => r.id === rewardId);
+        if (!reward) return;
+
+        const studentId = this.currentUser.studentId;
+        const totalStars = (this.data.starPoints || []).filter(p => p.studentId === studentId).reduce((a, p) => a + p.points, 0);
+
+        if (totalStars < reward.cost) {
+            this.showToast(`Yeterli yıldız puanın yok! (Gerekli: ${reward.cost}, Mevcut: ${totalStars})`, 'error');
+            return;
+        }
+
+        if (confirm(`${reward.name} ödülünü ${reward.cost} yıldız karşılığında almak istiyor musun?`)) {
+            this.showToast(`${reward.name} ödülünü aldın! 🎉 Ödülünü öğretmenine göster.`, 'success');
+        }
     }
 };
 
