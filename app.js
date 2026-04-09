@@ -68,7 +68,23 @@ const App = {
     loadData() {
         const saved = localStorage.getItem('schoolData');
         if (saved) {
-            this.data = JSON.parse(saved);
+            try {
+                this.data = JSON.parse(saved);
+            } catch(e) {
+                this.data = {
+                    settings: {},
+                    students: [],
+                    teachers: [],
+                    grades: [],
+                    schedule: [],
+                    exams: [],
+                    attendance: [],
+                    announcements: [],
+                    assignments: [],
+                    clubs: [],
+                    library: []
+                };
+            }
         }
     },
 
@@ -101,9 +117,10 @@ const App = {
 
     renderNavMenu() {
         const nav = document.getElementById('navMenu');
+        if (!nav) return;
+        
+        const role = this.currentUser ? this.currentUser.role : 'admin';
         let menuItems = [];
-
-        const role = this.currentUser.role;
 
         if (role === 'admin') {
             menuItems = [
@@ -155,12 +172,23 @@ const App = {
             ];
         }
 
-        nav.innerHTML = menuItems.map(item => `
-            <a href="#" class="nav-item" data-page="${item.page}" onclick="App.navigate('${item.page}'); return false;">
-                <i class="fas ${item.icon}"></i>
-                <span>${item.label}</span>
-            </a>
-        `).join('');
+        let html = '';
+        for (let i = 0; i < menuItems.length; i++) {
+            const item = menuItems[i];
+            const activeClass = this.currentPage === item.page ? ' active' : '';
+            html += '<a href="#" class="nav-item' + activeClass + '" data-page="' + item.page + '"><i class="fas ' + item.icon + '"></i><span>' + item.label + '</span></a>';
+        }
+        nav.innerHTML = html;
+        
+        const self = this;
+        const items = nav.querySelectorAll('.nav-item');
+        for (let i = 0; i < items.length; i++) {
+            items[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                const page = this.getAttribute('data-page');
+                self.navigate(page);
+            });
+        }
     },
 
     setupEventListeners() {
@@ -175,17 +203,22 @@ const App = {
 
     navigate(page) {
         this.currentPage = page;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-page') === page) {
-                item.classList.add('active');
+        const nav = document.getElementById('navMenu');
+        if (nav) {
+            const items = nav.querySelectorAll('.nav-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('active');
+                if (items[i].getAttribute('data-page') === page) {
+                    items[i].classList.add('active');
+                }
             }
-        });
+        }
         this.renderPage(page);
     },
 
     renderPage(page) {
         const content = document.getElementById('pageContent');
+        if (!content) return;
         
         const pages = {
             dashboard: () => this.renderDashboard(),
@@ -213,8 +246,15 @@ const App = {
 
         const renderFn = pages[page];
         if (renderFn) {
-            content.innerHTML = renderFn();
-            this.attachPageListeners(page);
+            try {
+                content.innerHTML = renderFn();
+                this.attachPageListeners(page);
+            } catch(e) {
+                content.innerHTML = '<p style="color: red;">Sayfa yüklenirken hata: ' + e.message + '</p>';
+                console.error(e);
+            }
+        } else {
+            content.innerHTML = '<p style="padding: 20px;">Sayfa bulunamadı: ' + page + '</p>';
         }
     },
 
