@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınıf Yönetim Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Sınıf Yönetimi</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Ana Panel</span>
+                </a>
+                <a href="#" class="nav-item" data-page="students">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Öğrenciler</span>
+                </a>
+                <a href="#" class="nav-item" data-page="grades">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Notlar</span>
+                </a>
+                <a href="#" class="nav-item" data-page="schedule">
+                    <i class="fas fa-calendar-week"></i>
+                    <span>Ders Programı</span>
+                </a>
+                <a href="#" class="nav-item" data-page="exams">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Deneme Çizelgesi</span>
+                </a>
+                <a href="#" class="nav-item" data-page="attendance">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Devamsızlık</span>
+                </a>
+                <a href="#" class="nav-item" data-page="teachers">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Öğretmenler</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Öğrenci, ders veya sınav ara..." id="globalSearch">
+                </div>
+                <div class="top-bar-right">
+                    <div class="class-info" id="classInfo">
+                        <i class="fas fa-school"></i>
+                        <span>Sınıf: Belirtilmedi</span>
+                    </div>
+                    <button class="btn-icon" id="exportData" title="Verileri Dışa Aktar">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn-icon" id="importData" title="Verileri İçe Aktar">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content" id="pageContent">
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Başlık</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer" id="modalFooter">
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <input type="file" id="importFile" accept=".json" style="display:none">
+
+    <script src="app.js"></script>
+</body>
+</html>
