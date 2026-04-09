@@ -874,19 +874,19 @@ const App = {
                 <div class="form-section-title" style="margin-top: 20px;"><i class="fas fa-user-circle"></i> Giriş Hesabı</div>
                 <div class="form-toggle">
                     <label class="toggle-label">
-                        <input type="checkbox" id="createStudentAccount" ${!id || existingUser ? 'checked' : ''} onchange="document.getElementById('studentAccountFields').style.display = this.checked ? 'block' : 'none'">
+                        <input type="checkbox" id="createStudentAccount" onchange="App.toggleAccountFields('student', this.checked)">
                         <span>Öğrenci giriş hesabı oluştur</span>
                     </label>
                 </div>
-                <div id="studentAccountFields" style="${!id || existingUser ? '' : 'display: none;'}">
+                <div id="studentAccountFields" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Kullanıcı Adı</label>
-                            <input type="text" name="studentUsername" value="${existingUser?.username || ''}" placeholder="ogrenci123">
+                            <label>Kullanıcı Adı *</label>
+                            <input type="text" name="studentUsername" id="studentUsername" placeholder="ogrenci123">
                         </div>
                         <div class="form-group">
-                            <label>Şifre ${id ? '(değiştirmek için)' : '*'}</label>
-                            <input type="password" name="studentPassword" ${!id ? 'required' : ''} placeholder="${id ? 'Değiştirmek istemiyorsanız boş bırakın' : 'Min. 6 karakter'}">
+                            <label>Şifre *</label>
+                            <input type="password" name="studentPassword" id="studentPassword" placeholder="Min. 6 karakter">
                         </div>
                     </div>
                     <div class="form-hint">
@@ -897,12 +897,27 @@ const App = {
         `;
         const buttons = [
             { text: 'İptal', action: 'App.closeModal()' },
-            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveStudent('${id || ''}', ${JSON.stringify(existingUser?.id || '')})` }
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveStudent('${id || ''}')` }
         ];
         this.showModal(id ? 'Öğrenci Düzenle' : 'Yeni Öğrenci', content, buttons);
     },
+    
+    toggleAccountFields(type, checked) {
+        const fields = document.getElementById(type + 'AccountFields');
+        const username = document.getElementById(type + 'Username');
+        const password = document.getElementById(type + 'Password');
+        if (checked) {
+            fields.style.display = 'block';
+            username.required = true;
+            password.required = true;
+        } else {
+            fields.style.display = 'none';
+            username.required = false;
+            password.required = false;
+        }
+    },
 
-    saveStudent(id, existingUserId = null) {
+    saveStudent(id) {
         const form = document.getElementById('studentForm');
         const formData = new FormData(form);
         const studentData = {
@@ -923,57 +938,52 @@ const App = {
         if (id) {
             const index = this.data.students.findIndex(s => s.id === id);
             this.data.students[index] = { ...this.data.students[index], ...studentData };
-            
-            if (createAccount) {
-                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
-                if (!users.users) users.users = [];
-                
-                if (existingUserId) {
-                    const userIndex = users.users.findIndex(u => u.id === existingUserId);
-                    users.users[userIndex] = {
-                        ...users.users[userIndex],
-                        username: username,
-                        name: studentData.name,
-                        studentId: id
-                    };
-                    if (password) users.users[userIndex].password = password;
-                } else {
-                    if (!users.users.some(u => u.username === username)) {
-                        users.users.push({
-                            id: this.generateId(),
-                            username: username,
-                            password: password || '123456',
-                            name: studentData.name,
-                            role: 'student',
-                            studentId: id
-                        });
-                    }
-                }
-                localStorage.setItem('schoolUsers', JSON.stringify(users));
-            }
         } else {
             if (this.data.students.some(s => s.number === studentData.number)) {
                 this.showToast('Bu öğrenci numarası zaten kullanılıyor!', 'error');
                 return;
             }
-            const newStudentId = this.generateId();
-            this.data.students.push({ id: newStudentId, ...studentData });
-            
-            if (createAccount && username) {
-                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
-                if (!users.users) users.users = [];
-                
+        }
+
+        let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+        if (!users.users) users.users = [];
+        
+        const existingUser = users.users.find(u => u.studentId === id && u.role === 'student');
+        
+        if (createAccount && username && password) {
+            if (existingUser) {
+                existingUser.username = username;
+                existingUser.name = studentData.name;
+                existingUser.password = password;
+            } else {
                 if (!users.users.some(u => u.username === username)) {
                     users.users.push({
                         id: this.generateId(),
                         username: username,
-                        password: password || '123456',
+                        password: password,
                         name: studentData.name,
                         role: 'student',
-                        studentId: newStudentId
+                        studentId: id || this.data.students[this.data.students.length - 1]?.id
                     });
-                    localStorage.setItem('schoolUsers', JSON.stringify(users));
+                } else {
+                    this.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                    return;
                 }
+            }
+            localStorage.setItem('schoolUsers', JSON.stringify(users));
+        } else if (existingUser && !createAccount) {
+            users.users = users.users.filter(u => u.id !== existingUser.id);
+            localStorage.setItem('schoolUsers', JSON.stringify(users));
+        }
+
+        if (!id) {
+            const newStudentId = this.generateId();
+            studentData.id = newStudentId;
+            this.data.students.push(studentData);
+            if (createAccount && username && password) {
+                const lastUser = users.users[users.users.length - 1];
+                if (lastUser) lastUser.studentId = newStudentId;
+                localStorage.setItem('schoolUsers', JSON.stringify(users));
             }
         }
 
@@ -1805,8 +1815,6 @@ const App = {
     showTeacherModal(id = null) {
         const teacher = id ? this.data.teachers.find(t => t.id === id) : null;
         const branches = ['Matematik', 'Türkçe', 'Fen Bilimleri', 'Sosyal Bilgiler', 'İngilizce', 'Almanca', 'Din Kültürü', 'Müzik', 'Görsel Sanatlar', 'Beden Eğitimi', 'Teknoloji', 'Resim'];
-        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
-        const existingUser = teacher ? users.find(u => u.teacherId === teacher.id && u.role === 'teacher') : null;
         
         const content = `
             <form id="teacherForm">
@@ -1836,19 +1844,19 @@ const App = {
                 <div class="form-section-title" style="margin-top: 20px;"><i class="fas fa-user-circle"></i> Giriş Hesabı</div>
                 <div class="form-toggle">
                     <label class="toggle-label">
-                        <input type="checkbox" id="createTeacherAccount" ${!id || existingUser ? 'checked' : ''} onchange="document.getElementById('teacherAccountFields').style.display = this.checked ? 'block' : 'none'">
+                        <input type="checkbox" id="createTeacherAccount" onchange="App.toggleAccountFields('teacher', this.checked)">
                         <span>Öğretmen giriş hesabı oluştur</span>
                     </label>
                 </div>
-                <div id="teacherAccountFields" style="${!id || existingUser ? '' : 'display: none;'}">
+                <div id="teacherAccountFields" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Kullanıcı Adı</label>
-                            <input type="text" name="teacherUsername" value="${existingUser?.username || ''}" placeholder="ogretmen123">
+                            <label>Kullanıcı Adı *</label>
+                            <input type="text" name="teacherUsername" id="teacherUsername" placeholder="ogretmen123">
                         </div>
                         <div class="form-group">
-                            <label>Şifre ${id ? '(değiştirmek için)' : '*'}</label>
-                            <input type="password" name="teacherPassword" ${!id ? 'required' : ''} placeholder="${id ? 'Değiştirmek istemiyorsanız boş bırakın' : 'Min. 6 karakter'}">
+                            <label>Şifre *</label>
+                            <input type="password" name="teacherPassword" id="teacherPassword" placeholder="Min. 6 karakter">
                         </div>
                     </div>
                     <div class="form-hint">
@@ -1859,12 +1867,12 @@ const App = {
         `;
         const buttons = [
             { text: 'İptal', action: 'App.closeModal()' },
-            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveTeacher('${id || ''}', ${JSON.stringify(existingUser?.id || '')})` }
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveTeacher('${id || ''}')` }
         ];
         this.showModal(id ? 'Öğretmen Düzenle' : 'Yeni Öğretmen', content, buttons);
     },
 
-    saveTeacher(id, existingUserId = null) {
+    saveTeacher(id) {
         const form = document.getElementById('teacherForm');
         const formData = new FormData(form);
         const teacherData = {
@@ -1881,54 +1889,40 @@ const App = {
         if (id) {
             const index = this.data.teachers.findIndex(t => t.id === id);
             this.data.teachers[index] = { ...this.data.teachers[index], ...teacherData };
-            
-            if (createAccount) {
-                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
-                if (!users.users) users.users = [];
-                
-                if (existingUserId) {
-                    const userIndex = users.users.findIndex(u => u.id === existingUserId);
-                    users.users[userIndex] = {
-                        ...users.users[userIndex],
-                        username: username,
-                        name: teacherData.name,
-                        teacherId: id
-                    };
-                    if (password) users.users[userIndex].password = password;
-                } else {
-                    if (!users.users.some(u => u.username === username)) {
-                        users.users.push({
-                            id: this.generateId(),
-                            username: username,
-                            password: password || '123456',
-                            name: teacherData.name,
-                            role: 'teacher',
-                            teacherId: id
-                        });
-                    }
-                }
-                localStorage.setItem('schoolUsers', JSON.stringify(users));
-            }
         } else {
-            const newTeacherId = this.generateId();
-            this.data.teachers.push({ id: newTeacherId, ...teacherData });
-            
-            if (createAccount && username) {
-                let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
-                if (!users.users) users.users = [];
-                
+            teacherData.id = this.generateId();
+            this.data.teachers.push(teacherData);
+        }
+
+        let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+        if (!users.users) users.users = [];
+        
+        const existingUser = users.users.find(u => u.teacherId === id && u.role === 'teacher');
+        
+        if (createAccount && username && password) {
+            if (existingUser) {
+                existingUser.username = username;
+                existingUser.name = teacherData.name;
+                existingUser.password = password;
+            } else {
                 if (!users.users.some(u => u.username === username)) {
                     users.users.push({
                         id: this.generateId(),
                         username: username,
-                        password: password || '123456',
+                        password: password,
                         name: teacherData.name,
                         role: 'teacher',
-                        teacherId: newTeacherId
+                        teacherId: id || teacherData.id
                     });
-                    localStorage.setItem('schoolUsers', JSON.stringify(users));
+                } else {
+                    this.showToast('Bu kullanıcı adı zaten kullanılıyor!', 'error');
+                    return;
                 }
             }
+            localStorage.setItem('schoolUsers', JSON.stringify(users));
+        } else if (existingUser && !createAccount) {
+            users.users = users.users.filter(u => u.id !== existingUser.id);
+            localStorage.setItem('schoolUsers', JSON.stringify(users));
         }
 
         this.saveData();
