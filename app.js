@@ -23,7 +23,10 @@ const App = {
         goals: [],
         rewards: [],
         trialExams: [],
-        trialResults: []
+        trialResults: [],
+        messages: [],
+        files: [],
+        notifications: []
     },
     currentUser: null,
     currentPage: 'dashboard',
@@ -96,6 +99,9 @@ const App = {
                 if (!this.data.rewards) this.data.rewards = [];
             if (!this.data.trialExams) this.data.trialExams = [];
             if (!this.data.trialResults) this.data.trialResults = [];
+            if (!this.data.messages) this.data.messages = [];
+            if (!this.data.files) this.data.files = [];
+            if (!this.data.notifications) this.data.notifications = [];
             } catch(e) {
                 this.data = defaultData;
             }
@@ -156,6 +162,10 @@ const App = {
                 { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                 { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
                 { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
+                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
+                { page: 'notifications', icon: 'fa-bell', label: 'Bildirimler' },
+                { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
                 { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' },
                 { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
                 { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' },
@@ -174,7 +184,10 @@ const App = {
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
                 { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
-                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' }
+                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
+                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
+                { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' }
             ];
         } else if (role === 'student') {
             menuItems = [
@@ -191,6 +204,8 @@ const App = {
                 { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' },
                 { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                 { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
+                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                { page: 'myfiles', icon: 'fa-folder', label: 'Dosyalarım' },
                 { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
                 { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' },
                 { page: 'mygoals', icon: 'fa-bullseye', label: 'Hedeflerim' },
@@ -203,7 +218,9 @@ const App = {
                 { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
                 { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
                 { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' },
-                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' }
+                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                { page: 'parentreport', icon: 'fa-file-pdf', label: 'Veli Raporu' }
             ];
         }
 
@@ -289,7 +306,14 @@ const App = {
             goals: () => this.renderGoals(),
             mygoals: () => this.renderMyGoals(),
             lgsanalysis: () => this.renderLGSAnalysis(),
-            rewards: () => this.renderRewards()
+            rewards: () => this.renderRewards(),
+            messages: () => this.renderMessages(),
+            mymessages: () => this.renderMyMessages(),
+            files: () => this.renderFiles(),
+            myfiles: () => this.renderMyFiles(),
+            notifications: () => this.renderNotifications(),
+            report: () => this.renderReport(),
+            parentreport: () => this.renderParentReport()
         };
 
         const renderFn = pages[page];
@@ -4257,6 +4281,755 @@ const App = {
                         </details>
                     </div>
                 `).join('') : '<p class="empty-state">Henüz deneme sonucu girilmedi</p>'}
+            </div>
+        `;
+    },
+
+    showNotifications() {
+        this.navigate('notifications');
+    },
+
+    updateNotificationBadge() {
+        const badge = document.getElementById('notificationBadge');
+        const notifications = (this.data.notifications || []).filter(n => !n.read && n.userId === this.currentUser?.id);
+        if (badge) {
+            if (notifications.length > 0) {
+                badge.textContent = notifications.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    },
+
+    renderNotifications() {
+        const myNotifications = (this.data.notifications || [])
+            .filter(n => !n.userId || n.userId === this.currentUser?.id)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">🔔 Bildirimlerim</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Tüm Bildirimler</span>
+                    <button class="btn btn-secondary" onclick="App.markAllNotificationsRead()">
+                        Tümünü Okundu İşaretle
+                    </button>
+                </div>
+                ${myNotifications.length > 0 ? myNotifications.map(n => `
+                    <div style="padding: 15px; border-bottom: 1px solid var(--gray-200); ${n.read ? 'opacity: 0.6;' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; margin-bottom: 5px;">${n.title}</div>
+                                <p style="color: var(--gray-500); font-size: 14px;">${n.message}</p>
+                                <div style="font-size: 12px; color: var(--gray-400); margin-top: 5px;">${n.date} ${n.time || ''}</div>
+                            </div>
+                            ${!n.read ? '<span style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%;"></span>' : ''}
+                        </div>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz bildirim yok</p>'}
+            </div>
+        `;
+    },
+
+    markAllNotificationsRead() {
+        if (!this.data.notifications) this.data.notifications = [];
+        this.data.notifications.forEach(n => {
+            if (!n.userId || n.userId === this.currentUser?.id) {
+                n.read = true;
+            }
+        });
+        this.saveData();
+        this.updateNotificationBadge();
+        this.renderPage(this.currentPage);
+        this.showToast('Tüm bildirimler okundu olarak işaretlendi');
+    },
+
+    addNotification(title, message, userId = null) {
+        if (!this.data.notifications) this.data.notifications = [];
+        this.data.notifications.push({
+            id: this.generateId(),
+            title,
+            message,
+            userId,
+            read: false,
+            date: new Date().toLocaleDateString('tr-TR'),
+            time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        });
+        this.saveData();
+        this.updateNotificationBadge();
+    },
+
+    renderMessages() {
+        const messages = (this.data.messages || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">💬 Mesajlar</h1>
+                <button class="btn btn-primary" onclick="App.showNewMessageModal()">
+                    <i class="fas fa-plus"></i> Yeni Mesaj
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Tüm Mesajlar</span>
+                </div>
+                ${messages.length > 0 ? messages.map(m => this.renderMessageCard(m)).join('') : '<p class="empty-state">Henüz mesaj yok. İlk mesajı siz gönderin!</p>'}
+            </div>
+        `;
+    },
+
+    renderMessageCard(m) {
+        const isNew = !m.read;
+        return `
+            <div style="padding: 20px; border-bottom: 1px solid var(--gray-200); cursor: pointer; ${isNew ? 'background: #f0f9ff;' : ''}" onclick="App.viewMessage('${m.id}')">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="student-avatar" style="background: ${this.getRoleColor(m.senderRole)};">${m.senderName?.charAt(0) || '?'}</div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>${m.senderName}</strong>
+                            <span style="font-size: 12px; color: var(--gray-500);">${m.date}</span>
+                        </div>
+                        <div style="color: var(--gray-500); font-size: 14px; margin-top: 3px;">${m.subject}</div>
+                        <p style="color: var(--gray-400); font-size: 13px; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.content}</p>
+                    </div>
+                    ${isNew ? '<span style="width: 10px; height: 10px; background: #ef4444; border-radius: 50%;"></span>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    getRoleColor(role) {
+        const colors = { admin: '#ef4444', teacher: '#3b82f6', student: '#10b981', parent: '#f59e0b' };
+        return colors[role] || '#6b7280';
+    },
+
+    showNewMessageModal() {
+        const content = `
+            <form id="messageForm">
+                <div class="form-group">
+                    <label>Alıcı</label>
+                    <select name="recipient">
+                        <option value="all">Tüm Sınıf</option>
+                        <option value="teachers">Öğretmenler</option>
+                        <option value="students">Öğrenciler</option>
+                        <option value="parents">Veliler</option>
+                        ${this.currentUser.role === 'admin' ? '<option value="admin">Admin</option>' : ''}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Konu *</label>
+                    <input type="text" name="subject" required placeholder="Mesaj konusu">
+                </div>
+                <div class="form-group">
+                    <label>Mesaj *</label>
+                    <textarea name="content" rows="5" required placeholder="Mesajınızı yazın..."></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Yeni Mesaj', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Gönder', class: 'btn-primary', action: 'App.sendMessage()' }
+        ]);
+    },
+
+    sendMessage() {
+        const form = document.getElementById('messageForm');
+        const formData = new FormData(form);
+
+        if (!this.data.messages) this.data.messages = [];
+
+        this.data.messages.push({
+            id: this.generateId(),
+            senderId: this.currentUser.id,
+            senderName: this.currentUser.name,
+            senderRole: this.currentUser.role,
+            recipient: formData.get('recipient'),
+            subject: formData.get('subject'),
+            content: formData.get('content'),
+            date: new Date().toLocaleDateString('tr-TR'),
+            time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+            read: false
+        });
+
+        this.saveData();
+        this.closeModal();
+        this.showToast('Mesaj gönderildi!');
+        this.renderPage(this.currentPage);
+    },
+
+    viewMessage(id) {
+        const message = this.data.messages.find(m => m.id === id);
+        if (message) {
+            message.read = true;
+            this.saveData();
+        }
+
+        const content = `
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div class="student-avatar" style="background: ${this.getRoleColor(message?.senderRole)}; width: 50px; height: 50px; font-size: 20px;">
+                        ${message?.senderName?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                        <strong>${message?.senderName}</strong>
+                        <div style="font-size: 12px; color: var(--gray-500);">${message?.date} ${message?.time}</div>
+                    </div>
+                </div>
+                <h4 style="margin-bottom: 10px;">${message?.subject}</h4>
+                <p style="line-height: 1.8; white-space: pre-wrap;">${message?.content}</p>
+            </div>
+        `;
+
+        const buttons = [
+            { text: 'Kapat', action: 'App.closeModal()' },
+            { text: 'Yanıtla', class: 'btn-primary', action: `App.replyToMessage('${id}')` }
+        ];
+        this.showModal('Mesaj', content, buttons);
+        this.updateNotificationBadge();
+    },
+
+    replyToMessage(id) {
+        const message = this.data.messages.find(m => m.id === id);
+        if (message) {
+            this.closeModal();
+            this.showNewMessageModal();
+            setTimeout(() => {
+                document.querySelector('[name="subject"]').value = 'Yanıt: ' + message.subject;
+            }, 100);
+        }
+    },
+
+    renderMyMessages() {
+        return this.renderMessages();
+    },
+
+    renderFiles() {
+        const files = (this.data.files || []).sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📁 Dosya Yönetimi</h1>
+                <button class="btn btn-primary" onclick="App.showUploadModal()">
+                    <i class="fas fa-upload"></i> Dosya Yükle
+                </button>
+            </div>
+
+            <div class="search-filter" style="margin-bottom: 20px;">
+                <input type="text" id="fileSearch" placeholder="Dosya ara..." oninput="App.filterFiles()">
+                <select id="fileType" onchange="App.filterFiles()">
+                    <option value="">Tüm Dosyalar</option>
+                    <option value="homework">Ödev</option>
+                    <option value="material">Ders Materyali</option>
+                    <option value="exam">Sınav</option>
+                    <option value="other">Diğer</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Yüklenen Dosyalar</span>
+                </div>
+                <div id="filesList">
+                    ${this.renderFilesList(files)}
+                </div>
+            </div>
+        `;
+    },
+
+    renderFilesList(files) {
+        if (files.length === 0) {
+            return '<p class="empty-state">Henüz dosya yüklenmedi</p>';
+        }
+
+        return files.map(f => `
+            <div style="padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 15px;">
+                <div style="width: 50px; height: 50px; background: ${this.getFileColor(f.type)}; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class="fas ${this.getFileIcon(f.type)}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <strong>${f.name}</strong>
+                    <div style="font-size: 12px; color: var(--gray-500);">
+                        ${f.type} | ${f.size || 'Boyut belirtilmedi'} | ${f.uploadDate} | ${f.uploadedBy}
+                    </div>
+                </div>
+                <div class="action-btns">
+                    <button class="action-btn view" onclick="App.downloadFile('${f.id}')" title="İndir">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="App.deleteFile('${f.id}')" title="Sil">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    getFileColor(type) {
+        const colors = { homework: '#10b981', material: '#3b82f6', exam: '#ef4444', other: '#6b7280' };
+        return colors[type] || '#6b7280';
+    },
+
+    getFileIcon(type) {
+        const icons = { homework: 'fa-tasks', material: 'fa-book', exam: 'fa-file-alt', other: 'fa-file' };
+        return icons[type] || 'fa-file';
+    },
+
+    showUploadModal() {
+        const content = `
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Dosya Adı *</label>
+                    <input type="text" name="name" required placeholder="Dosya adı">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tür</label>
+                        <select name="type">
+                            <option value="homework">Ödev</option>
+                            <option value="material">Ders Materyali</option>
+                            <option value="exam">Sınav</option>
+                            <option value="other">Diğer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ders</label>
+                        <input type="text" name="subject" placeholder="örn: Matematik">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Not / Açıklama</label>
+                    <textarea name="description" rows="2" placeholder="Dosya hakkında not..."></textarea>
+                </div>
+                <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Dosya seçmek için tıklayın</p>
+                    <input type="file" id="fileInput" style="display: none;" onchange="App.handleFileSelect(this)">
+                </div>
+                <p id="selectedFileName" style="text-align: center; margin-top: 10px; color: var(--gray-500);"></p>
+            </form>
+        `;
+        this.showModal('Dosya Yükle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Yükle', class: 'btn-primary', action: 'App.uploadFile()' }
+        ]);
+    },
+
+    handleFileSelect(input) {
+        const file = input.files[0];
+        if (file) {
+            document.getElementById('selectedFileName').textContent = file.name;
+            this.selectedFile = file;
+        }
+    },
+
+    uploadFile() {
+        const form = document.getElementById('uploadForm');
+        const formData = new FormData(form);
+
+        if (!this.data.files) this.data.files = [];
+
+        const fileData = {
+            id: this.generateId(),
+            name: formData.get('name'),
+            type: formData.get('type'),
+            subject: formData.get('subject'),
+            description: formData.get('description'),
+            uploadDate: new Date().toLocaleDateString('tr-TR'),
+            uploadedBy: this.currentUser.name,
+            fileName: this.selectedFile?.name || formData.get('name'),
+            size: this.selectedFile ? (this.selectedFile.size / 1024).toFixed(1) + ' KB' : 'Boyut belirtilmedi'
+        };
+
+        this.data.files.push(fileData);
+        this.saveData();
+        this.closeModal();
+        this.selectedFile = null;
+        this.showToast('Dosya yüklendi!');
+        this.renderPage(this.currentPage);
+    },
+
+    downloadFile(id) {
+        const file = this.data.files.find(f => f.id === id);
+        if (file) {
+            this.showToast(`${file.name} indirildi (simülasyon)`);
+        }
+    },
+
+    deleteFile(id) {
+        if (confirm('Bu dosyayı silmek istediğinize emin misiniz?')) {
+            this.data.files = (this.data.files || []).filter(f => f.id !== id);
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast('Dosya silindi!');
+        }
+    },
+
+    filterFiles() {
+        const search = document.getElementById('fileSearch')?.value.toLowerCase() || '';
+        const type = document.getElementById('fileType')?.value || '';
+        
+        let files = (this.data.files || []);
+        if (search) {
+            files = files.filter(f => f.name.toLowerCase().includes(search) || f.subject?.toLowerCase().includes(search));
+        }
+        if (type) {
+            files = files.filter(f => f.type === type);
+        }
+
+        document.getElementById('filesList').innerHTML = this.renderFilesList(files);
+    },
+
+    renderMyFiles() {
+        return this.renderFiles();
+    },
+
+    renderReport() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📄 Karne ve Raporlar</h1>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Öğrenci Karnesi</span>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="margin-bottom: 15px; color: var(--gray-500);">Öğrencinin dönem notlarını ve devamsızlık bilgilerini içeren karne oluştur.</p>
+                        <div class="form-group">
+                            <label>Öğrenci Seç</label>
+                            <select id="reportStudent">
+                                <option value="">Seçin...</option>
+                                ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="App.generateReport()" style="width: 100%;">
+                            <i class="fas fa-file-pdf"></i> Karneni Oluştur
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Sınıf Karnesi</span>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="margin-bottom: 15px; color: var(--gray-500);">Tüm sınıfın dönem sonu karnesini oluştur.</p>
+                        <button class="btn btn-primary" onclick="App.generateClassReport()" style="width: 100%;">
+                            <i class="fas fa-users"></i> Sınıf Karnesini Oluştur
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Devamsızlık Raporu</span>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="margin-bottom: 15px; color: var(--gray-500);">Öğrencinin devamsızlık raporunu oluştur.</p>
+                        <div class="form-group">
+                            <label>Öğrenci Seç</label>
+                            <select id="attendanceStudent">
+                                <option value="">Seçin...</option>
+                                ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="App.generateAttendanceReport()" style="width: 100%;">
+                            <i class="fas fa-clipboard-list"></i> Rapor Oluştur
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportPreview" style="margin-top: 30px;"></div>
+        `;
+    },
+
+    generateReport() {
+        const studentId = document.getElementById('reportStudent')?.value;
+        if (!studentId) {
+            this.showToast('Lütfen öğrenci seçin!', 'error');
+            return;
+        }
+
+        const student = this.data.students.find(s => s.id === studentId);
+        const grades = (this.data.grades || []).filter(g => g.studentId === studentId);
+        const attendance = (this.data.attendance || []).filter(a => a.studentId === studentId);
+        
+        const avgGrade = grades.length > 0 
+            ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1) 
+            : '-';
+        
+        const subjects = [...new Set(grades.map(g => g.subject))];
+        
+        const reportHtml = `
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <h1 style="color: var(--primary);">${this.data.settings.className || 'Sınıf'} Öğrenci Karnesi</h1>
+                    <p style="color: var(--gray-500);">${this.data.settings.schoolYear || '2025-2026'} - ${this.data.settings.term || '1'}. Dönem</p>
+                </div>
+                
+                <div style="padding: 30px;">
+                    <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+                        <div>
+                            <h3 style="margin-bottom: 5px;">${student?.name || 'Öğrenci'}</h3>
+                            <p style="color: var(--gray-500);">No: ${student?.number || '-'}</p>
+                            <p style="color: var(--gray-500);">Sınıf: ${this.data.settings.className || '-'}</p>
+                        </div>
+                        <div style="margin-left: auto; text-align: right;">
+                            <div style="font-size: 48px; font-weight: bold; color: ${avgGrade >= 50 ? '#10b981' : '#ef4444'};">${avgGrade}</div>
+                            <p style="color: var(--gray-500);">Ortalama</p>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 15px;">Ders Notları</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                        <thead>
+                            <tr style="background: var(--gray-100);">
+                                <th style="padding: 12px; text-align: left;">Ders</th>
+                                <th style="padding: 12px; text-align: center;">Yazılı</th>
+                                <th style="padding: 12px; text-align: center;">Sözlü</th>
+                                <th style="padding: 12px; text-align: center;">Ortalama</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${subjects.map(subj => {
+                                const subjGrades = grades.filter(g => g.subject === subj);
+                                const avg = (subjGrades.reduce((a, g) => a + parseFloat(g.score), 0) / subjGrades.length).toFixed(1);
+                                const yazili = subjGrades.filter(g => g.examType === 'Yazılı');
+                                const sozlu = subjGrades.filter(g => g.examType === 'Sözlü');
+                                const yaziliAvg = yazili.length > 0 ? (yazili.reduce((a, g) => a + parseFloat(g.score), 0) / yazili.length).toFixed(1) : '-';
+                                const sozluAvg = sozlu.length > 0 ? (sozlu.reduce((a, g) => a + parseFloat(g.score), 0) / sozlu.length).toFixed(1) : '-';
+                                return `
+                                    <tr style="border-bottom: 1px solid var(--gray-200);">
+                                        <td style="padding: 12px;">${subj}</td>
+                                        <td style="padding: 12px; text-align: center;">${yaziliAvg}</td>
+                                        <td style="padding: 12px; text-align: center;">${sozluAvg}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: bold;">${avg}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+
+                    <h4 style="margin-bottom: 15px;">Devamsızlık Bilgileri</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="padding: 20px; background: #d1fae5; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #065f46;">${attendance.filter(a => a.status === 'present').length}</div>
+                            <div style="color: #065f46;">Devamsız Gün</div>
+                        </div>
+                        <div style="padding: 20px; background: #fee2e2; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #991b1b;">${attendance.filter(a => a.status === 'absent').length}</div>
+                            <div style="color: #991b1b;">Devamsız Gün</div>
+                        </div>
+                        <div style="padding: 20px; background: #ffedd5; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #92400e;">${attendance.filter(a => a.status === 'late').length}</div>
+                            <div style="color: #92400e;">Geç Kalan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 20px; border-top: 1px solid var(--gray-200); text-align: center; color: var(--gray-500); font-size: 12px;">
+                    Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')}
+                </div>
+            </div>
+        `;
+
+        document.getElementById('reportPreview').innerHTML = reportHtml;
+    },
+
+    generateClassReport() {
+        const reportHtml = `
+            <div class="card" style="max-width: 1000px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <h1 style="color: var(--primary);">${this.data.settings.className || 'Sınıf'} Sınıf Karnesi</h1>
+                    <p style="color: var(--gray-500);">${this.data.settings.schoolYear || '2025-2026'} - ${this.data.settings.term || '1'}. Dönem</p>
+                </div>
+                
+                <div style="padding: 30px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--primary); color: white;">
+                                <th style="padding: 12px; text-align: left;">No</th>
+                                <th style="padding: 12px; text-align: left;">Ad Soyad</th>
+                                <th style="padding: 12px; text-align: center;">Ortalama</th>
+                                <th style="padding: 12px; text-align: center;">Başarı</th>
+                                <th style="padding: 12px; text-align: center;">Sıralama</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.data.students.map((s, i) => {
+                                const grades = (this.data.grades || []).filter(g => g.studentId === s.id);
+                                const avg = grades.length > 0 
+                                    ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1) 
+                                    : '-';
+                                return `
+                                    <tr style="border-bottom: 1px solid var(--gray-200); ${i === 0 ? 'background: #fef3c7;' : ''}">
+                                        <td style="padding: 12px;">${s.number}</td>
+                                        <td style="padding: 12px;">${s.name}</td>
+                                        <td style="padding: 12px; text-align: center; font-weight: bold;">${avg}</td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span class="badge ${parseFloat(avg) >= 70 ? 'badge-success' : parseFloat(avg) >= 50 ? 'badge-warning' : 'badge-danger'}">
+                                                ${parseFloat(avg) >= 70 ? 'Başarılı' : parseFloat(avg) >= 50 ? 'Geçer' : 'Başarısız'}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">#${i + 1}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('reportPreview').innerHTML = reportHtml;
+    },
+
+    generateAttendanceReport() {
+        const studentId = document.getElementById('attendanceStudent')?.value;
+        if (!studentId) {
+            this.showToast('Lütfen öğrenci seçin!', 'error');
+            return;
+        }
+
+        const student = this.data.students.find(s => s.id === studentId);
+        const attendance = (this.data.attendance || []).filter(a => a.studentId === studentId);
+        
+        const reportHtml = `
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <h2 style="color: var(--primary);">Devamsızlık Raporu</h2>
+                </div>
+                
+                <div style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px;">${student?.name} - No: ${student?.number}</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
+                        <div style="padding: 20px; background: #d1fae5; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 36px; font-weight: bold; color: #065f46;">${attendance.filter(a => a.status === 'present').length}</div>
+                            <div style="color: #065f46;">Devamsız (Gün)</div>
+                        </div>
+                        <div style="padding: 20px; background: #fee2e2; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 36px; font-weight: bold; color: #991b1b;">${attendance.filter(a => a.status === 'absent').length}</div>
+                            <div style="color: #991b1b;">Devamsız (Gün)</div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 15px;">Detaylı Kayıt</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--gray-100);">
+                                <th style="padding: 10px;">Tarih</th>
+                                <th style="padding: 10px;">Durum</th>
+                                <th style="padding: 10px;">Not</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${attendance.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => `
+                                <tr style="border-bottom: 1px solid var(--gray-200);">
+                                    <td style="padding: 10px;">${a.date}</td>
+                                    <td style="padding: 10px;">
+                                        <span class="badge ${a.status === 'present' ? 'badge-success' : a.status === 'absent' ? 'badge-danger' : 'badge-warning'}">
+                                            ${a.status === 'present' ? 'Var' : a.status === 'absent' ? 'Yok' : 'Geç'}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px; color: var(--gray-500);">${a.note || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('reportPreview').innerHTML = reportHtml;
+    },
+
+    renderParentReport() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+        
+        if (!student) {
+            return '<p class="empty-state">Bağlı öğrenci bulunamadı</p>';
+        }
+
+        const grades = (this.data.grades || []).filter(g => g.studentId === studentId);
+        const attendance = (this.data.attendance || []).filter(a => a.studentId === studentId);
+        const avgGrade = grades.length > 0 
+            ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1) 
+            : '-';
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">📊 ${student.name} - Veli Raporu</h1>
+            </div>
+
+            <div class="card" style="max-width: 900px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <div class="student-avatar" style="width: 80px; height: 80px; font-size: 32px; margin: 0 auto 15px; background: var(--primary);">${student.name.charAt(0)}</div>
+                    <h2>${student.name}</h2>
+                    <p style="color: var(--gray-500);">${this.data.settings.className || 'Sınıf'} - ${this.data.settings.schoolYear || ''}</p>
+                </div>
+
+                <div style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px;">📈 Genel Performans</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
+                        <div style="padding: 20px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: var(--radius); text-align: center; color: white;">
+                            <div style="font-size: 32px; font-weight: bold;">${avgGrade}</div>
+                            <div style="font-size: 12px; opacity: 0.9;">Ortalama</div>
+                        </div>
+                        <div style="padding: 20px; background: #d1fae5; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #065f46;">${grades.length}</div>
+                            <div style="font-size: 12px; color: #065f46;">Toplam Not</div>
+                        </div>
+                        <div style="padding: 20px; background: #fee2e2; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #991b1b;">${attendance.filter(a => a.status === 'absent').length}</div>
+                            <div style="font-size: 12px; color: #991b1b;">Devamsız Gün</div>
+                        </div>
+                        <div style="padding: 20px; background: #ffedd5; border-radius: var(--radius); text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #92400e;">${attendance.filter(a => a.status === 'late').length}</div>
+                            <div style="font-size: 12px; color: #92400e;">Geç Kalan</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">📚 Ders Performansı</h3>
+                    <div style="margin-bottom: 30px;">
+                        ${[...new Set(grades.map(g => g.subject))].map(subj => {
+                            const subjGrades = grades.filter(g => g.subject === subj);
+                            const avg = (subjGrades.reduce((a, g) => a + parseFloat(g.score), 0) / subjGrades.length).toFixed(1);
+                            return `
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>${subj}</span>
+                                        <span><strong>${avg}</strong></span>
+                                    </div>
+                                    <div class="grade-progress-bar">
+                                        <div class="grade-progress-fill ${parseFloat(avg) >= 70 ? 'high' : parseFloat(avg) >= 50 ? 'medium' : 'low'}" style="width: ${avg}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">💬 Öğretmen Yorumu</h3>
+                    <div style="padding: 20px; background: var(--gray-100); border-radius: var(--radius); font-style: italic; color: var(--gray-600);">
+                        ${student.comment || 'Henüz öğretmen yorumu eklenmedi.'}
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 20px; background: #eff6ff; border-radius: var(--radius); border: 1px solid #bfdbfe;">
+                        <h4 style="color: #1e40af; margin-bottom: 10px;">📋 Veliler İçin Not</h4>
+                        <p style="color: #1e40af; font-size: 14px;">
+                            Bu rapor dönem içindeki genel performansı özetlemektedir. 
+                            Detaylı bilgi için öğretmenlerle iletişime geçebilirsiniz.
+                        </p>
+                    </div>
+                </div>
             </div>
         `;
     }
