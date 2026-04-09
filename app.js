@@ -66,25 +66,40 @@ const App = {
     },
 
     loadData() {
+        const defaultData = {
+            settings: {
+                className: '',
+                classLevel: '',
+                term: '',
+                schoolYear: ''
+            },
+            students: [],
+            teachers: [],
+            subjects: [],
+            grades: [],
+            schedule: [],
+            exams: [],
+            attendance: [],
+            announcements: [],
+            assignments: [],
+            clubs: [],
+            library: []
+        };
+        
         const saved = localStorage.getItem('schoolData');
         if (saved) {
             try {
-                this.data = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                this.data = { ...defaultData, ...parsed };
+                if (!this.data.announcements) this.data.announcements = [];
+                if (!this.data.assignments) this.data.assignments = [];
+                if (!this.data.clubs) this.data.clubs = [];
+                if (!this.data.library) this.data.library = [];
             } catch(e) {
-                this.data = {
-                    settings: {},
-                    students: [],
-                    teachers: [],
-                    grades: [],
-                    schedule: [],
-                    exams: [],
-                    attendance: [],
-                    announcements: [],
-                    assignments: [],
-                    clubs: [],
-                    library: []
-                };
+                this.data = defaultData;
             }
+        } else {
+            this.data = defaultData;
         }
     },
 
@@ -2114,7 +2129,7 @@ const App = {
     },
 
     renderAnnouncements() {
-        const announcements = this.data.announcements.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const announcements = (this.data.announcements || []).sort((a, b) => new Date(b.date) - new Date(a.date));
         
         return `
             <div class="page-header">
@@ -2450,7 +2465,7 @@ const App = {
     },
 
     renderAssignmentsList() {
-        const assignments = this.data.assignments.sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
+        const assignments = (this.data.assignments || []).sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
         
         if (assignments.length === 0) {
             return '<p class="empty-state">Henüz ödev eklenmedi</p>';
@@ -2593,12 +2608,10 @@ const App = {
     },
 
     renderClubsList() {
-        if (this.data.clubs.length === 0) {
+        if (!this.data.clubs || this.data.clubs.length === 0) {
             return '<div class="card" style="grid-column: 1/-1;"><p class="empty-state">Henüz kulüp eklenmedi</p></div>';
         }
 
-        const icons = ['blue', 'green', 'orange', 'purple', 'pink', 'red'];
-        
         return this.data.clubs.map((club, i) => `
             <div class="club-card" onclick="App.viewClub('${club.id}')">
                 <div class="club-icon ${icons[i % icons.length]}">
@@ -2746,7 +2759,7 @@ const App = {
     },
 
     renderBooksList() {
-        if (this.data.library.length === 0) {
+        if (!this.data.library || this.data.library.length === 0) {
             return '<p class="empty-state">Henüz kitap eklenmedi</p>';
         }
 
