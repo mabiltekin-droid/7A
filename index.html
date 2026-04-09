@@ -3,95 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sınıf Yönetim Sistemi</title>
+    <title>Giriş - Sınıf Yönetim Sistemi</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-logo i {
+            font-size: 50px;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        .login-logo h1 {
+            font-size: 24px;
+            color: #1e293b;
+            margin: 0;
+        }
+        .login-logo p {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .login-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 25px;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .login-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .login-tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .login-form {
+            display: none;
+        }
+        .login-form.active {
+            display: block;
+        }
+        .role-select-container {
+            margin-bottom: 20px;
+        }
+        .demo-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1e40af;
+        }
+        .demo-info strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .demo-info code {
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-graduation-cap"></i>
-                <span>Sınıf Yönetimi</span>
-            </div>
-            <nav class="nav-menu">
-                <a href="#" class="nav-item active" data-page="dashboard">
-                    <i class="fas fa-home"></i>
-                    <span>Ana Panel</span>
-                </a>
-                <a href="#" class="nav-item" data-page="students">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>Öğrenciler</span>
-                </a>
-                <a href="#" class="nav-item" data-page="grades">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Notlar</span>
-                </a>
-                <a href="#" class="nav-item" data-page="schedule">
-                    <i class="fas fa-calendar-week"></i>
-                    <span>Ders Programı</span>
-                </a>
-                <a href="#" class="nav-item" data-page="exams">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Deneme Çizelgesi</span>
-                </a>
-                <a href="#" class="nav-item" data-page="attendance">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span>Devamsızlık</span>
-                </a>
-                <a href="#" class="nav-item" data-page="teachers">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    <span>Öğretmenler</span>
-                </a>
-                <a href="#" class="nav-item" data-page="settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Ayarlar</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <header class="top-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Öğrenci, ders veya sınav ara..." id="globalSearch">
-                </div>
-                <div class="top-bar-right">
-                    <div class="class-info" id="classInfo">
-                        <i class="fas fa-school"></i>
-                        <span>Sınıf: Belirtilmedi</span>
-                    </div>
-                    <button class="btn-icon" id="exportData" title="Verileri Dışa Aktar">
-                        <i class="fas fa-download"></i>
-                    </button>
-                    <button class="btn-icon" id="importData" title="Verileri İçe Aktar">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div class="page-content" id="pageContent">
-            </div>
-        </main>
-    </div>
-
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Modal Başlık</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-            </div>
-            <div class="modal-footer" id="modalFooter">
-            </div>
+    <div class="login-container">
+        <div class="login-logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Sınıf Yönetim Sistemi</h1>
+            <p>7-A Sınıfı</p>
         </div>
+
+        <div class="login-tabs">
+            <button class="login-tab active" data-role="admin">Admin</button>
+            <button class="login-tab" data-role="teacher">Öğretmen</button>
+            <button class="login-tab" data-role="student">Öğrenci</button>
+            <button class="login-tab" data-role="parent">Veli</button>
+        </div>
+
+        <div class="demo-info">
+            <strong>Demo Giriş:</strong>
+            <div><code>admin</code> / <code>admin123</code> (Admin)</div>
+            <div><code>ogretmen</code> / <code>ogretmen123</code> (Öğretmen)</div>
+            <div><code>ogrenci</code> / <code>ogrenci123</code> (Öğrenci)</div>
+            <div><code>veli</code> / <code>veli123</code> (Veli)</div>
+        </div>
+
+        <form class="login-form active" data-role="admin" id="loginForm">
+            <div class="form-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="username" placeholder="Kullanıcı adı" required>
+            </div>
+            <div class="form-group">
+                <label>Şifre</label>
+                <input type="password" id="password" placeholder="Şifre" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+            </button>
+            <div id="loginError" style="color: #ef4444; text-align: center; margin-top: 10px; display: none;"></div>
+        </form>
+
+        <p style="text-align: center; margin-top: 20px; color: #64748b; font-size: 13px;">
+            Hesabınız yoksa admin ile iletişime geçin
+        </p>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <script>
+        const loginTabs = document.querySelectorAll('.login-tab');
+        const loginForms = document.querySelectorAll('.login-form');
+        
+        loginTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                loginTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
 
-    <input type="file" id="importFile" accept=".json" style="display:none">
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const users = JSON.parse(localStorage.getItem('schoolUsers') || JSON.stringify({
+                users: [
+                    { id: '1', username: 'admin', password: 'admin123', role: 'admin', name: 'Yönetici' },
+                    { id: '2', username: 'ogretmen', password: 'ogretmen123', role: 'teacher', name: 'Öğretmen' },
+                    { id: '3', username: 'ogrenci', password: 'ogrenci123', role: 'student', name: 'Öğrenci', studentId: null },
+                    { id: '4', username: 'veli', password: 'veli123', role: 'parent', name: 'Veli', studentId: null }
+                ]
+            }));
 
-    <script src="app.js"></script>
+            const user = users.users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                window.location.href = 'dashboard.html';
+            } else {
+                const error = document.getElementById('loginError');
+                error.textContent = 'Kullanıcı adı veya şifre hatalı!';
+                error.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınıf Yönetim Sistemi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Sınıf Yönetimi</span>
+            </div>
+            <div class="user-info" style="padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="user-avatar" id="userAvatar" style="width: 40px; height: 40px; border-radius: 50%; background: white; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 600;">A</div>
+                    <div style="color: white;">
+                        <div style="font-weight: 600; font-size: 14px;" id="userName">Admin</div>
+                        <div style="font-size: 11px; opacity: 0.7;" id="userRole">Admin</div>
+                    </div>
+                </div>
+                <button onclick="App.logout()" style="width: 100%; margin-top: 10px; padding: 8px; border: none; background: rgba(255,255,255,0.1); color: white; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                </button>
+            </div>
+            <nav class="nav-menu" id="navMenu">
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Ara..." id="globalSearch">
+                </div>
+                <div class="top-bar-right">
+                    <div class="class-info" id="classInfo">
+                        <i class="fas fa-school"></i>
+                        <span>Sınıf: Belirtilmedi</span>
+                    </div>
+                    <button class="btn-icon" id="exportData" title="Verileri Dışa Aktar">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn-icon" id="importData" title="Verileri İçe Aktar">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content" id="pageContent">
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Başlık</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer" id="modalFooter">
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <input type="file" id="importFile" accept=".json" style="display:none">
+
+    <script src="app.js"></script>
+</body>
+</html>

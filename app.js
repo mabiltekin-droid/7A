@@ -14,12 +14,25 @@ const App = {
         exams: [],
         attendance: []
     },
+    currentUser: null,
     currentPage: 'dashboard',
 
     init() {
+        this.checkAuth();
+    },
+
+    checkAuth() {
+        const userStr = localStorage.getItem('currentUser');
+        if (!userStr) {
+            window.location.href = 'index.html';
+            return;
+        }
+        this.currentUser = JSON.parse(userStr);
         this.loadData();
         this.setupEventListeners();
         this.updateClassInfo();
+        this.updateUserInfo();
+        this.renderNavMenu();
         this.navigate('dashboard');
     },
 
@@ -41,7 +54,72 @@ const App = {
         }
     },
 
-    setupEventListeners() {
+    updateUserInfo() {
+        document.getElementById('userAvatar').textContent = this.currentUser.name.charAt(0).toUpperCase();
+        document.getElementById('userName').textContent = this.currentUser.name;
+        document.getElementById('userRole').textContent = this.getRoleName(this.currentUser.role);
+    },
+
+    getRoleName(role) {
+        const names = {
+            admin: 'Yönetici',
+            teacher: 'Öğretmen',
+            student: 'Öğrenci',
+            parent: 'Veli'
+        };
+        return names[role] || role;
+    },
+
+    renderNavMenu() {
+        const nav = document.getElementById('navMenu');
+        let menuItems = [];
+
+        const role = this.currentUser.role;
+
+        if (role === 'admin') {
+            menuItems = [
+                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
+                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
+                { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
+                { page: 'grades', icon: 'fa-chart-line', label: 'Notlar' },
+                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
+                { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
+                { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
+            ];
+        } else if (role === 'teacher') {
+            menuItems = [
+                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
+                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
+                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' }
+            ];
+        } else if (role === 'student') {
+            menuItems = [
+                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
+                { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
+                { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
+                { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' }
+            ];
+        } else if (role === 'parent') {
+            menuItems = [
+                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
+                { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
+                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' }
+            ];
+        }
+
+        nav.innerHTML = menuItems.map(item => `
+            <a href="#" class="nav-item" data-page="${item.page}">
+                <i class="fas ${item.icon}"></i>
+                <span>${item.label}</span>
+            </a>
+        `).join('');
+
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -49,7 +127,9 @@ const App = {
                 this.navigate(page);
             });
         });
+    },
 
+    setupEventListeners() {
         document.getElementById('globalSearch').addEventListener('input', (e) => {
             this.handleSearch(e.target.value);
         });
@@ -69,18 +149,35 @@ const App = {
 
     renderPage(page) {
         const content = document.getElementById('pageContent');
+        
         const pages = {
-            dashboard: this.renderDashboard,
-            students: this.renderStudents,
-            grades: this.renderGrades,
-            schedule: this.renderSchedule,
-            exams: this.renderExams,
-            attendance: this.renderAttendance,
-            teachers: this.renderTeachers,
-            settings: this.renderSettings
+            dashboard: () => this.renderDashboard(),
+            users: () => this.renderUsers(),
+            students: () => this.renderStudents(),
+            teachers: () => this.renderTeachers(),
+            grades: () => this.renderGrades(),
+            schedule: () => this.renderSchedule(),
+            exams: () => this.renderExams(),
+            attendance: () => this.renderAttendance(),
+            settings: () => this.renderSettings(),
+            mygrades: () => this.renderMyGrades(),
+            myschedule: () => this.renderMySchedule(),
+            myattendance: () => this.renderMyAttendance(),
+            myexams: () => this.renderMyExams(),
+            childgrades: () => this.renderChildGrades(),
+            childattendance: () => this.renderChildAttendance()
         };
-        content.innerHTML = (pages[page] || pages.dashboard).call(this);
-        this.attachPageListeners(page);
+
+        const renderFn = pages[page];
+        if (renderFn) {
+            content.innerHTML = renderFn();
+            this.attachPageListeners(page);
+        }
+    },
+
+    logout() {
+        localStorage.removeItem('currentUser');
+        window.location.href = 'index.html';
     },
 
     showToast(message, type = 'success') {
@@ -140,20 +237,27 @@ const App = {
     },
 
     handleSearch(query) {
-        if (!query) return;
-        const students = this.data.students.filter(s => 
-            s.name.toLowerCase().includes(query.toLowerCase()) ||
-            s.number.toString().includes(query)
-        );
-        if (students.length > 0) {
-            this.navigate('students');
-            document.getElementById('studentSearch') && (document.getElementById('studentSearch').value = query);
-        }
+        if (!query || this.currentUser.role === 'student' || this.currentUser.role === 'parent') return;
     },
 
     renderDashboard() {
+        const role = this.currentUser.role;
+        
+        if (role === 'admin') {
+            return this.renderAdminDashboard();
+        } else if (role === 'teacher') {
+            return this.renderTeacherDashboard();
+        } else if (role === 'student') {
+            return this.renderStudentDashboard();
+        } else if (role === 'parent') {
+            return this.renderParentDashboard();
+        }
+    },
+
+    renderAdminDashboard() {
         const totalStudents = this.data.students.length;
         const totalTeachers = this.data.teachers.length;
+        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
         const upcomingExams = this.data.exams.filter(e => new Date(e.date) >= new Date()).length;
         const avgGrade = this.data.grades.length > 0 
             ? (this.data.grades.reduce((a, g) => a + (parseFloat(g.score) || 0), 0) / this.data.grades.length).toFixed(1)
@@ -161,13 +265,17 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Ana Panel</h1>
-                <button class="btn btn-primary" onclick="App.navigate('students')">
-                    <i class="fas fa-plus"></i> Yeni Öğrenci Ekle
-                </button>
+                <h1 class="page-title">Admin Ana Panel</h1>
             </div>
 
             <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <h4>${users.length}</h4>
+                        <p>Toplam Kullanıcı</p>
+                    </div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
                     <div class="stat-info">
@@ -189,11 +297,115 @@ const App = {
                         <p>Yaklaşan Deneme</p>
                     </div>
                 </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Son Eklenen Öğrenciler</span>
+                    </div>
+                    ${this.renderRecentStudents()}
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Son Eklenen Öğretmenler</span>
+                    </div>
+                    ${this.renderRecentTeachers()}
+                </div>
+            </div>
+        `;
+    },
+
+    renderTeacherDashboard() {
+        const myGrades = this.data.grades.length;
+        const mySchedule = this.data.schedule.length;
+        const upcomingExams = this.data.exams.filter(e => new Date(e.date) >= new Date()).length;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Öğretmen Ana Panel</h1>
+            </div>
+
+            <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon red"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-icon blue"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h4>${myGrades}</h4>
+                        <p>Girilen Not</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-calendar-week"></i></div>
+                    <div class="stat-info">
+                        <h4>${mySchedule}</h4>
+                        <p>Ders Saati</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-info">
+                        <h4>${upcomingExams}</h4>
+                        <p>Yaklaşan Deneme</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Hızlı İşlemler</span>
+                </div>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="App.navigate('grades')">
+                        <i class="fas fa-plus"></i> Not Girişi Yap
+                    </button>
+                    <button class="btn btn-secondary" onclick="App.navigate('attendance')">
+                        <i class="fas fa-clipboard-list"></i> Yoklama Al
+                    </button>
+                    <button class="btn btn-secondary" onclick="App.navigate('students')">
+                        <i class="fas fa-user-graduate"></i> Öğrencileri Gör
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    renderStudentDashboard() {
+        const studentId = this.currentUser.studentId;
+        const myGrades = studentId ? this.data.grades.filter(g => g.studentId === studentId) : [];
+        const myAttendance = studentId ? this.data.attendance.filter(a => a.studentId === studentId) : [];
+        
+        const avgGrade = myGrades.length > 0 
+            ? (myGrades.reduce((a, g) => a + parseFloat(g.score), 0) / myGrades.length).toFixed(1)
+            : '-';
+        
+        const presentDays = myAttendance.filter(a => a.status === 'present').length;
+        const absentDays = myAttendance.filter(a => a.status === 'absent').length;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Hoş Geldin, ${this.currentUser.name}!</h1>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-info">
                         <h4>${avgGrade}</h4>
-                        <p>Ortalama Not</p>
+                        <p>Ortalamam</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${presentDays}</h4>
+                        <p>Devamsız Gün</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${absentDays}</h4>
+                        <p>Devamsız Gün</p>
                     </div>
                 </div>
             </div>
@@ -201,20 +413,130 @@ const App = {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">Yaklaşan Denemeler</span>
-                        <button class="btn btn-secondary" onclick="App.navigate('exams')">Tümü</button>
+                        <span class="card-title">Son Notlarım</span>
                     </div>
-                    ${this.renderUpcomingExams()}
+                    ${myGrades.length > 0 ? myGrades.slice(-5).reverse().map(g => `
+                        <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                            <span>${g.subject}</span>
+                            <span class="badge ${parseFloat(g.score) >= 50 ? 'badge-success' : 'badge-danger'}">${g.score}</span>
+                        </div>
+                    `).join('') : '<p style="text-align: center; color: var(--gray-500); padding: 20px;">Henüz not girilmedi</p>'}
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">Son Eklenen Öğrenciler</span>
-                        <button class="btn btn-secondary" onclick="App.navigate('students')">Tümü</button>
+                        <span class="card-title">Yaklaşan Denemeler</span>
                     </div>
-                    ${this.renderRecentStudents()}
+                    ${this.renderUpcomingExams()}
                 </div>
             </div>
         `;
+    },
+
+    renderParentDashboard() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+        const myGrades = studentId ? this.data.grades.filter(g => g.studentId === studentId) : [];
+        const myAttendance = studentId ? this.data.attendance.filter(a => a.studentId === studentId) : [];
+        
+        const avgGrade = myGrades.length > 0 
+            ? (myGrades.reduce((a, g) => a + parseFloat(g.score), 0) / myGrades.length).toFixed(1)
+            : '-';
+        
+        const absentDays = myAttendance.filter(a => a.status === 'absent').length;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Hoş Geldiniz!</h1>
+            </div>
+
+            ${student ? `
+                <div class="card" style="margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div class="student-avatar" style="width: 60px; height: 60px; font-size: 24px;">${student.name.charAt(0)}</div>
+                        <div>
+                            <h3>${student.name}</h3>
+                            <p style="color: var(--gray-500);">Öğrenci No: ${student.number}</p>
+                        </div>
+                    </div>
+                </div>
+            ` : '<p style="color: var(--gray-500);">Öğrenci bilgisi bulunamadı</p>'}
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h4>${avgGrade}</h4>
+                        <p>Ortalama</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${absentDays}</h4>
+                        <p>Devamsız Gün</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Son Notlar</span>
+                    </div>
+                    ${myGrades.length > 0 ? myGrades.slice(-5).reverse().map(g => `
+                        <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                            <span>${g.subject}</span>
+                            <span class="badge ${parseFloat(g.score) >= 50 ? 'badge-success' : 'badge-danger'}">${g.score}</span>
+                        </div>
+                    `).join('') : '<p style="text-align: center; color: var(--gray-500); padding: 20px;">Henüz not girilmedi</p>'}
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Hızlı İşlemler</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="App.navigate('childgrades')">
+                            <i class="fas fa-chart-line"></i> Tüm Notları Gör
+                        </button>
+                        <button class="btn btn-secondary" onclick="App.navigate('childattendance')">
+                            <i class="fas fa-clipboard-list"></i> Devamsızlık Detayı
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderRecentStudents() {
+        const recent = this.data.students.slice(-5).reverse();
+        if (recent.length === 0) {
+            return '<p class="empty-state">Henüz öğrenci eklenmedi</p>';
+        }
+        return recent.map(student => `
+            <div style="display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                <div class="student-avatar">${student.name.charAt(0)}</div>
+                <div>
+                    <h4>${student.name}</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">No: ${student.number}</p>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderRecentTeachers() {
+        const recent = this.data.teachers.slice(-5).reverse();
+        if (recent.length === 0) {
+            return '<p class="empty-state">Henüz öğretmen eklenmedi</p>';
+        }
+        return recent.map(teacher => `
+            <div style="display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                <div class="student-avatar" style="background: var(--secondary);">${teacher.name.charAt(0)}</div>
+                <div>
+                    <h4>${teacher.name}</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">${teacher.branch || '-'}</p>
+                </div>
+            </div>
+        `).join('');
     },
 
     renderUpcomingExams() {
@@ -224,7 +546,7 @@ const App = {
             .slice(0, 5);
 
         if (upcoming.length === 0) {
-            return '<p class="empty-state">Henüz deneme eklenmedi</p>';
+            return '<p class="empty-state">Yaklaşan deneme yok</p>';
         }
 
         return upcoming.map(exam => {
@@ -244,21 +566,177 @@ const App = {
         }).join('');
     },
 
-    renderRecentStudents() {
-        const recent = this.data.students.slice(-5).reverse();
-        if (recent.length === 0) {
-            return '<p class="empty-state">Henüz öğrenci eklenmedi</p>';
-        }
+    renderUsers() {
+        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
+        
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Kullanıcı Yönetimi</h1>
+                <button class="btn btn-primary" onclick="App.showUserModal()">
+                    <i class="fas fa-plus"></i> Kullanıcı Ekle
+                </button>
+            </div>
 
-        return recent.map(student => `
-            <div style="display: flex; align-items: center; gap: 15px; padding: 10px; border-bottom: 1px solid var(--gray-200);">
-                <div class="student-avatar">${student.name.charAt(0)}</div>
-                <div>
-                    <h4>${student.name}</h4>
-                    <p style="font-size: 12px; color: var(--gray-500);">No: ${student.number}</p>
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı Adı</th>
+                                <th>Ad Soyad</th>
+                                <th>Rol</th>
+                                <th>Bağlı Öğrenci</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.renderUsersTable(users)}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        `).join('');
+        `;
+    },
+
+    renderUsersTable(users) {
+        if (users.length === 0) {
+            return '<tr><td colspan="5" style="text-align: center; padding: 30px;">Kullanıcı bulunamadı</td></tr>';
+        }
+        return users.map(u => {
+            let linkedStudent = '-';
+            if (u.studentId) {
+                const student = this.data.students.find(s => s.id === u.studentId);
+                linkedStudent = student ? student.name : '<em>Silinen öğrenci</em>';
+            }
+            const roleBadge = {
+                admin: 'badge-danger',
+                teacher: 'badge-info',
+                student: 'badge-success',
+                parent: 'badge-warning'
+            }[u.role] || 'badge-info';
+            const roleText = this.getRoleName(u.role);
+            
+            return `
+                <tr>
+                    <td><strong>${u.username}</strong></td>
+                    <td>${u.name}</td>
+                    <td><span class="badge ${roleBadge}">${roleText}</span></td>
+                    <td>${linkedStudent}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="App.showUserModal('${u.id}')"><i class="fas fa-edit"></i></button>
+                            ${u.username !== 'admin' ? `<button class="action-btn delete" onclick="App.deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    },
+
+    showUserModal(id = null) {
+        const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+        const user = id ? users.users.find(u => u.id === id) : null;
+        
+        const content = `
+            <form id="userForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Kullanıcı Adı *</label>
+                        <input type="text" name="username" value="${user?.username || ''}" required ${id ? 'readonly' : ''} style="${id ? 'background: var(--gray-100);' : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Rol *</label>
+                        <select name="role" required onchange="App.onRoleChange(this.value)">
+                            <option value="">Seçin...</option>
+                            <option value="admin" ${user?.role === 'admin' ? 'selected' : ''}>Admin</option>
+                            <option value="teacher" ${user?.role === 'teacher' ? 'selected' : ''}>Öğretmen</option>
+                            <option value="student" ${user?.role === 'student' ? 'selected' : ''}>Öğrenci</option>
+                            <option value="parent" ${user?.role === 'parent' ? 'selected' : ''}>Veli</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ad Soyad *</label>
+                    <input type="text" name="name" value="${user?.name || ''}" required>
+                </div>
+                <div class="form-group" id="studentSelectGroup" style="display: none;">
+                    <label>Bağlı Öğrenci</label>
+                    <select name="studentId">
+                        <option value="">Seçin...</option>
+                        ${this.data.students.map(s => `<option value="${s.id}" ${user?.studentId === s.id ? 'selected' : ''}>${s.name} (${s.number})</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Şifre ${id ? '(değiştirmek için)' : '*'}</label>
+                        <input type="password" name="password" ${!id ? 'required' : ''} placeholder="${id ? 'Değiştirmek istemiyorsanız boş bırakın' : ''}">
+                    </div>
+                </div>
+            </form>
+            <script>
+                App.onRoleChange = function(role) {
+                    const group = document.getElementById('studentSelectGroup');
+                    group.style.display = (role === 'student' || role === 'parent') ? 'block' : 'none';
+                };
+                ${user && (user.role === 'student' || user.role === 'parent') ? 'document.getElementById("studentSelectGroup").style.display = "block";' : ''}
+            </script>
+        `;
+        const buttons = [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: id ? 'Güncelle' : 'Kaydet', class: 'btn-primary', action: `App.saveUser('${id || ''}')` }
+        ];
+        this.showModal(id ? 'Kullanıcı Düzenle' : 'Yeni Kullanıcı', content, buttons);
+    },
+
+    onRoleChange(role) {},
+
+    saveUser(id) {
+        const form = document.getElementById('userForm');
+        const formData = new FormData(form);
+        
+        let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+        if (!users.users) users.users = [];
+        
+        const userData = {
+            username: formData.get('username'),
+            name: formData.get('name'),
+            role: formData.get('role'),
+            studentId: formData.get('studentId') || null
+        };
+
+        if (!id) {
+            userData.password = formData.get('password');
+            userData.id = this.generateId();
+            
+            if (users.users.some(u => u.username === userData.username)) {
+                this.showToast('Bu kullanıcı adı zaten var!', 'error');
+                return;
+            }
+            users.users.push(userData);
+        } else {
+            const index = users.users.findIndex(u => u.id === id);
+            if (formData.get('password')) {
+                userData.password = formData.get('password');
+            } else {
+                userData.password = users.users[index].password;
+            }
+            users.users[index] = { ...users.users[index], ...userData };
+        }
+
+        localStorage.setItem('schoolUsers', JSON.stringify(users));
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast(id ? 'Kullanıcı güncellendi!' : 'Kullanıcı eklendi!');
+    },
+
+    deleteUser(id) {
+        if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+            let users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}');
+            users.users = users.users.filter(u => u.id !== id);
+            localStorage.setItem('schoolUsers', JSON.stringify(users));
+            this.renderPage(this.currentPage);
+            this.showToast('Kullanıcı silindi!');
+        }
     },
 
     renderStudents() {
@@ -319,15 +797,9 @@ const App = {
                 <td>${s.parentName || '-'}</td>
                 <td>
                     <div class="action-btns">
-                        <button class="action-btn view" onclick="App.viewStudent('${s.id}')" title="Görüntüle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn edit" onclick="App.showStudentModal('${s.id}')" title="Düzenle">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn delete" onclick="App.deleteStudent('${s.id}')" title="Sil">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <button class="action-btn view" onclick="App.viewStudent('${s.id}')"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn edit" onclick="App.showStudentModal('${s.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn delete" onclick="App.deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                 </td>
             </tr>
@@ -682,6 +1154,65 @@ const App = {
         }
     },
 
+    renderMyGrades() {
+        const studentId = this.currentUser.studentId;
+        const myGrades = studentId ? this.data.grades.filter(g => g.studentId === studentId) : [];
+        
+        const avgGrade = myGrades.length > 0 
+            ? (myGrades.reduce((a, g) => a + parseFloat(g.score), 0) / myGrades.length).toFixed(1)
+            : '-';
+
+        const subjects = [...new Set(myGrades.map(g => g.subject))];
+        
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Notlarım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h4>${avgGrade}</h4>
+                        <p>Genel Ortalama</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${myGrades.filter(g => parseFloat(g.score) >= 50).length}</h4>
+                        <p>Geçilen Sınav</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Ders Bazlı Notlar</span>
+                </div>
+                ${subjects.map(subject => {
+                    const subjectGrades = myGrades.filter(g => g.subject === subject);
+                    const avg = (subjectGrades.reduce((a, g) => a + parseFloat(g.score), 0) / subjectGrades.length).toFixed(1);
+                    return `
+                        <div style="margin-bottom: 15px; padding: 15px; background: var(--gray-100); border-radius: var(--radius);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <strong>${subject}</strong>
+                                <span class="badge ${parseFloat(avg) >= 50 ? 'badge-success' : 'badge-danger'}">Ortalama: ${avg}</span>
+                            </div>
+                            ${subjectGrades.sort((a, b) => new Date(b.date) - new Date(a.date)).map(g => `
+                                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--gray-200);">
+                                    <span>${g.examType} - ${g.date}</span>
+                                    <span class="badge ${parseFloat(g.score) >= 50 ? 'badge-success' : 'badge-danger'}">${g.score}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }).join('')}
+                ${subjects.length === 0 ? '<p class="empty-state">Henüz not girilmedi</p>' : ''}
+            </div>
+        `;
+    },
+
     renderSchedule() {
         const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
         const timeSlots = ['08:00-08:40', '08:50-09:30', '09:40-10:20', '10:30-11:10', '11:20-12:00', '13:00-13:40', '13:50-14:30', '14:40-15:20'];
@@ -689,9 +1220,11 @@ const App = {
         return `
             <div class="page-header">
                 <h1 class="page-title">Ders Programı</h1>
-                <button class="btn btn-primary" onclick="App.showScheduleModal()">
-                    <i class="fas fa-plus"></i> Ders Ekle
-                </button>
+                ${this.currentUser.role === 'admin' ? `
+                    <button class="btn btn-primary" onclick="App.showScheduleModal()">
+                        <i class="fas fa-plus"></i> Ders Ekle
+                    </button>
+                ` : ''}
             </div>
 
             <div class="card">
@@ -716,6 +1249,10 @@ const App = {
                 </div>
             </div>
         `;
+    },
+
+    renderMySchedule() {
+        return this.renderSchedule();
     },
 
     showScheduleModal() {
@@ -793,9 +1330,11 @@ const App = {
         return `
             <div class="page-header">
                 <h1 class="page-title">Deneme Çizelgesi</h1>
-                <button class="btn btn-primary" onclick="App.showExamModal()">
-                    <i class="fas fa-plus"></i> Deneme Ekle
-                </button>
+                ${this.currentUser.role === 'admin' ? `
+                    <button class="btn btn-primary" onclick="App.showExamModal()">
+                        <i class="fas fa-plus"></i> Deneme Ekle
+                    </button>
+                ` : ''}
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
@@ -814,6 +1353,10 @@ const App = {
         `;
     },
 
+    renderMyExams() {
+        return this.renderExams();
+    },
+
     renderExamCard(exam) {
         const date = new Date(exam.date);
         const isPast = date < new Date();
@@ -826,13 +1369,15 @@ const App = {
                     </div>
                     <div class="exam-info">
                         <h4>${exam.name}</h4>
-                        <p>${exam.subject || 'Genel'} • ${exam.duration || '-'} dk • ${exam.location || '-'}</p>
+                        <p>${exam.subject || 'Genel'} - ${exam.duration || '-'} dk - ${exam.location || '-'}</p>
                     </div>
                 </div>
-                <div class="action-btns">
-                    ${!isPast ? `<button class="action-btn edit" onclick="App.showExamModal('${exam.id}')"><i class="fas fa-edit"></i></button>` : ''}
-                    <button class="action-btn delete" onclick="App.deleteExam('${exam.id}')"><i class="fas fa-trash"></i></button>
-                </div>
+                ${this.currentUser.role === 'admin' ? `
+                    <div class="action-btns">
+                        ${!isPast ? `<button class="action-btn edit" onclick="App.showExamModal('${exam.id}')"><i class="fas fa-edit"></i></button>` : ''}
+                        <button class="action-btn delete" onclick="App.deleteExam('${exam.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                ` : ''}
             </div>
         `;
     },
@@ -916,9 +1461,11 @@ const App = {
         return `
             <div class="page-header">
                 <h1 class="page-title">Devamsızlık Takibi</h1>
-                <button class="btn btn-primary" onclick="App.showAttendanceModal()">
-                    <i class="fas fa-plus"></i> Yoklama Ekle
-                </button>
+                ${this.currentUser.role !== 'student' && this.currentUser.role !== 'parent' ? `
+                    <button class="btn btn-primary" onclick="App.showAttendanceModal()">
+                        <i class="fas fa-plus"></i> Yoklama Ekle
+                    </button>
+                ` : ''}
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
@@ -931,8 +1478,7 @@ const App = {
                             <tr>
                                 <th>Öğrenci</th>
                                 <th>Devamsız (Gün)</th>
-                                <th>Devamsız (Saat)</th>
-                                <th>İzinli (Gün)</th>
+                                <th>Geç (Gün)</th>
                                 <th>Detay</th>
                             </tr>
                         </thead>
@@ -942,24 +1488,63 @@ const App = {
                     </table>
                 </div>
             </div>
+        `;
+    },
+
+    renderMyAttendance() {
+        const studentId = this.currentUser.studentId;
+        const myAttendance = studentId ? this.data.attendance.filter(a => a.studentId === studentId) : [];
+        const absentDays = myAttendance.filter(a => a.status === 'absent').length;
+        const lateDays = myAttendance.filter(a => a.status === 'late').length;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Devamsızlığım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-info">
+                        <h4>${absentDays}</h4>
+                        <p>Devamsız Gün</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <h4>${lateDays}</h4>
+                        <p>Geç Kaldığım Gün</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Tüm Yoklama Kayıtları</span>
+                    <span class="card-title">Tüm Yoklama Kayıtlarım</span>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Tarih</th>
-                                <th>Öğrenci</th>
                                 <th>Durum</th>
                                 <th>Açıklama</th>
-                                <th>İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${this.renderAttendanceTable()}
+                            ${myAttendance.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => {
+                                const statusClass = a.status === 'present' ? 'badge-success' : a.status === 'absent' ? 'badge-danger' : 'badge-warning';
+                                const statusText = a.status === 'present' ? 'Var' : a.status === 'absent' ? 'Yok' : 'Geç';
+                                return `
+                                    <tr>
+                                        <td>${a.date}</td>
+                                        <td><span class="badge ${statusClass}">${statusText}</span></td>
+                                        <td>${a.note || '-'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${myAttendance.length === 0 ? '<tr><td colspan="3" style="text-align: center; padding: 30px;">Henüz yoklama kaydı yok</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -967,9 +1552,13 @@ const App = {
         `;
     },
 
+    renderChildAttendance() {
+        return this.renderMyAttendance();
+    },
+
     renderAttendanceSummary() {
         if (this.data.students.length === 0) {
-            return '<tr><td colspan="5" style="text-align: center; padding: 30px;">Öğrenci bulunamadı</td></tr>';
+            return '<tr><td colspan="4" style="text-align: center; padding: 30px;">Öğrenci bulunamadı</td></tr>';
         }
         return this.data.students.map(s => {
             const studentAttendance = this.data.attendance.filter(a => a.studentId === s.id);
@@ -985,35 +1574,9 @@ const App = {
                     </td>
                     <td><span class="badge badge-danger">${absentDays}</span></td>
                     <td><span class="badge badge-warning">${lateDays}</span></td>
-                    <td>0</td>
                     <td>
                         <button class="action-btn view" onclick="App.viewStudentAttendance('${s.id}')">
                             <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    },
-
-    renderAttendanceTable() {
-        const sorted = [...this.data.attendance].sort((a, b) => new Date(b.date) - new Date(a.date));
-        if (sorted.length === 0) {
-            return '<tr><td colspan="5" style="text-align: center; padding: 30px;">Henüz yoklama kaydı eklenmedi</td></tr>';
-        }
-        return sorted.map(a => {
-            const student = this.data.students.find(s => s.id === a.studentId);
-            const statusClass = a.status === 'present' ? 'badge-success' : a.status === 'absent' ? 'badge-danger' : 'badge-warning';
-            const statusText = a.status === 'present' ? 'Var' : a.status === 'absent' ? 'Yok' : 'Geç';
-            return `
-                <tr>
-                    <td>${a.date}</td>
-                    <td>${student?.name || '-'}</td>
-                    <td><span class="badge ${statusClass}">${statusText}</span></td>
-                    <td>${a.note || '-'}</td>
-                    <td>
-                        <button class="action-btn delete" onclick="App.deleteAttendance('${a.id}')">
-                            <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -1075,30 +1638,14 @@ const App = {
         this.showToast('Yoklama kaydı eklendi!');
     },
 
-    deleteAttendance(id) {
-        if (confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
-            this.data.attendance = this.data.attendance.filter(a => a.id !== id);
-            this.saveData();
-            this.renderPage(this.currentPage);
-            this.showToast('Kayıt silindi!');
-        }
-    },
-
     viewStudentAttendance(studentId) {
         const student = this.data.students.find(s => s.id === studentId);
         const attendance = this.data.attendance.filter(a => a.studentId === studentId);
         
         const content = `
             <h4 style="margin-bottom: 15px;">${student.name} - Devamsızlık Detayı</h4>
-            <div class="attendance-grid" style="margin-bottom: 20px;">
-                ${attendance.map(a => {
-                    const cls = a.status === 'present' ? 'present' : a.status === 'absent' ? 'absent' : 'late';
-                    const label = a.status === 'present' ? '✓' : a.status === 'absent' ? '✗' : '●';
-                    return `<div class="attendance-day ${cls}" title="${a.date}: ${a.status}">${a.date.split('-')[2]}</div>`;
-                }).join('')}
-            </div>
             <table style="width: 100%; font-size: 13px;">
-                ${attendance.map(a => {
+                ${attendance.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => {
                     const statusClass = a.status === 'present' ? 'badge-success' : a.status === 'absent' ? 'badge-danger' : 'badge-warning';
                     const statusText = a.status === 'present' ? 'Var' : a.status === 'absent' ? 'Yok' : 'Geç';
                     return `<tr>
@@ -1107,6 +1654,7 @@ const App = {
                         <td>${a.note || '-'}</td>
                     </tr>`;
                 }).join('')}
+                ${attendance.length === 0 ? '<tr><td colspan="3" style="text-align: center; padding: 20px;">Kayıt yok</td></tr>' : ''}
             </table>
         `;
         this.showModal('Devamsızlık Detayı', content, [
@@ -1114,13 +1662,19 @@ const App = {
         ]);
     },
 
+    renderChildGrades() {
+        return this.renderMyGrades();
+    },
+
     renderTeachers() {
         return `
             <div class="page-header">
                 <h1 class="page-title">Öğretmenler</h1>
-                <button class="btn btn-primary" onclick="App.showTeacherModal()">
-                    <i class="fas fa-plus"></i> Öğretmen Ekle
-                </button>
+                ${this.currentUser.role === 'admin' ? `
+                    <button class="btn btn-primary" onclick="App.showTeacherModal()">
+                        <i class="fas fa-plus"></i> Öğretmen Ekle
+                    </button>
+                ` : ''}
             </div>
 
             <div class="card">
@@ -1132,7 +1686,7 @@ const App = {
                                 <th>Brans</th>
                                 <th>Telefon</th>
                                 <th>E-posta</th>
-                                <th>İşlemler</th>
+                                ${this.currentUser.role === 'admin' ? '<th>İşlemler</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
@@ -1159,12 +1713,14 @@ const App = {
                 <td>${t.branch || '-'}</td>
                 <td>${t.phone || '-'}</td>
                 <td>${t.email || '-'}</td>
-                <td>
-                    <div class="action-btns">
-                        <button class="action-btn edit" onclick="App.showTeacherModal('${t.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn delete" onclick="App.deleteTeacher('${t.id}')"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
+                ${this.currentUser.role === 'admin' ? `
+                    <td>
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="App.showTeacherModal('${t.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete" onclick="App.deleteTeacher('${t.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                ` : ''}
             </tr>
         `).join('');
     },
@@ -1251,13 +1807,13 @@ const App = {
                     <div class="form-row">
                         <div class="form-group">
                             <label>Sınıf Adı</label>
-                            <input type="text" name="className" value="${this.data.settings.className || ''}" placeholder="örn: 9-A">
+                            <input type="text" name="className" value="${this.data.settings.className || ''}" placeholder="örn: 7-A">
                         </div>
                         <div class="form-group">
                             <label>Sınıf Seviyesi</label>
                             <select name="classLevel">
                                 <option value="">Seçin...</option>
-                                ${[9,10,11,12].map(l => `<option value="${l}" ${this.data.settings.classLevel == l ? 'selected' : ''}>${l}. Sınıf</option>`).join('')}
+                                ${[5,6,7,8,9,10,11,12].map(l => `<option value="${l}" ${this.data.settings.classLevel == l ? 'selected' : ''}>${l}. Sınıf</option>`).join('')}
                             </select>
                         </div>
                     </div>
