@@ -139,9 +139,50 @@
         <p style="text-align: center; margin-top: 20px; color: #64748b; font-size: 13px;">
             Hesabınız yoksa admin ile iletişime geçin
         </p>
+        <p style="text-align: center; margin-top: 10px;">
+            <a href="#" onclick="resetUsers(); return false;" style="color: #ef4444; font-size: 12px; text-decoration: none;">
+                <i class="fas fa-refresh"></i> Şifremi Unuttum / Kullanıcıları Sıfırla
+            </a>
+        </p>
+        <script>
+            function resetUsers() {
+                if (confirm('Tüm kullanıcıları varsayılan hale getirmek istediğinize emin misiniz?')) {
+                    localStorage.removeItem('schoolUsers');
+                    localStorage.removeItem('currentUser');
+                    location.reload();
+                }
+            }
+        </script>
     </div>
 
     <script>
+        const defaultUsers = {
+            users: [
+                { id: '1', username: 'admin', password: 'admin123', role: 'admin', name: 'Yönetici' },
+                { id: '2', username: 'ogretmen', password: 'ogretmen123', role: 'teacher', name: 'Öğretmen' },
+                { id: '3', username: 'ogrenci', password: 'ogrenci123', role: 'student', name: 'Öğrenci', studentId: null },
+                { id: '4', username: 'veli', password: 'veli123', role: 'parent', name: 'Veli', studentId: null }
+            ]
+        };
+
+        function initUsers() {
+            const savedUsers = localStorage.getItem('schoolUsers');
+            if (!savedUsers) {
+                localStorage.setItem('schoolUsers', JSON.stringify(defaultUsers));
+            } else {
+                try {
+                    const parsed = JSON.parse(savedUsers);
+                    if (!parsed.users || parsed.users.length === 0) {
+                        localStorage.setItem('schoolUsers', JSON.stringify(defaultUsers));
+                    }
+                } catch (e) {
+                    localStorage.setItem('schoolUsers', JSON.stringify(defaultUsers));
+                }
+            }
+        }
+
+        initUsers();
+
         const loginTabs = document.querySelectorAll('.login-tab');
         const loginForms = document.querySelectorAll('.login-form');
         
@@ -157,14 +198,14 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            const users = JSON.parse(localStorage.getItem('schoolUsers') || JSON.stringify({
-                users: [
-                    { id: '1', username: 'admin', password: 'admin123', role: 'admin', name: 'Yönetici' },
-                    { id: '2', username: 'ogretmen', password: 'ogretmen123', role: 'teacher', name: 'Öğretmen' },
-                    { id: '3', username: 'ogrenci', password: 'ogrenci123', role: 'student', name: 'Öğrenci', studentId: null },
-                    { id: '4', username: 'veli', password: 'veli123', role: 'parent', name: 'Veli', studentId: null }
-                ]
-            }));
+            const usersStr = localStorage.getItem('schoolUsers');
+            let users = defaultUsers;
+            try {
+                users = JSON.parse(usersStr);
+                if (!users.users) users = defaultUsers;
+            } catch (e) {
+                users = defaultUsers;
+            }
 
             const user = users.users.find(u => u.username === username && u.password === password);
             
