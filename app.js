@@ -371,6 +371,30 @@ const App = {
         this.showToast('Veriler dışa aktarıldı!');
     },
 
+    exportCurrentViewAsPDF() {
+        // Prefer printing the report area if present
+        const reportEl = document.getElementById('reportPreview');
+        let content = reportEl && reportEl.innerHTML ? reportEl.innerHTML : document.body.innerHTML;
+        // If the current page has a dedicated printable area, prefer that
+        const printableSelector = '#pageContent';
+        const printable = document.querySelector(printableSelector);
+        if (printable) content = printable.outerHTML;
+
+        const w = window.open('', '_blank');
+        const style = `
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ddd; padding: 8px; }
+            </style>
+        `;
+        w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Print</title>' + style + '</head><body>' + content + '</body></html>');
+        w.document.close();
+        w.focus();
+        w.print();
+        w.close();
+    },
+
     importData(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -4558,8 +4582,8 @@ const App = {
                     </div>
                 </div>
                 <div class="action-btns">
-                    <button class="action-btn view" onclick="App.downloadFile('${f.id}')" title="İndir">
-                        <i class="fas fa-download"></i>
+                    <button class="action-btn view" onclick="App.openFile('${f.id}')" title="Aç">
+                        <i class="fas fa-eye"></i>
                     </button>
                     <button class="action-btn delete" onclick="App.deleteFile('${f.id}')" title="Sil">
                         <i class="fas fa-trash"></i>
@@ -4645,18 +4669,54 @@ const App = {
             size: this.selectedFile ? (this.selectedFile.size / 1024).toFixed(1) + ' KB' : 'Boyut belirtilmedi'
         };
 
-        this.data.files.push(fileData);
-        this.saveData();
-        this.closeModal();
-        this.selectedFile = null;
-        this.showToast('Dosya yüklendi!');
-        this.renderPage(this.currentPage);
+        const proceed = () => {
+            this.data.files.push(fileData);
+            this.saveData();
+            this.closeModal();
+            this.selectedFile = null;
+            this.showToast('Dosya yüklendi!');
+            this.renderPage(this.currentPage);
+        };
+
+        // If a file was selected, read it as Data URL for in-browser viewing
+        if (this.selectedFile) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                fileData.dataUrl = e.target?.result;
+                proceed();
+            };
+            reader.readAsDataURL(this.selectedFile);
+        } else {
+            proceed();
+        }
     },
 
     downloadFile(id) {
         const file = this.data.files.find(f => f.id === id);
         if (file) {
-            this.showToast(`${file.name} indirildi (simülasyon)`);
+            // If Data URL exists, allow direct download/view via data URL
+            if (file.dataUrl) {
+                const a = document.createElement('a');
+                a.href = file.dataUrl;
+                a.download = file.fileName || file.name;
+                a.click();
+            } else {
+                this.showToast(`${file.name} indirildi (simülasyon)`);
+            }
+        }
+    },
+
+    openFile(id) {
+        const file = this.data.files.find(f => f.id === id);
+        if (!file) return;
+        if (file.dataUrl) {
+            const w = window.open('', '_blank');
+            if (w) {
+                w.document.write(`<iframe width="100%" height="100%" src="${file.dataUrl}"></iframe>`);
+            }
+        } else {
+            // Fallback to download behavior
+            this.downloadFile(id);
         }
     },
 
@@ -4692,6 +4752,7 @@ const App = {
         return `
             <div class="page-header">
                 <h1 class="page-title">📄 Karne ve Raporlar</h1>
+                <button class="btn btn-secondary" onclick="App.exportCurrentViewAsPDF()" style="margin-left: auto;">PDF İndir</button>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
@@ -4968,6 +5029,7 @@ const App = {
         return `
             <div class="page-header">
                 <h1 class="page-title">📊 ${student.name} - Veli Raporu</h1>
+                <button class="btn btn-secondary" onclick="App.exportCurrentViewAsPDF()" style="margin-left: auto;">PDF İndir</button>
             </div>
 
             <div class="card" style="max-width: 900px; margin: 0 auto;">

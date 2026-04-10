@@ -696,6 +696,16 @@ tr:hover {
     }
 }
 
+/* Print-friendly adjustments */
+@media print {
+  .sidebar, .top-bar, .toast, .modal, .nav-item, .search-box, .form-group, .card-header > .card-title { display: none !important; }
+  body { background: white; color: black; }
+  .page-content { padding: 0; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #ddd; }
+  .card { page-break-inside: avoid; }
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
