@@ -475,14 +475,6 @@ const App = {
                         { page: 'quote', icon: 'fa-quote-left', label: 'Günün Sözü' }
                     ]
                 }
-            ];,
-                {
-                    title: 'İLETİŞİM',
-                    icon: 'fa-comments',
-                    items: [
-                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' }
-                    ]
-                }
             ];
         }
 
