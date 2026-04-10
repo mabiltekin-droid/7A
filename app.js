@@ -142,93 +142,207 @@ const App = {
         if (!nav) return;
         
         const role = this.currentUser ? this.currentUser.role : 'admin';
-        let menuItems = [];
+        let menuSections = [];
 
         if (role === 'admin') {
-            menuItems = [
-                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
-                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
-                { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
-                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
-                { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
-                { page: 'grades', icon: 'fa-chart-line', label: 'Notlar' },
-                { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Not Analizi' },
-                { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
-                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
-                { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
-                { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
-                { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
-                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
-                { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
-                { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
-                { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
-                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
-                { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
-                { page: 'notifications', icon: 'fa-bell', label: 'Bildirimler' },
-                { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
-                { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' },
-                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
-                { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' },
-                { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
+            menuSections = [
+                {
+                    title: 'ANA PANEL',
+                    icon: 'fa-home',
+                    items: [
+                        { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                        { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' }
+                    ]
+                },
+                {
+                    title: 'YÖNETİM',
+                    icon: 'fa-cogs',
+                    items: [
+                        { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
+                        { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
+                        { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
+                        { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
+                    ]
+                },
+                {
+                    title: 'EĞİTİM',
+                    icon: 'fa-graduation-cap',
+                    items: [
+                        { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
+                        { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Not Analizi' },
+                        { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
+                        { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                        { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
+                        { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
+                        { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' }
+                    ]
+                },
+                {
+                    title: 'SOSYAL & AKTİVİTE',
+                    icon: 'fa-users',
+                    items: [
+                        { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                        { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
+                        { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
+                        { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
+                        { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' }
+                    ]
+                },
+                {
+                    title: 'ARAÇLAR',
+                    icon: 'fa-tools',
+                    items: [
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                        { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
+                        { page: 'notifications', icon: 'fa-bell', label: 'Bildirimler' },
+                        { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
+                        { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
+                        { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' }
+                    ]
+                }
             ];
         } else if (role === 'teacher') {
-            menuItems = [
-                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
-                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
-                { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
-                { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
-                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
-                { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
-                { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
-                { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
-                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
-                { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
-                { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
-                { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
-                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
-                { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
-                { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' }
+            menuSections = [
+                {
+                    title: 'ANA PANEL',
+                    icon: 'fa-home',
+                    items: [
+                        { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                        { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' }
+                    ]
+                },
+                {
+                    title: 'EĞİTİM',
+                    icon: 'fa-graduation-cap',
+                    items: [
+                        { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
+                        { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
+                        { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                        { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
+                        { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
+                        { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' }
+                    ]
+                },
+                {
+                    title: 'SOSYAL & AKTİVİTE',
+                    icon: 'fa-users',
+                    items: [
+                        { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                        { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
+                        { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
+                        { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' }
+                    ]
+                },
+                {
+                    title: 'ARAÇLAR',
+                    icon: 'fa-tools',
+                    items: [
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                        { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
+                        { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' }
+                    ]
+                }
             ];
         } else if (role === 'student') {
-            menuItems = [
-                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
-                { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
-                { page: 'mood', icon: 'fa-smile', label: 'Bugün Nasılım?' },
-                { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
-                { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Gelişimim' },
-                { page: 'lgsanalysis', icon: 'fa-graduation-cap', label: 'LGS Analiz' },
-                { page: 'myassignments', icon: 'fa-tasks', label: 'Ödevlerim' },
-                { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
-                { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
-                { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
-                { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' },
-                { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
-                { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
-                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
-                { page: 'myfiles', icon: 'fa-folder', label: 'Dosyalarım' },
-                { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
-                { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' },
-                { page: 'mygoals', icon: 'fa-bullseye', label: 'Hedeflerim' },
-                { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
-                { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' }
+            menuSections = [
+                {
+                    title: 'ANA PANEL',
+                    icon: 'fa-home',
+                    items: [
+                        { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                        { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
+                        { page: 'mood', icon: 'fa-smile', label: 'Bugün Nasılım?' }
+                    ]
+                },
+                {
+                    title: 'EĞİTİMİM',
+                    icon: 'fa-graduation-cap',
+                    items: [
+                        { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
+                        { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Gelişimim' },
+                        { page: 'lgsanalysis', icon: 'fa-graduation-cap', label: 'LGS Analiz' },
+                        { page: 'myassignments', icon: 'fa-tasks', label: 'Ödevlerim' },
+                        { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
+                        { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
+                        { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
+                        { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' }
+                    ]
+                },
+                {
+                    title: 'SOSYAL & AKTİVİTE',
+                    icon: 'fa-users',
+                    items: [
+                        { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
+                        { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
+                        { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
+                        { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
+                        { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' }
+                    ]
+                },
+                {
+                    title: 'ARAÇLAR',
+                    icon: 'fa-tools',
+                    items: [
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                        { page: 'myfiles', icon: 'fa-folder', label: 'Dosyalarım' },
+                        { page: 'mygoals', icon: 'fa-bullseye', label: 'Hedeflerim' },
+                        { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' }
+                    ]
+                }
             ];
         } else if (role === 'parent') {
-            menuItems = [
-                { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
-                { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
-                { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
-                { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' },
-                { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
-                { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
-                { page: 'parentreport', icon: 'fa-file-pdf', label: 'Veli Raporu' }
+            menuSections = [
+                {
+                    title: 'ANA PANEL',
+                    icon: 'fa-home',
+                    items: [
+                        { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' }
+                    ]
+                },
+                {
+                    title: 'ÇOCUKUM',
+                    icon: 'fa-child',
+                    items: [
+                        { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
+                        { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
+                        { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' }
+                    ]
+                },
+                {
+                    title: 'BİLGİLER',
+                    icon: 'fa-info-circle',
+                    items: [
+                        { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
+                        { page: 'parentreport', icon: 'fa-file-pdf', label: 'Veli Raporu' }
+                    ]
+                },
+                {
+                    title: 'İLETİŞİM',
+                    icon: 'fa-comments',
+                    items: [
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' }
+                    ]
+                }
             ];
         }
 
         let html = '';
-        for (let i = 0; i < menuItems.length; i++) {
-            const item = menuItems[i];
-            const activeClass = this.currentPage === item.page ? ' active' : '';
-            html += '<a href="#" class="nav-item' + activeClass + '" data-page="' + item.page + '"><i class="fas ' + item.icon + '"></i><span>' + item.label + '</span></a>';
+        for (let s = 0; s < menuSections.length; s++) {
+            const section = menuSections[s];
+            html += '<div class="nav-section">';
+            html += '<div class="nav-section-header" onclick="App.toggleNavSection(this)">';
+            html += '<i class="fas ' + section.icon + '"></i>';
+            html += '<span>' + section.title + '</span>';
+            html += '<i class="fas fa-chevron-down nav-section-arrow"></i>';
+            html += '</div>';
+            html += '<div class="nav-section-items">';
+            for (let i = 0; i < section.items.length; i++) {
+                const item = section.items[i];
+                const activeClass = this.currentPage === item.page ? ' active' : '';
+                html += '<a href="#" class="nav-item' + activeClass + '" data-page="' + item.page + '"><i class="fas ' + item.icon + '"></i><span>' + item.label + '</span></a>';
+            }
+            html += '</div>';
+            html += '</div>';
         }
         nav.innerHTML = html;
         
@@ -240,6 +354,21 @@ const App = {
                 const page = this.getAttribute('data-page');
                 self.navigate(page);
             });
+        }
+    },
+
+    toggleNavSection(header) {
+        const section = header.parentElement;
+        const items = section.querySelector('.nav-section-items');
+        const arrow = header.querySelector('.nav-section-arrow');
+        if (items.style.display === 'none') {
+            items.style.display = 'block';
+            section.classList.remove('collapsed');
+            arrow.style.transform = 'rotate(0deg)';
+        } else {
+            items.style.display = 'none';
+            section.classList.add('collapsed');
+            arrow.style.transform = 'rotate(-90deg)';
         }
     },
 
@@ -438,13 +567,22 @@ const App = {
         const totalTeachers = this.data.teachers.length;
         const users = JSON.parse(localStorage.getItem('schoolUsers') || '{"users":[]}').users || [];
         const upcomingExams = this.data.exams.filter(e => new Date(e.date) >= new Date()).length;
-        const avgGrade = this.data.grades.length > 0 
-            ? (this.data.grades.reduce((a, g) => a + (parseFloat(g.score) || 0), 0) / this.data.grades.length).toFixed(1)
+        const totalGrades = this.data.grades.length;
+        const avgGrade = totalGrades > 0 
+            ? (this.data.grades.reduce((a, g) => a + (parseFloat(g.score) || 0), 0) / totalGrades).toFixed(1)
             : '-';
+        const totalAnnouncements = this.data.announcements.length;
+        const unreadNotifications = (this.data.notifications || []).filter(n => !n.read).length;
+        const totalAbsences = (this.data.attendance || []).filter(a => a.status === 'absent').length;
 
         return `
             <div class="page-header">
                 <h1 class="page-title">Admin Ana Panel</h1>
+                <div style="display: flex; gap: 10px;">
+                    <span style="display: flex; align-items: center; gap: 5px; color: var(--gray-500); font-size: 14px;">
+                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}
+                    </span>
+                </div>
             </div>
 
             <div class="stats-grid">
@@ -476,20 +614,190 @@ const App = {
                         <p>Yaklaşan Deneme</p>
                     </div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h4>${avgGrade}</h4>
+                        <p>Sınıf Ortalaması</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-bell"></i></div>
+                    <div class="stat-info">
+                        <h4>${unreadNotifications > 0 ? unreadNotifications : '-'}</h4>
+                        <p>Okunmamış Bildirim</p>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="quick-actions-grid">
+                <button class="quick-action-btn" onclick="App.navigate('students')">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Öğrenci Ekle</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('grades')">
+                    <i class="fas fa-pen"></i>
+                    <span>Not Girişi</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('attendance')">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Yoklama Al</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('announcements')">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Duyuru Yap</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('messages')">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Mesaj Gönder</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('report')">
+                    <i class="fas fa-file-pdf"></i>
+                    <span>Karne Oluştur</span>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">Son Eklenen Öğrenciler</span>
+                        <span class="card-title"><i class="fas fa-user-graduate"></i> Son Eklenen Öğrenciler</span>
+                        <button class="btn btn-sm" onclick="App.navigate('students')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
                     </div>
                     ${this.renderRecentStudents()}
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title">Son Eklenen Öğretmenler</span>
+                        <span class="card-title"><i class="fas fa-chalkboard-teacher"></i> Son Eklenen Öğretmenler</span>
+                        <button class="btn btn-sm" onclick="App.navigate('teachers')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
                     </div>
                     ${this.renderRecentTeachers()}
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-bullhorn"></i> Son Duyurular</span>
+                        <button class="btn btn-sm" onclick="App.navigate('announcements')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
+                    </div>
+                    ${this.renderRecentAnnouncements()}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-calendar-alt"></i> Yaklaşan Etkinlikler</span>
+                    </div>
+                    ${this.renderUpcomingEvents()}
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-chart-pie"></i> Sınıf Özeti</span>
+                    </div>
+                    ${this.renderClassSummary()}
+                </div>
+            </div>
+        `;
+    },
+
+    renderRecentAnnouncements() {
+        const recent = (this.data.announcements || []).slice(-5).reverse();
+        if (recent.length === 0) {
+            return '<p class="empty-state" style="padding: 20px;">Henüz duyuru yok</p>';
+        }
+        return recent.map(a => `
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--gray-200);">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <strong style="font-size: 13px;">${a.title || 'Duyuru'}</strong>
+                        <p style="font-size: 11px; color: var(--gray-500); margin-top: 3px;">${a.date || ''}</p>
+                    </div>
+                    <span class="badge badge-${a.priority === 'high' ? 'danger' : a.priority === 'normal' ? 'info' : 'success'}">${a.priority || 'normal'}</span>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderUpcomingEvents() {
+        const today = new Date();
+        const events = [];
+        
+        const exams = (this.data.exams || []).filter(e => new Date(e.date) >= today).slice(0, 3);
+        exams.forEach(e => events.push({type: 'exam', title: e.name, date: e.date, icon: 'fa-file-alt', color: '#ef4444'}));
+        
+        const assignments = (this.data.assignments || []).filter(a => new Date(a.dueDate) >= today).slice(0, 3);
+        assignments.forEach(a => events.push({type: 'assignment', title: a.title, date: a.dueDate, icon: 'fa-tasks', color: '#f59e0b'}));
+        
+        const announcements = (this.data.announcements || []).filter(a => a.priority === 'high').slice(-3);
+        announcements.forEach(a => events.push({type: 'announcement', title: a.title, date: a.date, icon: 'fa-bullhorn', color: '#ef4444'}));
+        
+        events.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const displayEvents = events.slice(0, 5);
+        
+        if (displayEvents.length === 0) {
+            return '<p class="empty-state" style="padding: 20px;">Yaklaşan etkinlik yok</p>';
+        }
+        
+        return displayEvents.map(e => {
+            const d = new Date(e.date);
+            const daysLeft = Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+            return `
+                <div style="display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid var(--gray-200);">
+                    <div style="width: 45px; height: 45px; background: ${e.color}20; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas ${e.icon}" style="color: ${e.color};"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="font-size: 13px;">${e.title}</strong>
+                        <p style="font-size: 11px; color: var(--gray-500);">${e.date}</p>
+                    </div>
+                    <span class="badge badge-${daysLeft <= 1 ? 'danger' : daysLeft <= 3 ? 'warning' : 'info'}">${daysLeft === 0 ? 'Bugün' : daysLeft === 1 ? 'Yarın' : daysLeft + ' gün'}</span>
+                </div>
+            `;
+        }).join('');
+    },
+
+    renderClassSummary() {
+        const totalStudents = this.data.students.length;
+        const avgGrade = this.data.grades.length > 0 
+            ? (this.data.grades.reduce((a, g) => a + (parseFloat(g.score) || 0), 0) / this.data.grades.length).toFixed(1)
+            : '-';
+        const passRate = this.data.grades.length > 0 
+            ? ((this.data.grades.filter(g => parseFloat(g.score) >= 50).length / this.data.grades.length) * 100).toFixed(0)
+            : '-';
+        const totalAbsences = (this.data.attendance || []).filter(a => a.status === 'absent').length;
+        const totalPresents = (this.data.attendance || []).filter(a => a.status === 'present').length;
+        const totalClubs = this.data.clubs.length;
+        const totalBadges = this.data.badges.length;
+
+        return `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="padding: 15px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 12px; color: white; text-align: center;">
+                    <div style="font-size: 28px; font-weight: bold;">${avgGrade}</div>
+                    <div style="font-size: 11px; opacity: 0.9;">Sınıf Ortalaması</div>
+                </div>
+                <div style="padding: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; color: white; text-align: center;">
+                    <div style="font-size: 28px; font-weight: bold;">%${passRate}</div>
+                    <div style="font-size: 11px; opacity: 0.9;">Geçme Oranı</div>
+                </div>
+                <div style="padding: 15px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 12px; color: white; text-align: center;">
+                    <div style="font-size: 28px; font-weight: bold;">${totalAbsences}</div>
+                    <div style="font-size: 11px; opacity: 0.9;">Toplam Devamsızlık</div>
+                </div>
+                <div style="padding: 15px; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); border-radius: 12px; color: white; text-align: center;">
+                    <div style="font-size: 28px; font-weight: bold;">${totalClubs}</div>
+                    <div style="font-size: 11px; opacity: 0.9;">Aktif Kulüp</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: var(--gray-100); border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-500); margin-bottom: 8px;">
+                    <span>Okul Yılı</span>
+                    <strong>${this.data.settings.schoolYear || 'Belirtilmedi'}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-500); margin-bottom: 8px;">
+                    <span>Sınıf</span>
+                    <strong>${this.data.settings.className || 'Belirtilmedi'}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--gray-500);">
+                    <span>Dönem</span>
+                    <strong>${this.data.settings.term || '1'}. Dönem</strong>
                 </div>
             </div>
         `;
@@ -499,10 +807,20 @@ const App = {
         const myGrades = this.data.grades.length;
         const mySchedule = this.data.schedule.length;
         const upcomingExams = this.data.exams.filter(e => new Date(e.date) >= new Date()).length;
+        const unreadMessages = (this.data.messages || []).filter(m => !m.read && m.to === this.currentUser.name).length;
+        const totalStudents = this.data.students.length;
+        const avgGrade = this.data.grades.length > 0 
+            ? (this.data.grades.reduce((a, g) => a + (parseFloat(g.score) || 0), 0) / this.data.grades.length).toFixed(1)
+            : '-';
 
         return `
             <div class="page-header">
                 <h1 class="page-title">Öğretmen Ana Panel</h1>
+                <div style="display: flex; gap: 10px;">
+                    <span style="display: flex; align-items: center; gap: 5px; color: var(--gray-500); font-size: 14px;">
+                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}
+                    </span>
+                </div>
             </div>
 
             <div class="stats-grid">
@@ -527,22 +845,62 @@ const App = {
                         <p>Yaklaşan Deneme</p>
                     </div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-user-graduate"></i></div>
+                    <div class="stat-info">
+                        <h4>${totalStudents}</h4>
+                        <p>Öğrenci Sayısı</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Hızlı İşlemler</span>
+            <div class="quick-actions-grid">
+                <button class="quick-action-btn" onclick="App.navigate('grades')">
+                    <i class="fas fa-pen"></i>
+                    <span>Not Girişi</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('attendance')">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Yoklama Al</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('assignments')">
+                    <i class="fas fa-tasks"></i>
+                    <span>Ödev Ver</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('announcements')">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Duyuru Yap</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('messages')">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Mesaj Gönder</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('stars')">
+                    <i class="fas fa-star"></i>
+                    <span>Yıldız Ver</span>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-chart-line"></i> Sınıf Genel Görünüm</span>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 48px; font-weight: bold; color: var(--primary);">${avgGrade}</div>
+                        <p style="color: var(--gray-500);">Sınıf Ortalaması</p>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-secondary" onclick="App.navigate('students')">
+                                <i class="fas fa-users"></i> Öğrencileri Gör
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="App.navigate('grades')">
-                        <i class="fas fa-plus"></i> Not Girişi Yap
-                    </button>
-                    <button class="btn btn-secondary" onclick="App.navigate('attendance')">
-                        <i class="fas fa-clipboard-list"></i> Yoklama Al
-                    </button>
-                    <button class="btn btn-secondary" onclick="App.navigate('students')">
-                        <i class="fas fa-user-graduate"></i> Öğrencileri Gör
-                    </button>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-calendar-alt"></i> Yaklaşan Etkinlikler</span>
+                    </div>
+                    ${this.renderUpcomingEvents()}
                 </div>
             </div>
         `;
@@ -552,6 +910,9 @@ const App = {
         const studentId = this.currentUser.studentId;
         const myGrades = studentId ? this.data.grades.filter(g => g.studentId === studentId) : [];
         const myAttendance = studentId ? this.data.attendance.filter(a => a.studentId === studentId) : [];
+        const myStars = (this.data.starPoints || []).filter(s => s.studentId === studentId);
+        const myBadges = (this.data.badges || []).filter(b => b.studentId === studentId);
+        const unreadMessages = (this.data.messages || []).filter(m => !m.read && m.to === this.currentUser.name).length;
         
         const avgGrade = myGrades.length > 0 
             ? (myGrades.reduce((a, g) => a + parseFloat(g.score), 0) / myGrades.length).toFixed(1)
@@ -559,10 +920,16 @@ const App = {
         
         const presentDays = myAttendance.filter(a => a.status === 'present').length;
         const absentDays = myAttendance.filter(a => a.status === 'absent').length;
+        const totalStars = myStars.reduce((a, s) => a + (parseInt(s.points) || 0), 0);
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Hoş Geldin, ${this.currentUser.name}!</h1>
+                <h1 class="page-title">Hoş Geldin, ${this.currentUser.name}! <span style="font-size: 16px; color: var(--gray-500); font-weight: normal;">😊</span></h1>
+                <div style="display: flex; gap: 10px;">
+                    <span style="display: flex; align-items: center; gap: 5px; color: var(--gray-500); font-size: 14px;">
+                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}
+                    </span>
+                </div>
             </div>
 
             <div class="stats-grid">
@@ -574,10 +941,17 @@ const App = {
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-icon green"><i class="fas fa-star"></i></div>
                     <div class="stat-info">
-                        <h4>${presentDays}</h4>
-                        <p>Devamsız Gün</p>
+                        <h4>${totalStars}</h4>
+                        <p>Toplam Yıldızım</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-award"></i></div>
+                    <div class="stat-info">
+                        <h4>${myBadges.length}</h4>
+                        <p>Rozetlerim</p>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -589,7 +963,34 @@ const App = {
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="quick-actions-grid">
+                <button class="quick-action-btn" onclick="App.navigate('mygrades')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Notlarım</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('mood')">
+                    <i class="fas fa-smile"></i>
+                    <span>Nasıl Hissediyorum?</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('myassignments')">
+                    <i class="fas fa-tasks"></i>
+                    <span>Ödevlerim</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('leaderboard')">
+                    <i class="fas fa-trophy"></i>
+                    <span>Liderlik</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('rewards')">
+                    <i class="fas fa-gift"></i>
+                    <span>Ödüller</span>
+                </button>
+                <button class="quick-action-btn" onclick="App.navigate('messages')">
+                    <i class="fas fa-comments"></i>
+                    <span>Mesajlarım${unreadMessages > 0 ? ' (' + unreadMessages + ')' : ''}</span>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">Son Notlarım</span>
@@ -607,7 +1008,27 @@ const App = {
                     </div>
                     ${this.renderUpcomingExams()}
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Son Duyurular</span>
+                    </div>
+                    ${this.renderRecentAnnouncements()}
+                </div>
             </div>
+
+            ${myStars.length > 0 || myBadges.length > 0 ? `
+            <div style="margin-top: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-trophy"></i> Başarılarım</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; padding: 10px;">
+                        ${totalStars > 0 ? '<div style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: #fef3c7; border-radius: 20px;"><i class="fas fa-star" style="color: #f59e0b;"></i> <strong>' + totalStars + '</strong> Yıldız</div>' : ''}
+                        ${myBadges.slice(-3).map(b => '<div style="display: flex; align-items: center; gap: 8px; padding: 10px 15px; background: #f3e8ff; border-radius: 20px;"><i class="fas ' + (b.icon || 'fa-award') + '" style="color: #a855f7;"></i> ' + (b.name || 'Rozet') + '</div>').join('')}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
         `;
     },
 
