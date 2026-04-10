@@ -1915,3 +1915,126 @@ body.dark-mode .feedback-content {
 .development-indicator.up::before { content: '↑ '; }
 .development-indicator.down::before { content: '↓ '; }
 .development-indicator.stable::before { content: '→ '; }
+
+/* Mevsimlik Temalar */
+
+/* Yeni Yıl Teması */
+body.theme-newyear {
+    --primary: #dc2626;
+    --primary-dark: #b91c1c;
+    --secondary: #15803d;
+    --accent: #fbbf24;
+}
+
+body.theme-newyear {
+    background: linear-gradient(135deg, #fef2f2 0%, #f0fdf4 50%, #fef9c3 100%);
+}
+
+body.theme-newyear .sidebar {
+    background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+}
+
+body.theme-newyear .top-bar {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid #dc2626;
+}
+
+body.theme-newyear .card,
+body.theme-newyear .stat-card,
+body.theme-newyear .chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #fecaca;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.1);
+}
+
+body.theme-newyear .page-title::after {
+    background: linear-gradient(90deg, #dc2626, #fbbf24);
+}
+
+body.theme-newyear .stat-icon {
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+body.theme-newyear .logo i {
+    color: #fbbf24;
+}
+
+@keyframes sparkle {
+    0%, 100% { filter: brightness(1); transform: scale(1); }
+    50% { filter: brightness(1.2); transform: scale(1.1); }
+}
+
+/* 23 Nisan Teması */
+body.theme-april23 {
+    --primary: #1d4ed8;
+    --primary-dark: #1e40af;
+    --secondary: #0d9488;
+    --accent: #7c3aed;
+}
+
+body.theme-april23 {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdfa 50%, #f5f3ff 100%);
+}
+
+body.theme-april23 .sidebar {
+    background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+body.theme-april23 .top-bar {
+    background: rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid #7c3aed;
+}
+
+body.theme-april23 .card,
+body.theme-april23 .stat-card,
+body.theme-april23 .chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #c7d2fe;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1);
+}
+
+body.theme-april23 .page-title::after {
+    background: linear-gradient(90deg, #1d4ed8, #7c3aed);
+}
+
+body.theme-april23 .logo i {
+    color: #fbbf24;
+}
+
+body.theme-april23 .logo {
+    animation: flagWave 3s ease-in-out infinite;
+}
+
+@keyframes flagWave {
+    0%, 100% { transform: skewX(0deg); }
+    25% { transform: skewX(2deg); }
+    75% { transform: skewX(-2deg); }
+}
+
+body.theme-april23.dark-mode {
+    background: linear-gradient(135deg, #1e1b4b 0%, #134e4a 50%, #3b0764 100%);
+}
+
+body.theme-april23.dark-mode .sidebar {
+    background: linear-gradient(180deg, #1e40af 0%, #312e81 100%);
+}
+
+body.theme-april23.dark-mode .card,
+body.theme-april23.dark-mode .stat-card {
+    background: rgba(30, 27, 75, 0.9);
+    border-color: #4338ca;
+}
+
+body.theme-newyear.dark-mode {
+    background: linear-gradient(135deg, #450a0a 0%, #14532d 50%, #422006 100%);
+}
+
+body.theme-newyear.dark-mode .sidebar {
+    background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+}
+
+body.theme-newyear.dark-mode .card,
+body.theme-newyear.dark-mode .stat-card {
+    background: rgba(69, 10, 10, 0.9);
+    border-color: #dc2626;
+}

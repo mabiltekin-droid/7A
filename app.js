@@ -4,7 +4,8 @@ const App = {
             className: '',
             classLevel: '',
             term: '',
-            schoolYear: ''
+            schoolYear: '',
+            theme: 'default'
         },
         students: [],
         teachers: [],
@@ -51,7 +52,13 @@ const App = {
             "Kendine inan, her şeyi başarabilirsin."
         ],
         loginLogs: [],
-        quickLinks: []
+        polls: [],
+        reminders: [],
+        studyTopics: [],
+        reportTemplates: [],
+        badgeSettings: [],
+        dashboardOrder: [],
+        lastBackup: null
     },
     currentUser: null,
     currentPage: 'dashboard',
@@ -102,7 +109,7 @@ const App = {
 
     loadData() {
         const defaultData = {
-            settings: { className: '', classLevel: '', term: '', schoolYear: '' },
+            settings: { className: '', classLevel: '', term: '', schoolYear: '', theme: 'default' },
             students: [], teachers: [], subjects: [], grades: [], schedule: [], exams: [], attendance: [],
             announcements: [], assignments: [], clubs: [], library: [],
             badges: [], starPoints: [], moods: [], goals: [], rewards: [],
@@ -115,7 +122,14 @@ const App = {
                 "Başarısızlık, başarının annesidir.",
                 "Azimle çalışan her hayali gerçekleştirir."
             ],
-            loginLogs: []
+            loginLogs: [],
+            polls: [],
+            reminders: [],
+            studyTopics: [],
+            reportTemplates: [],
+            badgeSettings: [],
+            dashboardOrder: [],
+            lastBackup: null
         };
         
         const saved = localStorage.getItem('schoolData');
@@ -149,6 +163,13 @@ const App = {
                 if (!this.data.tournaments) this.data.tournaments = [];
                 if (!this.data.galleries) this.data.galleries = [];
                 if (!this.data.loginLogs) this.data.loginLogs = [];
+                if (!this.data.polls) this.data.polls = [];
+                if (!this.data.reminders) this.data.reminders = [];
+                if (!this.data.studyTopics) this.data.studyTopics = [];
+                if (!this.data.reportTemplates) this.data.reportTemplates = [];
+                if (!this.data.badgeSettings) this.data.badgeSettings = [];
+                if (!this.data.dashboardOrder) this.data.dashboardOrder = [];
+                this.applyTheme();
             } catch(e) {
                 this.data = defaultData;
             }
@@ -223,8 +244,11 @@ const App = {
                         { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
                         { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
                         { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
-                        { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' },
-                        { page: 'loginlogs', icon: 'fa-history', label: 'Giriş Logları' }
+                        { page: 'loginlogs', icon: 'fa-history', label: 'Giriş Logları' },
+                        { page: 'importdata', icon: 'fa-upload', label: 'Veri İçe Aktar' },
+                        { page: 'backups', icon: 'fa-database', label: 'Yedekleme' },
+                        { page: 'themes', icon: 'fa-palette', label: 'Temalar' },
+                        { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
                     ]
                 },
                 {
@@ -233,9 +257,11 @@ const App = {
                     items: [
                         { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
                         { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Not Analizi' },
+                        { page: 'examanalysis', icon: 'fa-chart-pie', label: 'Sınav Analizi' },
                         { page: 'materials', icon: 'fa-book-open', label: 'Ders Materyalleri' },
                         { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
                         { page: 'assignmentcalendar', icon: 'fa-calendar-alt', label: 'Ödev Takvimi' },
+                        { page: 'study', icon: 'fa-book-reader', label: 'Sınav Hazırlık' },
                         { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                         { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
                         { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
@@ -248,12 +274,15 @@ const App = {
                     title: 'TAKİP & RAPOR',
                     icon: 'fa-chart-pie',
                     items: [
+                        { page: 'studentprofile', icon: 'fa-id-card', label: 'Öğrenci Profili' },
                         { page: 'calendar', icon: 'fa-calendar', label: 'Okul Takvimi' },
                         { page: 'events', icon: 'fa-party-horn', label: 'Sınıf Etkinlikleri' },
                         { page: 'parentmeetings', icon: 'fa-users', label: 'Veli Toplantıları' },
+                        { page: 'meetingnotes', icon: 'fa-sticky-note', label: 'Toplantı Notları' },
                         { page: 'weeklyreport', icon: 'fa-file-alt', label: 'Haftalık Rapor' },
                         { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
-                        { page: 'loginlogs', icon: 'fa-history', label: 'Giriş Logları' }
+                        { page: 'polls', icon: 'fa-vote-yea', label: 'Anketler' },
+                        { page: 'reminders', icon: 'fa-bell', label: 'Hatırlatıcılar' }
                     ]
                 },
                 {
@@ -263,6 +292,7 @@ const App = {
                         { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                         { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                         { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
+                        { page: 'badgedesign', icon: 'fa-palette', label: 'Rozet Tasarımı' },
                         { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
                         { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' },
                         { page: 'achievements', icon: 'fa-medal', label: 'Başarı Panosu' },
@@ -309,6 +339,7 @@ const App = {
                         { page: 'materials', icon: 'fa-book-open', label: 'Ders Materyalleri' },
                         { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
                         { page: 'assignmentcalendar', icon: 'fa-calendar-alt', label: 'Ödev Takvimi' },
+                        { page: 'study', icon: 'fa-book-reader', label: 'Sınav Hazırlık' },
                         { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                         { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
                         { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
@@ -321,11 +352,15 @@ const App = {
                     title: 'TAKİP & RAPOR',
                     icon: 'fa-chart-pie',
                     items: [
+                        { page: 'studentprofile', icon: 'fa-id-card', label: 'Öğrenci Profili' },
                         { page: 'events', icon: 'fa-party-horn', label: 'Sınıf Etkinlikleri' },
                         { page: 'parentmeetings', icon: 'fa-users', label: 'Veli Toplantıları' },
+                        { page: 'meetingnotes', icon: 'fa-sticky-note', label: 'Toplantı Notları' },
                         { page: 'weeklyreport', icon: 'fa-file-alt', label: 'Haftalık Rapor' },
                         { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
-                        { page: 'diaries', icon: 'fa-book', label: 'Öğrenci Günlüğü' }
+                        { page: 'diaries', icon: 'fa-book', label: 'Öğrenci Günlüğü' },
+                        { page: 'polls', icon: 'fa-vote-yea', label: 'Anketler' },
+                        { page: 'reminders', icon: 'fa-bell', label: 'Hatırlatıcılar' }
                     ]
                 },
                 {
@@ -335,6 +370,7 @@ const App = {
                         { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                         { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
                         { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
+                        { page: 'badgedesign', icon: 'fa-palette', label: 'Rozet Tasarımı' },
                         { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
                         { page: 'achievements', icon: 'fa-medal', label: 'Başarı Panosu' },
                         { page: 'birthdays', icon: 'fa-birthday-cake', label: 'Doğum Günleri' },
@@ -367,6 +403,7 @@ const App = {
                     icon: 'fa-home',
                     items: [
                         { page: 'dashboard', icon: 'fa-home', label: 'Ana Panel' },
+                        { page: 'myprofile', icon: 'fa-user', label: 'Profilim' },
                         { page: 'announcements', icon: 'fa-bullhorn', label: 'Duyurular' },
                         { page: 'mood', icon: 'fa-smile', label: 'Bugün Nasılım?' }
                     ]
@@ -384,6 +421,7 @@ const App = {
                         { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
                         { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
                         { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' },
+                        { page: 'mystudytopics', icon: 'fa-book-reader', label: 'Çalışma Listem' },
                         { page: 'mybehavior', icon: 'fa-heart', label: 'Davranış Kartım' }
                     ]
                 },
@@ -394,7 +432,9 @@ const App = {
                         { page: 'calendar', icon: 'fa-calendar', label: 'Okul Takvimi' },
                         { page: 'myevents', icon: 'fa-party-horn', label: 'Etkinlikler' },
                         { page: 'myreport', icon: 'fa-file-alt', label: 'Haftalık Raporum' },
-                        { page: 'mydiary', icon: 'fa-book', label: 'Günlüğüm' }
+                        { page: 'mydiary', icon: 'fa-book', label: 'Günlüğüm' },
+                        { page: 'polls', icon: 'fa-vote-yea', label: 'Anketler' },
+                        { page: 'reminders', icon: 'fa-bell', label: 'Hatırlatıcılarım' }
                     ]
                 },
                 {
@@ -465,7 +505,8 @@ const App = {
                     title: 'İLETİŞİM',
                     icon: 'fa-comments',
                     items: [
-                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' }
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
+                        { page: 'polls', icon: 'fa-vote-yea', label: 'Anketler' }
                     ]
                 },
                 {
@@ -621,7 +662,19 @@ const App = {
             mygallery: () => this.renderMyGallery(),
             quote: () => this.renderQuote(),
             games: () => this.renderGames(),
-            loginlogs: () => this.renderLoginLogs()
+            loginlogs: () => this.renderLoginLogs(),
+            polls: () => this.renderPolls(),
+            reminders: () => this.renderReminders(),
+            study: () => this.renderStudyTopics(),
+            mystudy: () => this.renderMyStudyTopics(),
+            meetingnotes: () => this.renderMeetingNotes(),
+            examanalysis: () => this.renderExamAnalysis(),
+            studentprofile: () => this.renderStudentProfile(),
+            myprofile: () => this.renderMyProfile(),
+            badgedesign: () => this.renderBadgeDesign(),
+            importdata: () => this.renderImportData(),
+            backups: () => this.renderBackups(),
+            themes: () => this.renderThemes()
         };
 
         const renderFn = pages[page];
@@ -7077,6 +7130,940 @@ const App = {
         a.download = `login-logs-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         this.showToast('Loglar dışa aktarıldı!');
+    },
+
+    applyTheme() {
+        const theme = this.data.settings?.theme || 'default';
+        document.body.className = '';
+        if (theme === 'dark') document.body.classList.add('dark-mode');
+        if (theme === 'newyear') document.body.classList.add('theme-newyear');
+        if (theme === 'april23') document.body.classList.add('theme-april23');
+        localStorage.setItem('theme', theme);
+    },
+
+    renderPolls() {
+        const polls = this.data.polls || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Sınıf Anketleri</h1>
+                <button class="btn btn-primary" onclick="App.showPollModal()">
+                    <i class="fas fa-plus"></i> Anket Oluştur
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Aktif Anketler</span>
+                </div>
+                ${polls.filter(p => !p.closed).length > 0 ? polls.filter(p => !p.closed).map(p => this.renderPollCard(p)).join('') : '<p class="empty-state">Aktif anket yok</p>'}
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Tamamlanan Anketler</h3>
+            <div class="card">
+                ${polls.filter(p => p.closed).length > 0 ? polls.filter(p => p.closed).map(p => this.renderPollCard(p)).join('') : '<p class="empty-state">Tamamlanan anket yok</p>'}
+            </div>
+        `;
+    },
+
+    renderPollCard(poll) {
+        const totalVotes = poll.options.reduce((a, o) => a + (o.votes || 0), 0);
+        const userVoted = poll.voted?.includes(this.currentUser?.id);
+
+        return `
+            <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4>${poll.title}</h4>
+                    <span class="badge badge-${poll.closed ? 'info' : 'success'}">${poll.closed ? 'Kapalı' : 'Aktif'}</span>
+                </div>
+                <p style="color: var(--gray-500); font-size: 13px; margin-bottom: 15px;">${poll.description || ''}</p>
+                ${!poll.closed && !userVoted ? `
+                    ${poll.options.map((opt, i) => `
+                        <div style="margin-bottom: 10px;">
+                            <button class="btn btn-secondary" onclick="App.votePoll('${poll.id}', ${i})" style="width: 100%; text-align: left;">
+                                <i class="fas fa-circle"></i> ${opt.text}
+                            </button>
+                        </div>
+                    `).join('')}
+                ` : `
+                    ${poll.options.map(opt => {
+                        const percent = totalVotes > 0 ? ((opt.votes || 0) / totalVotes * 100).toFixed(0) : 0;
+                        return `
+                            <div style="margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>${opt.text}</span>
+                                    <span>${percent}% (${opt.votes || 0} oy)</span>
+                                </div>
+                                <div style="height: 20px; background: var(--gray-200); border-radius: 10px; overflow: hidden;">
+                                    <div style="height: 100%; width: ${percent}%; background: var(--primary); border-radius: 10px; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                `}
+                <p style="font-size: 12px; color: var(--gray-400); margin-top: 10px;">Toplam ${totalVotes} oy | Oluşturan: ${poll.createdBy}</p>
+            </div>
+        `;
+    },
+
+    showPollModal() {
+        const content = `
+            <form id="pollForm">
+                <div class="form-group">
+                    <label>Soru *</label>
+                    <input type="text" name="title" required placeholder="Anket sorusu">
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Seçenekler * (her satıra bir seçenek)</label>
+                    <textarea name="options" rows="4" required placeholder="Seçenek 1&#10;Seçenek 2&#10;Seçenek 3"></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Anket Oluştur', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Oluştur', class: 'btn-primary', action: 'App.savePoll()' }
+        ]);
+    },
+
+    savePoll() {
+        const form = document.getElementById('pollForm');
+        const formData = new FormData(form);
+        const options = formData.get('options').split('\n').filter(o => o.trim()).map(text => ({ text: text.trim(), votes: 0 }));
+        const poll = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            options: options,
+            voted: [],
+            closed: false,
+            createdBy: this.currentUser.name,
+            createdAt: new Date().toISOString()
+        };
+        if (!this.data.polls) this.data.polls = [];
+        this.data.polls.push(poll);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Anket oluşturuldu!');
+    },
+
+    votePoll(pollId, optionIndex) {
+        const poll = this.data.polls.find(p => p.id === pollId);
+        if (poll && !poll.voted.includes(this.currentUser?.id)) {
+            poll.options[optionIndex].votes++;
+            poll.voted.push(this.currentUser?.id);
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast('Oyunuz kaydedildi!');
+        }
+    },
+
+    renderReminders() {
+        const reminders = this.data.reminders || [];
+        const now = new Date();
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Hatırlatıcılar</h1>
+                <button class="btn btn-primary" onclick="App.showReminderModal()">
+                    <i class="fas fa-plus"></i> Hatırlatıcı Ekle
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Yaklaşan Hatırlatıcılar</span>
+                </div>
+                ${reminders.filter(r => new Date(r.date) >= now).sort((a, b) => new Date(a.date) - new Date(b.date)).length > 0 
+                    ? reminders.filter(r => new Date(r.date) >= now).sort((a, b) => new Date(a.date) - new Date(b.date)).map(r => this.renderReminderCard(r)).join('')
+                    : '<p class="empty-state">Yaklaşan hatırlatıcı yok</p>'}
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Geçmiş Hatırlatıcılar</h3>
+            <div class="card">
+                ${reminders.filter(r => new Date(r.date) < now).length > 0 
+                    ? reminders.filter(r => new Date(r.date) < now).map(r => this.renderReminderCard(r)).join('')
+                    : '<p class="empty-state">Geçmiş hatırlatıcı yok</p>'}
+            </div>
+        `;
+    },
+
+    renderReminderCard(reminder) {
+        const isPast = new Date(reminder.date) < new Date();
+        return `
+            <div style="padding: 15px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="color: ${isPast ? 'var(--gray-400)' : 'inherit'};">${reminder.title}</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">${reminder.date} - ${reminder.time || ''}</p>
+                </div>
+                <button class="action-btn delete" onclick="App.deleteReminder('${reminder.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+    },
+
+    showReminderModal() {
+        const content = `
+            <form id="reminderForm">
+                <div class="form-group">
+                    <label>Başlık *</label>
+                    <input type="text" name="title" required placeholder="Hatırlatıcı başlığı">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Saat</label>
+                        <input type="time" name="time" value="09:00">
+                    </div>
+                </div>
+            </form>
+        `;
+        this.showModal('Hatırlatıcı Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveReminder()' }
+        ]);
+    },
+
+    saveReminder() {
+        const form = document.getElementById('reminderForm');
+        const formData = new FormData(form);
+        const reminder = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            createdBy: this.currentUser.name
+        };
+        if (!this.data.reminders) this.data.reminders = [];
+        this.data.reminders.push(reminder);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Hatırlatıcı eklendi!');
+    },
+
+    deleteReminder(id) {
+        if (confirm('Hatırlatıcıyı silmek istediğinize emin misiniz?')) {
+            this.data.reminders = this.data.reminders.filter(r => r.id !== id);
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast('Hatırlatıcı silindi!');
+        }
+    },
+
+    renderStudyTopics() {
+        const topics = this.data.studyTopics || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Sınav Hazırlık</h1>
+                <button class="btn btn-primary" onclick="App.showStudyTopicModal()">
+                    <i class="fas fa-plus"></i> Konu Ekle
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                ${topics.length > 0 ? topics.map(t => `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4>${t.title}</h4>
+                            <span class="badge badge-${t.priority === 'high' ? 'danger' : t.priority === 'medium' ? 'warning' : 'info'}">${t.subject || 'Genel'}</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 10px;">${t.description || ''}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 11px; color: var(--gray-400);"><i class="fas fa-calendar"></i> ${t.deadline || 'Belirtilmedi'}</span>
+                            <button class="btn btn-sm" onclick="App.toggleStudyTopic('${t.id}')">
+                                <i class="fas ${t.completed ? 'fa-check-circle' : 'fa-circle'}"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz konu eklenmedi</p>'}
+            </div>
+        `;
+    },
+
+    showStudyTopicModal() {
+        const content = `
+            <form id="studyForm">
+                <div class="form-group">
+                    <label>Konu Adı *</label>
+                    <input type="text" name="title" required placeholder="Çalışılacak konu">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ders</label>
+                        <select name="subject">
+                            <option value="">Seçin...</option>
+                            ${[...new Set(this.data.grades.map(g => g.subject))].map(s => `<option value="${s}">${s}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Öncelik</label>
+                        <select name="priority">
+                            <option value="low">Düşük</option>
+                            <option value="medium">Orta</option>
+                            <option value="high">Yüksek</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Bitiş Tarihi</label>
+                    <input type="date" name="deadline">
+                </div>
+            </form>
+        `;
+        this.showModal('Konu Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveStudyTopic()' }
+        ]);
+    },
+
+    saveStudyTopic() {
+        const form = document.getElementById('studyForm');
+        const formData = new FormData(form);
+        const topic = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            subject: formData.get('subject'),
+            priority: formData.get('priority'),
+            description: formData.get('description'),
+            deadline: formData.get('deadline'),
+            completed: false,
+            createdBy: this.currentUser.name
+        };
+        if (!this.data.studyTopics) this.data.studyTopics = [];
+        this.data.studyTopics.push(topic);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Konu eklendi!');
+    },
+
+    toggleStudyTopic(id) {
+        const topic = this.data.studyTopics.find(t => t.id === id);
+        if (topic) {
+            topic.completed = !topic.completed;
+            this.saveData();
+            this.renderPage(this.currentPage);
+            this.showToast(topic.completed ? 'Tamamlandı!' : 'Geri alındı');
+        }
+    },
+
+    renderMyStudyTopics() {
+        const topics = (this.data.studyTopics || []).filter(t => !t.completed);
+        const completed = (this.data.studyTopics || []).filter(t => t.completed);
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Çalışma Listem</h1>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-book"></i> Çalışılacak Konular (${topics.length})</span>
+                </div>
+                ${topics.length > 0 ? topics.map(t => `
+                    <div style="padding: 12px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 15px;">
+                        <button class="btn btn-sm" onclick="App.toggleStudyTopic('${t.id}')" style="width: 40px; height: 40px;">
+                            <i class="far fa-circle" style="font-size: 20px;"></i>
+                        </button>
+                        <div style="flex: 1;">
+                            <h4 style="margin-bottom: 3px;">${t.title}</h4>
+                            <p style="font-size: 12px; color: var(--gray-500);">${t.subject || 'Genel'} - ${t.deadline || ''}</p>
+                        </div>
+                        <span class="badge badge-${t.priority === 'high' ? 'danger' : t.priority === 'medium' ? 'warning' : 'info'}">${t.priority}</span>
+                    </div>
+                `).join('') : '<p class="empty-state">Tüm konular tamamlandı! 🎉</p>'}
+            </div>
+
+            ${completed.length > 0 ? `
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-check-circle"></i> Tamamlananlar (${completed.length})</span>
+                </div>
+                ${completed.map(t => `
+                    <div style="padding: 10px; border-bottom: 1px solid var(--gray-200); color: var(--gray-400); text-decoration: line-through;">
+                        ${t.title}
+                    </div>
+                `).join('')}
+            </div>
+            ` : ''}
+        `;
+    },
+
+    renderMeetingNotes() {
+        const meetings = this.data.parentMeetings || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Toplantı Notları</h1>
+                <button class="btn btn-primary" onclick="App.showMeetingNoteModal()">
+                    <i class="fas fa-plus"></i> Not Ekle
+                </button>
+            </div>
+
+            <div class="card">
+                ${meetings.length > 0 ? meetings.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => `
+                    <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <h4>${m.title}</h4>
+                            <span class="badge badge-info">${m.date || ''}</span>
+                        </div>
+                        <p style="color: var(--gray-600); font-size: 14px; line-height: 1.6;">${m.notes || ''}</p>
+                        <p style="font-size: 12px; color: var(--gray-400); margin-top: 10px;">Not: ${m.noteTaker || ''}</p>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz toplantı notu yok</p>'}
+            </div>
+        `;
+    },
+
+    showMeetingNoteModal() {
+        const meetings = this.data.parentMeetings || [];
+        const content = `
+            <form id="noteForm">
+                <div class="form-group">
+                    <label>Toplantı</label>
+                    <select name="meetingId" onchange="App.fillMeetingNote(this.value)">
+                        <option value="">Yeni toplantı notu</option>
+                        ${meetings.map(m => `<option value="${m.id}">${m.title} - ${m.date || ''}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Toplantı Adı *</label>
+                    <input type="text" name="title" required placeholder="Toplantı adı">
+                </div>
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input type="date" name="date" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label>Notlar *</label>
+                    <textarea name="notes" rows="6" required placeholder="Toplantıda konuşulan önemli noktalar..."></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Toplantı Notu Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveMeetingNote()' }
+        ]);
+    },
+
+    fillMeetingNote(id) {
+        if (id) {
+            const meeting = this.data.parentMeetings.find(m => m.id === id);
+            if (meeting) {
+                document.querySelector('[name="title"]').value = meeting.title;
+                document.querySelector('[name="date"]').value = meeting.date || '';
+            }
+        }
+    },
+
+    saveMeetingNote() {
+        const form = document.getElementById('noteForm');
+        const formData = new FormData(form);
+        const note = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            date: formData.get('date'),
+            notes: formData.get('notes'),
+            noteTaker: this.currentUser.name
+        };
+        this.data.parentMeetings.push(note);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Not kaydedildi!');
+    },
+
+    renderExamAnalysis() {
+        const exams = this.data.trialExams || [];
+        const results = this.data.trialResults || [];
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Sınav Analizi Detaylı</h1>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                ${exams.map(exam => {
+                    const examResults = results.filter(r => r.examId === exam.id);
+                    const avgNet = examResults.length > 0 
+                        ? (examResults.reduce((a, r) => a + (parseFloat(r.totalNet) || 0), 0) / examResults.length).toFixed(1)
+                        : '-';
+                    const avgCorrect = examResults.length > 0
+                        ? (examResults.reduce((a, r) => a + (parseFloat(r.totalCorrect) || 0), 0) / examResults.length).toFixed(1)
+                        : '-';
+
+                    return `
+                        <div class="card">
+                            <h4 style="margin-bottom: 10px;">${exam.name}</h4>
+                            <p style="font-size: 12px; color: var(--gray-500); margin-bottom: 15px;">${exam.date}</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="text-align: center; padding: 15px; background: var(--gray-100); border-radius: 8px;">
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--primary);">${avgNet}</div>
+                                    <div style="font-size: 11px; color: var(--gray-500);">Ortalama Net</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: var(--gray-100); border-radius: 8px;">
+                                    <div style="font-size: 24px; font-weight: bold; color: var(--secondary);">${avgCorrect}</div>
+                                    <div style="font-size: 11px; color: var(--gray-500);">Doğru Ort.</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || '<p class="empty-state">Henüz sınav yok</p>'}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Ders Bazlı Performans</span>
+                </div>
+                ${exams.length > 0 ? `
+                    <div style="padding: 20px;">
+                        ${['Turkce', 'Matematik', 'Fen', 'Sosyal', 'Ingilizce'].map(subject => {
+                            const subjectResults = results.filter(r => r.subject === subject);
+                            const avg = subjectResults.length > 0 
+                                ? (subjectResults.reduce((a, r) => a + (parseFloat(r.net) || 0), 0) / subjectResults.length).toFixed(1)
+                                : '-';
+                            const percent = parseFloat(avg) || 0;
+                            return `
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>${subject}</span>
+                                        <span>${avg} net</span>
+                                    </div>
+                                    <div style="height: 10px; background: var(--gray-200); border-radius: 5px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${Math.min(percent * 10, 100)}%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 5px;"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : '<p class="empty-state">Analiz için sınav verisi yok</p>'}
+            </div>
+        `;
+    },
+
+    renderStudentProfile() {
+        const studentId = this.currentUser?.role === 'student' ? this.currentUser.studentId : null;
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Öğrenci Profili</h1>
+            </div>
+
+            <div class="search-filter" style="margin-bottom: 20px;">
+                <select id="profileStudent" onchange="App.loadStudentProfile(this.value)">
+                    <option value="">Öğrenci seçin...</option>
+                    ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                </select>
+            </div>
+
+            <div id="profileContent">
+                <p class="empty-state">Öğrenci seçin</p>
+            </div>
+        `;
+    },
+
+    loadStudentProfile(id) {
+        if (!id) return;
+        const student = this.data.students.find(s => s.id === id);
+        const grades = (this.data.grades || []).filter(g => g.studentId === id);
+        const attendance = (this.data.attendance || []).filter(a => a.studentId === id);
+        const badges = (this.data.badges || []).filter(b => b.studentId === id);
+        const stars = (this.data.starPoints || []).filter(s => s.studentId === id);
+        const behaviors = (this.data.behaviors || []).filter(b => b.studentId === id);
+
+        const avgGrade = grades.length > 0 
+            ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1)
+            : '-';
+        const totalStars = stars.reduce((a, s) => a + (parseInt(s.points) || 0), 0);
+
+        const content = `
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px;">
+                <div class="card">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3>${student.name}</h3>
+                        <p style="color: var(--gray-500);">No: ${student.number}</p>
+                        <p style="color: var(--gray-500);">${student.gender === 'male' ? 'Erkek' : 'Kız'}</p>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--gray-200); padding: 20px;">
+                        <h4 style="margin-bottom: 15px;">İstatistikler</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--primary);">${avgGrade}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Ortalama</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">${totalStars}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Yıldız</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--secondary);">${badges.length}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Rozet</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: var(--danger);">${attendance.filter(a => a.status === 'absent').length}</div>
+                                <div style="font-size: 11px; color: var(--gray-500);">Devamsızlık</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; gap: 20px;">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Son Notlar</span>
+                        </div>
+                        ${grades.slice(-10).reverse().map(g => `
+                            <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-100);">
+                                <span>${g.subject}</span>
+                                <span class="badge ${parseFloat(g.score) >= 50 ? 'badge-success' : 'badge-danger'}">${g.score}</span>
+                            </div>
+                        `).join('') || '<p class="empty-state">Not yok</p>'}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Davranış Geçmişi</span>
+                        </div>
+                        ${behaviors.slice(-5).reverse().map(b => `
+                            <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-100);">
+                                <span style="font-size: 13px;">${b.note}</span>
+                                <span class="badge badge-${b.type === 'positive' ? 'success' : b.type === 'negative' ? 'danger' : 'warning'}">${b.type === 'positive' ? '+' : b.type === 'negative' ? '-' : '~'}</span>
+                            </div>
+                        `).join('') || '<p class="empty-state">Kayıt yok</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('profileContent').innerHTML = content;
+    },
+
+    renderMyProfile() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+        const grades = (this.data.grades || []).filter(g => g.studentId === studentId);
+        const totalStars = (this.data.starPoints || []).filter(s => s.studentId === studentId).reduce((a, s) => a + (parseInt(s.points) || 0), 0);
+        const badges = (this.data.badges || []).filter(b => b.studentId === studentId);
+
+        const avgGrade = grades.length > 0 
+            ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1)
+            : '-';
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Profilim</h1>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px;">
+                <div class="card">
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                            ${this.currentUser.name.charAt(0)}
+                        </div>
+                        <h2>${this.currentUser.name}</h2>
+                        <p style="color: var(--gray-500);">Öğrenci</p>
+                        <p style="color: var(--gray-400); font-size: 13px;">${this.data.settings.className || 'Sınıf'}</p>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--gray-200); padding: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; color: white;">
+                                <div style="font-size: 28px; font-weight: bold;">${avgGrade}</div>
+                                <div style="font-size: 11px;">Ortalama</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: #fef3c7; border-radius: 12px;">
+                                <div style="font-size: 28px; font-weight: bold; color: #f59e0b;">${totalStars}</div>
+                                <div style="font-size: 11px; color: #92400e;">Yıldız</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header">
+                            <span class="card-title">Rozetlerim</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; padding: 10px;">
+                            ${badges.length > 0 ? badges.map(b => `
+                                <div style="padding: 15px; background: #f3e8ff; border-radius: 12px; text-align: center; min-width: 80px;">
+                                    <i class="fas fa-award" style="font-size: 24px; color: #a855f7;"></i>
+                                    <div style="font-size: 11px; margin-top: 5px;">${b.name || 'Rozet'}</div>
+                                </div>
+                            `).join('') : '<p class="empty-state">Henüz rozet yok</p>'}
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Son Notlarım</span>
+                        </div>
+                        ${grades.slice(-5).reverse().map(g => `
+                            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--gray-100);">
+                                <span>${g.subject}</span>
+                                <span class="badge ${parseFloat(g.score) >= 50 ? 'badge-success' : 'badge-danger'}">${g.score}</span>
+                            </div>
+                        `).join('') || '<p class="empty-state">Henüz not yok</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderBadgeDesign() {
+        const settings = this.data.badgeSettings || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Rozet Tasarımları</h1>
+                <button class="btn btn-primary" onclick="App.showBadgeDesignModal()">
+                    <i class="fas fa-plus"></i> Rozet Ekle
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+                ${settings.length > 0 ? settings.map(b => `
+                    <div class="card" style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: ${b.color || '#a855f7'}; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px;">
+                            <i class="fas ${b.icon || 'fa-award'}"></i>
+                        </div>
+                        <h4>${b.name}</h4>
+                        <p style="font-size: 12px; color: var(--gray-500);">${b.description || ''}</p>
+                        <p style="font-size: 11px; color: var(--gray-400);">Puan: ${b.points || 0}</p>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz rozet tasarımı yok</p>'}
+            </div>
+        `;
+    },
+
+    showBadgeDesignModal() {
+        const content = `
+            <form id="badgeDesignForm">
+                <div class="form-group">
+                    <label>Rozet Adı *</label>
+                    <input type="text" name="name" required placeholder="örn: Kitap Kurdu">
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <input type="text" name="description" placeholder="Rozet açıklaması">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>İkon</label>
+                        <select name="icon">
+                            <option value="fa-star">Yıldız</option>
+                            <option value="fa-book">Kitap</option>
+                            <option value="fa-trophy">Kupa</option>
+                            <option value="fa-medal">Madalya</option>
+                            <option value="fa-heart">Kalp</option>
+                            <option value="fa-bolt">Şimşek</option>
+                            <option value="fa-brain">Beyin</option>
+                            <option value="fa-graduation-cap">Kep</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Renk</label>
+                        <select name="color">
+                            <option value="#a855f7">Mor</option>
+                            <option value="#ef4444">Kırmızı</option>
+                            <option value="#10b981">Yeşil</option>
+                            <option value="#f59e0b">Turuncu</option>
+                            <option value="#3b82f6">Mavi</option>
+                            <option value="#ec4899">Pembe</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Puan</label>
+                    <input type="number" name="points" value="10" min="0">
+                </div>
+            </form>
+        `;
+        this.showModal('Rozet Tasarımı Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveBadgeDesign()' }
+        ]);
+    },
+
+    saveBadgeDesign() {
+        const form = document.getElementById('badgeDesignForm');
+        const formData = new FormData(form);
+        const badge = {
+            id: this.generateId(),
+            name: formData.get('name'),
+            description: formData.get('description'),
+            icon: formData.get('icon'),
+            color: formData.get('color'),
+            points: parseInt(formData.get('points')) || 10
+        };
+        if (!this.data.badgeSettings) this.data.badgeSettings = [];
+        this.data.badgeSettings.push(badge);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Rozet tasarımı eklendi!');
+    },
+
+    renderImportData() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Veri İçe Aktar</h1>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card-header">
+                    <span class="card-title">JSON Dosyası Yükle</span>
+                </div>
+                <div style="padding: 30px; text-align: center;">
+                    <p style="margin-bottom: 20px; color: var(--gray-500);">
+                        Daha önce dışa aktardığınız JSON dosyasını yükleyerek verileri geri yükleyebilirsiniz.
+                    </p>
+                    <div class="file-upload-area" onclick="document.getElementById('importJsonInput').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px;"></i>
+                        <p>JSON dosyası seçin veya sürükleyin</p>
+                        <input type="file" id="importJsonInput" style="display: none;" accept=".json" onchange="App.handleJsonImport(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 20px auto;">
+                <div class="card-header">
+                    <span class="card-title">Excel'den Öğrenci Aktar (Yakında)</span>
+                </div>
+                <div style="padding: 30px; text-align: center; opacity: 0.5;">
+                    <i class="fas fa-file-excel" style="font-size: 48px; color: #10b981;"></i>
+                    <p style="margin-top: 15px;">Excel dosyası ile toplu öğrenci ekleme özelliği yakında eklenecek.</p>
+                </div>
+            </div>
+        `;
+    },
+
+    handleJsonImport(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (confirm('Mevcut veriler silinecek! Devam etmek istiyor musunuz?')) {
+                    this.data = { ...this.data, ...imported };
+                    this.saveData();
+                    this.showToast('Veriler içe aktarıldı!');
+                    window.location.reload();
+                }
+            } catch (err) {
+                this.showToast('Geçersiz dosya formatı!', 'error');
+            }
+        };
+        reader.readAsText(file);
+    },
+
+    renderBackups() {
+        const lastBackup = this.data.lastBackup;
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Yedekleme</h1>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card-header">
+                    <span class="card-title">Otomatik Yedekleme</span>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h4>Son Yedekleme</h4>
+                            <p style="color: var(--gray-500); font-size: 13px;">${lastBackup ? new Date(lastBackup).toLocaleString('tr-TR') : 'Henüz yedekleme yapılmadı'}</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="App.createBackup()">
+                            <i class="fas fa-download"></i> Şimdi Yedekle
+                        </button>
+                    </div>
+
+                    <div style="background: var(--gray-100); padding: 15px; border-radius: 8px;">
+                        <p style="font-size: 13px; color: var(--gray-500);">
+                            <i class="fas fa-info-circle"></i> Yedekleme, tüm verilerinizi JSON formatında indirir. 
+                            Verilerinizi düzenli olarak yedeklemeniz önerilir.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    createBackup() {
+        this.data.lastBackup = new Date().toISOString();
+        this.saveData();
+        const dataStr = JSON.stringify(this.data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `yedek-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        this.showToast('Yedekleme tamamlandı!');
+    },
+
+    renderThemes() {
+        const currentTheme = this.data.settings?.theme || 'default';
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Tema Ayarları</h1>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                <div class="card" onclick="App.setTheme('default')" style="cursor: pointer; ${currentTheme === 'default' ? 'border: 3px solid var(--primary);' : ''}">
+                    <div style="height: 100px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 8px; margin-bottom: 15px;"></div>
+                    <h4>Varsayılan</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">Mavi-Mor tema</p>
+                    ${currentTheme === 'default' ? '<span class="badge badge-success" style="margin-top: 10px;">Aktif</span>' : ''}
+                </div>
+
+                <div class="card" onclick="App.setTheme('dark')" style="cursor: pointer; ${currentTheme === 'dark' ? 'border: 3px solid var(--primary);' : ''}">
+                    <div style="height: 100px; background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 8px; margin-bottom: 15px;"></div>
+                    <h4>Karanlık Mod</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">Koyu tema</p>
+                    ${currentTheme === 'dark' ? '<span class="badge badge-success" style="margin-top: 10px;">Aktif</span>' : ''}
+                </div>
+
+                <div class="card" onclick="App.setTheme('newyear')" style="cursor: pointer; ${currentTheme === 'newyear' ? 'border: 3px solid var(--primary);' : ''}">
+                    <div style="height: 100px; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 40px;">🎄</span>
+                    </div>
+                    <h4>Yılbaşı</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">Kırmızı-Yeşil tema</p>
+                    ${currentTheme === 'newyear' ? '<span class="badge badge-success" style="margin-top: 10px;">Aktif</span>' : ''}
+                </div>
+
+                <div class="card" onclick="App.setTheme('april23')" style="cursor: pointer; ${currentTheme === 'april23' ? 'border: 3px solid var(--primary);' : ''}">
+                    <div style="height: 100px; background: linear-gradient(135deg, #ef4444, #b91c1c); border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 40px;">🇹🇷</span>
+                    </div>
+                    <h4>23 Nisan</h4>
+                    <p style="font-size: 12px; color: var(--gray-500);">Bayram teması</p>
+                    ${currentTheme === 'april23' ? '<span class="badge badge-success" style="margin-top: 10px;">Aktif</span>' : ''}
+                </div>
+            </div>
+        `;
+    },
+
+    setTheme(theme) {
+        this.data.settings.theme = theme;
+        this.saveData();
+        this.applyTheme();
+        this.renderPage(this.currentPage);
+        this.showToast('Tema değiştirildi!');
     }
 };
 
