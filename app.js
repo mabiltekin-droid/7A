@@ -26,7 +26,32 @@ const App = {
         trialResults: [],
         messages: [],
         files: [],
-        notifications: []
+        notifications: [],
+        materials: [],
+        events: [],
+        parentMeetings: [],
+        behaviors: [],
+        weeklyReports: [],
+        diaries: [],
+        meals: [],
+        achievements: [],
+        birthdays: [],
+        tournaments: [],
+        galleries: [],
+        quotes: [
+            "Başarı, hazırlık ve fırsatın buluştuğu yerdir.",
+            "Öğrenmek, asla bitmeyen bir yolculuktur.",
+            "Her gün biraz daha iyi olmaya çalış.",
+            "Başarısızlık, başarının annesidir.",
+            "Azimle çalışan her hayali gerçekleştirir.",
+            "Öğrenmek, en güzel yatırımdır.",
+            "Bugün yapılacak işi yarına bırakma.",
+            "Küçük adımlar büyük sonuçlar doğurur.",
+            "Her engel, bir öğrenme fırsatıdır.",
+            "Kendine inan, her şeyi başarabilirsin."
+        ],
+        loginLogs: [],
+        quickLinks: []
     },
     currentUser: null,
     currentPage: 'dashboard',
@@ -80,7 +105,17 @@ const App = {
             settings: { className: '', classLevel: '', term: '', schoolYear: '' },
             students: [], teachers: [], subjects: [], grades: [], schedule: [], exams: [], attendance: [],
             announcements: [], assignments: [], clubs: [], library: [],
-            badges: [], starPoints: [], moods: [], goals: [], rewards: []
+            badges: [], starPoints: [], moods: [], goals: [], rewards: [],
+            materials: [], events: [], parentMeetings: [], behaviors: [], weeklyReports: [],
+            diaries: [], meals: [], achievements: [], birthdays: [], tournaments: [], galleries: [],
+            quotes: [
+                "Başarı, hazırlık ve fırsatın buluştuğu yerdir.",
+                "Öğrenmek, asla bitmeyen bir yolculuktur.",
+                "Her gün biraz daha iyi olmaya çalış.",
+                "Başarısızlık, başarının annesidir.",
+                "Azimle çalışan her hayali gerçekleştirir."
+            ],
+            loginLogs: []
         };
         
         const saved = localStorage.getItem('schoolData');
@@ -97,16 +132,43 @@ const App = {
                 if (!this.data.moods) this.data.moods = [];
                 if (!this.data.goals) this.data.goals = [];
                 if (!this.data.rewards) this.data.rewards = [];
-            if (!this.data.trialExams) this.data.trialExams = [];
-            if (!this.data.trialResults) this.data.trialResults = [];
-            if (!this.data.messages) this.data.messages = [];
-            if (!this.data.files) this.data.files = [];
-            if (!this.data.notifications) this.data.notifications = [];
+                if (!this.data.trialExams) this.data.trialExams = [];
+                if (!this.data.trialResults) this.data.trialResults = [];
+                if (!this.data.messages) this.data.messages = [];
+                if (!this.data.files) this.data.files = [];
+                if (!this.data.notifications) this.data.notifications = [];
+                if (!this.data.materials) this.data.materials = [];
+                if (!this.data.events) this.data.events = [];
+                if (!this.data.parentMeetings) this.data.parentMeetings = [];
+                if (!this.data.behaviors) this.data.behaviors = [];
+                if (!this.data.weeklyReports) this.data.weeklyReports = [];
+                if (!this.data.diaries) this.data.diaries = [];
+                if (!this.data.meals) this.data.meals = [];
+                if (!this.data.achievements) this.data.achievements = [];
+                if (!this.data.birthdays) this.data.birthdays = [];
+                if (!this.data.tournaments) this.data.tournaments = [];
+                if (!this.data.galleries) this.data.galleries = [];
+                if (!this.data.loginLogs) this.data.loginLogs = [];
             } catch(e) {
                 this.data = defaultData;
             }
         } else {
             this.data = defaultData;
+        }
+        
+        this.logLogin();
+    },
+
+    logLogin() {
+        const log = {
+            user: this.currentUser?.name || 'unknown',
+            role: this.currentUser?.role || 'unknown',
+            time: new Date().toISOString(),
+            action: 'login'
+        };
+        this.data.loginLogs.push(log);
+        if (this.data.loginLogs.length > 100) {
+            this.data.loginLogs = this.data.loginLogs.slice(-100);
         }
     },
 
@@ -161,7 +223,8 @@ const App = {
                         { page: 'users', icon: 'fa-users-cog', label: 'Kullanıcılar' },
                         { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
                         { page: 'teachers', icon: 'fa-chalkboard-teacher', label: 'Öğretmenler' },
-                        { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' }
+                        { page: 'settings', icon: 'fa-cog', label: 'Ayarlar' },
+                        { page: 'loginlogs', icon: 'fa-history', label: 'Giriş Logları' }
                     ]
                 },
                 {
@@ -170,11 +233,27 @@ const App = {
                     items: [
                         { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
                         { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Not Analizi' },
+                        { page: 'materials', icon: 'fa-book-open', label: 'Ders Materyalleri' },
                         { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
+                        { page: 'assignmentcalendar', icon: 'fa-calendar-alt', label: 'Ödev Takvimi' },
                         { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                         { page: 'exams', icon: 'fa-file-alt', label: 'Deneme Çizelgesi' },
                         { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
-                        { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' }
+                        { page: 'attendance', icon: 'fa-clipboard-list', label: 'Devamsızlık' },
+                        { page: 'behavior', icon: 'fa-heart', label: 'Davranış Takibi' },
+                        { page: 'meals', icon: 'fa-utensils', label: 'Beslenme Takibi' }
+                    ]
+                },
+                {
+                    title: 'TAKİP & RAPOR',
+                    icon: 'fa-chart-pie',
+                    items: [
+                        { page: 'calendar', icon: 'fa-calendar', label: 'Okul Takvimi' },
+                        { page: 'events', icon: 'fa-party-horn', label: 'Sınıf Etkinlikleri' },
+                        { page: 'parentmeetings', icon: 'fa-users', label: 'Veli Toplantıları' },
+                        { page: 'weeklyreport', icon: 'fa-file-alt', label: 'Haftalık Rapor' },
+                        { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
+                        { page: 'loginlogs', icon: 'fa-history', label: 'Giriş Logları' }
                     ]
                 },
                 {
@@ -185,7 +264,19 @@ const App = {
                         { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                         { page: 'badges', icon: 'fa-award', label: 'Rozetler' },
                         { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
-                        { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' }
+                        { page: 'stars', icon: 'fa-star', label: 'Yıldız Puanı' },
+                        { page: 'achievements', icon: 'fa-medal', label: 'Başarı Panosu' },
+                        { page: 'birthdays', icon: 'fa-birthday-cake', label: 'Doğum Günleri' },
+                        { page: 'tournaments', icon: 'fa-gamepad', label: 'Spor Turnuvaları' },
+                        { page: 'gallery', icon: 'fa-images', label: 'Galeri' }
+                    ]
+                },
+                {
+                    title: 'EĞLENCE',
+                    icon: 'fa-gamepad',
+                    items: [
+                        { page: 'quote', icon: 'fa-quote-left', label: 'Günün Sözü' },
+                        { page: 'games', icon: 'fa-puzzle-piece', label: 'Zeka Oyunları' }
                     ]
                 },
                 {
@@ -195,7 +286,6 @@ const App = {
                         { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' },
                         { page: 'files', icon: 'fa-folder', label: 'Dosyalar' },
                         { page: 'notifications', icon: 'fa-bell', label: 'Bildirimler' },
-                        { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
                         { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
                         { page: 'rewards', icon: 'fa-gift', label: 'Ödüller' }
                     ]
@@ -216,11 +306,26 @@ const App = {
                     icon: 'fa-graduation-cap',
                     items: [
                         { page: 'grades', icon: 'fa-chart-line', label: 'Not Girişi' },
+                        { page: 'materials', icon: 'fa-book-open', label: 'Ders Materyalleri' },
                         { page: 'assignments', icon: 'fa-tasks', label: 'Ödevler' },
+                        { page: 'assignmentcalendar', icon: 'fa-calendar-alt', label: 'Ödev Takvimi' },
                         { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
                         { page: 'attendance', icon: 'fa-clipboard-list', label: 'Yoklama' },
                         { page: 'students', icon: 'fa-user-graduate', label: 'Öğrenciler' },
-                        { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' }
+                        { page: 'trialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçları' },
+                        { page: 'behavior', icon: 'fa-heart', label: 'Davranış Takibi' },
+                        { page: 'meals', icon: 'fa-utensils', label: 'Beslenme Takibi' }
+                    ]
+                },
+                {
+                    title: 'TAKİP & RAPOR',
+                    icon: 'fa-chart-pie',
+                    items: [
+                        { page: 'events', icon: 'fa-party-horn', label: 'Sınıf Etkinlikleri' },
+                        { page: 'parentmeetings', icon: 'fa-users', label: 'Veli Toplantıları' },
+                        { page: 'weeklyreport', icon: 'fa-file-alt', label: 'Haftalık Rapor' },
+                        { page: 'report', icon: 'fa-file-pdf', label: 'Karne/Rapor' },
+                        { page: 'diaries', icon: 'fa-book', label: 'Öğrenci Günlüğü' }
                     ]
                 },
                 {
@@ -230,7 +335,19 @@ const App = {
                         { page: 'clubs', icon: 'fa-users', label: 'Kulüpler' },
                         { page: 'stars', icon: 'fa-star', label: 'Yıldız Ver' },
                         { page: 'badges', icon: 'fa-award', label: 'Rozet Ver' },
-                        { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' }
+                        { page: 'goals', icon: 'fa-bullseye', label: 'Hedefler' },
+                        { page: 'achievements', icon: 'fa-medal', label: 'Başarı Panosu' },
+                        { page: 'birthdays', icon: 'fa-birthday-cake', label: 'Doğum Günleri' },
+                        { page: 'tournaments', icon: 'fa-gamepad', label: 'Spor Turnuvaları' },
+                        { page: 'gallery', icon: 'fa-images', label: 'Galeri' }
+                    ]
+                },
+                {
+                    title: 'EĞLENCE',
+                    icon: 'fa-gamepad',
+                    items: [
+                        { page: 'quote', icon: 'fa-quote-left', label: 'Günün Sözü' },
+                        { page: 'games', icon: 'fa-puzzle-piece', label: 'Zeka Oyunları' }
                     ]
                 },
                 {
@@ -261,11 +378,23 @@ const App = {
                         { page: 'mygrades', icon: 'fa-chart-line', label: 'Notlarım' },
                         { page: 'gradeanalysis', icon: 'fa-chart-bar', label: 'Gelişimim' },
                         { page: 'lgsanalysis', icon: 'fa-graduation-cap', label: 'LGS Analiz' },
+                        { page: 'mymaterials', icon: 'fa-book-open', label: 'Materyallerim' },
                         { page: 'myassignments', icon: 'fa-tasks', label: 'Ödevlerim' },
                         { page: 'myschedule', icon: 'fa-calendar-week', label: 'Ders Programım' },
                         { page: 'myattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığım' },
                         { page: 'myexams', icon: 'fa-file-alt', label: 'Deneme Takvimi' },
-                        { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' }
+                        { page: 'mytrialresults', icon: 'fa-chart-bar', label: 'Deneme Sonuçlarım' },
+                        { page: 'mybehavior', icon: 'fa-heart', label: 'Davranış Kartım' }
+                    ]
+                },
+                {
+                    title: 'TAKİP & BİLGİ',
+                    icon: 'fa-chart-pie',
+                    items: [
+                        { page: 'calendar', icon: 'fa-calendar', label: 'Okul Takvimi' },
+                        { page: 'myevents', icon: 'fa-party-horn', label: 'Etkinlikler' },
+                        { page: 'myreport', icon: 'fa-file-alt', label: 'Haftalık Raporum' },
+                        { page: 'mydiary', icon: 'fa-book', label: 'Günlüğüm' }
                     ]
                 },
                 {
@@ -276,7 +405,19 @@ const App = {
                         { page: 'library', icon: 'fa-book', label: 'Kütüphane' },
                         { page: 'mybadges', icon: 'fa-award', label: 'Rozetlerim' },
                         { page: 'leaderboard', icon: 'fa-trophy', label: 'Liderlik' },
-                        { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' }
+                        { page: 'mystars', icon: 'fa-star', label: 'Yıldızlarım' },
+                        { page: 'myachievements', icon: 'fa-medal', label: 'Başarılarım' },
+                        { page: 'mybirthday', icon: 'fa-birthday-cake', label: 'Doğum Günüm' },
+                        { page: 'mytournaments', icon: 'fa-gamepad', label: 'Turnuvalar' },
+                        { page: 'mygallery', icon: 'fa-images', label: 'Galeri' }
+                    ]
+                },
+                {
+                    title: 'EĞLENCE',
+                    icon: 'fa-gamepad',
+                    items: [
+                        { page: 'quote', icon: 'fa-quote-left', label: 'Günün Sözü' },
+                        { page: 'games', icon: 'fa-puzzle-piece', label: 'Zeka Oyunları' }
                     ]
                 },
                 {
@@ -305,17 +446,36 @@ const App = {
                     items: [
                         { page: 'childgrades', icon: 'fa-chart-line', label: 'Notları' },
                         { page: 'childattendance', icon: 'fa-clipboard-list', label: 'Devamsızlığı' },
-                        { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' }
+                        { page: 'childmood', icon: 'fa-smile', label: 'Ruh Hali' },
+                        { page: 'childbehavior', icon: 'fa-heart', label: 'Davranışı' }
                     ]
                 },
                 {
-                    title: 'BİLGİLER',
-                    icon: 'fa-info-circle',
+                    title: 'TAKİP & BİLGİ',
+                    icon: 'fa-chart-pie',
                     items: [
                         { page: 'schedule', icon: 'fa-calendar-week', label: 'Ders Programı' },
-                        { page: 'parentreport', icon: 'fa-file-pdf', label: 'Veli Raporu' }
+                        { page: 'calendar', icon: 'fa-calendar', label: 'Okul Takvimi' },
+                        { page: 'parentreport', icon: 'fa-file-pdf', label: 'Veli Raporu' },
+                        { page: 'parentmeetings', icon: 'fa-users', label: 'Veli Toplantıları' },
+                        { page: 'childmeals', icon: 'fa-utensils', label: 'Beslenme' }
                     ]
                 },
+                {
+                    title: 'İLETİŞİM',
+                    icon: 'fa-comments',
+                    items: [
+                        { page: 'messages', icon: 'fa-comments', label: 'Mesajlar' }
+                    ]
+                },
+                {
+                    title: 'EĞLENCE',
+                    icon: 'fa-gamepad',
+                    items: [
+                        { page: 'quote', icon: 'fa-quote-left', label: 'Günün Sözü' }
+                    ]
+                }
+            ];,
                 {
                     title: 'İLETİŞİM',
                     icon: 'fa-comments',
@@ -408,23 +568,26 @@ const App = {
             teachers: () => this.renderTeachers(),
             grades: () => this.renderGrades(),
             gradeanalysis: () => this.renderGradeAnalysis(),
+            materials: () => this.renderMaterials(),
+            mymaterials: () => this.renderMyMaterials(),
             schedule: () => this.renderSchedule(),
             exams: () => this.renderExams(),
             trialresults: () => this.renderTrialResults(),
             mytrialresults: () => this.renderMyTrialResults(),
             attendance: () => this.renderAttendance(),
+            myattendance: () => this.renderMyAttendance(),
+            childattendance: () => this.renderChildAttendance(),
             settings: () => this.renderSettings(),
             announcements: () => this.renderAnnouncements(),
             assignments: () => this.renderAssignments(),
             myassignments: () => this.renderMyAssignments(),
+            assignmentcalendar: () => this.renderAssignmentCalendar(),
             clubs: () => this.renderClubs(),
             library: () => this.renderLibrary(),
             mygrades: () => this.renderMyGrades(),
-            myschedule: () => this.renderMySchedule(),
-            myattendance: () => this.renderMyAttendance(),
-            myexams: () => this.renderMyExams(),
             childgrades: () => this.renderChildGrades(),
-            childattendance: () => this.renderChildAttendance(),
+            myschedule: () => this.renderMySchedule(),
+            myexams: () => this.renderMyExams(),
             badges: () => this.renderBadges(),
             mybadges: () => this.renderMyBadges(),
             leaderboard: () => this.renderLeaderboard(),
@@ -442,7 +605,31 @@ const App = {
             myfiles: () => this.renderMyFiles(),
             notifications: () => this.renderNotifications(),
             report: () => this.renderReport(),
-            parentreport: () => this.renderParentReport()
+            parentreport: () => this.renderParentReport(),
+            calendar: () => this.renderCalendar(),
+            events: () => this.renderEvents(),
+            myevents: () => this.renderMyEvents(),
+            parentmeetings: () => this.renderParentMeetings(),
+            behavior: () => this.renderBehavior(),
+            mybehavior: () => this.renderMyBehavior(),
+            childbehavior: () => this.renderChildBehavior(),
+            weeklyreport: () => this.renderWeeklyReport(),
+            myreport: () => this.renderMyReport(),
+            diaries: () => this.renderDiaries(),
+            mydiary: () => this.renderMyDiary(),
+            meals: () => this.renderMeals(),
+            childmeals: () => this.renderChildMeals(),
+            achievements: () => this.renderAchievements(),
+            myachievements: () => this.renderMyAchievements(),
+            birthdays: () => this.renderBirthdays(),
+            mybirthday: () => this.renderMyBirthday(),
+            tournaments: () => this.renderTournaments(),
+            mytournaments: () => this.renderMyTournaments(),
+            gallery: () => this.renderGallery(),
+            mygallery: () => this.renderMyGallery(),
+            quote: () => this.renderQuote(),
+            games: () => this.renderGames(),
+            loginlogs: () => this.renderLoginLogs()
         };
 
         const renderFn = pages[page];
@@ -5515,6 +5702,1389 @@ const App = {
                 </div>
             </div>
         `;
+    },
+
+    renderMaterials() {
+        const materials = (this.data.materials || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Ders Materyalleri</h1>
+                <button class="btn btn-primary" onclick="App.showMaterialModal()">
+                    <i class="fas fa-plus"></i> Materyal Ekle
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="materialSearch" placeholder="Materyal ara..." oninput="App.filterMaterials()">
+                <select id="materialSubject" onchange="App.filterMaterials()">
+                    <option value="">Tüm Dersler</option>
+                    ${[...new Set(this.data.grades.map(g => g.subject))].map(s => `<option value="${s}">${s}</option>`).join('')}
+                </select>
+            </div>
+
+            <div id="materialsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                ${this.renderMaterialsGrid(materials)}
+            </div>
+        `;
+    },
+
+    renderMaterialsGrid(materials) {
+        if (materials.length === 0) {
+            return '<p class="empty-state">Henüz materyal eklenmedi</p>';
+        }
+        return materials.map(m => `
+            <div class="card" style="cursor: pointer;" onclick="App.openMaterial('${m.id}')">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        <i class="fas ${this.getMaterialIcon(m.type)}"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 3px;">${m.title}</h4>
+                        <p style="font-size: 12px; color: var(--gray-500);">${m.subject}</p>
+                    </div>
+                </div>
+                <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 10px;">${m.description || ''}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--gray-400);">
+                    <span><i class="fas fa-user"></i> ${m.teacher || 'Öğretmen'}</span>
+                    <span><i class="fas fa-calendar"></i> ${m.date}</span>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    getMaterialIcon(type) {
+        const icons = { pdf: 'fa-file-pdf', video: 'fa-video', document: 'fa-file-word', image: 'fa-image', link: 'fa-link', other: 'fa-file' };
+        return icons[type] || 'fa-file';
+    },
+
+    filterMaterials() {
+        const search = document.getElementById('materialSearch')?.value.toLowerCase() || '';
+        const subject = document.getElementById('materialSubject')?.value || '';
+        let materials = this.data.materials || [];
+        if (search) materials = materials.filter(m => m.title.toLowerCase().includes(search) || m.description?.toLowerCase().includes(search));
+        if (subject) materials = materials.filter(m => m.subject === subject);
+        document.getElementById('materialsGrid').innerHTML = this.renderMaterialsGrid(materials);
+    },
+
+    showMaterialModal() {
+        const content = `
+            <form id="materialForm">
+                <div class="form-group">
+                    <label>Başlık *</label>
+                    <input type="text" name="title" required placeholder="Materyal başlığı">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ders</label>
+                        <select name="subject">
+                            <option value="">Seçin...</option>
+                            ${[...new Set(this.data.grades.map(g => g.subject))].map(s => `<option value="${s}">${s}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tür</label>
+                        <select name="type">
+                            <option value="document">Doküman</option>
+                            <option value="pdf">PDF</option>
+                            <option value="video">Video</option>
+                            <option value="link">Link</option>
+                            <option value="other">Diğer</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3" placeholder="Materyal hakkında bilgi..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Link / URL</label>
+                    <input type="url" name="url" placeholder="https://...">
+                </div>
+            </form>
+        `;
+        this.showModal('Ders Materyali Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveMaterial()' }
+        ]);
+    },
+
+    saveMaterial() {
+        const form = document.getElementById('materialForm');
+        const formData = new FormData(form);
+        const material = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            subject: formData.get('subject'),
+            type: formData.get('type'),
+            description: formData.get('description'),
+            url: formData.get('url'),
+            teacher: this.currentUser.name,
+            date: new Date().toLocaleDateString('tr-TR')
+        };
+        if (!this.data.materials) this.data.materials = [];
+        this.data.materials.push(material);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Materyal eklendi!');
+    },
+
+    openMaterial(id) {
+        const material = this.data.materials.find(m => m.id === id);
+        if (material && material.url) {
+            window.open(material.url, '_blank');
+        } else {
+            this.showToast('Bu materyal için link yok', 'warning');
+        }
+    },
+
+    renderMyMaterials() {
+        const studentId = this.currentUser.studentId;
+        const materials = (this.data.materials || []).filter(m => !m.subject || this.data.grades.some(g => g.studentId === studentId && g.subject === m.subject));
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Ders Materyallerim</h1>
+            </div>
+            <div id="materialsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                ${this.renderMaterialsGrid(materials)}
+            </div>
+        `;
+    },
+
+    renderAssignmentCalendar() {
+        const today = new Date();
+        const month = today.getMonth();
+        const year = today.getFullYear();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const assignments = this.data.assignments || [];
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Ödev Takvimi</h1>
+            </div>
+
+            <div class="card" style="text-align: center;">
+                <h2 style="margin-bottom: 20px;">${['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'][month]} ${year}</h2>
+                <div class="schedule-grid" style="grid-template-columns: repeat(7, 1fr);">
+                    ${['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map(d => `<div class="schedule-header">${d}</div>`).join('')}
+                    ${Array(firstDay === 0 ? 6 : firstDay - 1).fill('<div class="schedule-cell"></div>').join('')}
+                    ${Array(daysInMonth).fill(0).map((_, i) => {
+                        const day = i + 1;
+                        const dateStr = `${day}/${month + 1}/${year}`;
+                        const dayAssignments = assignments.filter(a => a.dueDate === dateStr);
+                        const isToday = day === today.getDate();
+                        return `
+                            <div class="schedule-cell" style="${isToday ? 'background: rgba(79,70,229,0.1); border: 2px solid var(--primary);' : ''}">
+                                <strong style="${isToday ? 'color: var(--primary);' : ''}">${day}</strong>
+                                ${dayAssignments.map(a => `<div style="margin-top: 5px; padding: 3px 5px; background: #fef3c7; border-radius: 4px; font-size: 10px;">${a.title}</div>`).join('')}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">Bu Ayki Ödevler</h3>
+                ${assignments.filter(a => {
+                    const parts = a.dueDate?.split('/') || [];
+                    return parts[1] == month + 1 && parts[2] == year;
+                }).map(a => `
+                    <div class="assignment-card">
+                        <div class="assignment-header">
+                            <span class="assignment-title"><i class="fas fa-tasks"></i> ${a.title}</span>
+                            <span class="assignment-status ${a.status}">${a.status}</span>
+                        </div>
+                        <p style="color: var(--gray-500); font-size: 13px;">${a.description || ''}</p>
+                        <div class="assignment-meta">
+                            <span><i class="fas fa-calendar"></i> ${a.dueDate}</span>
+                            <span><i class="fas fa-book"></i> ${a.subject || 'Genel'}</span>
+                        </div>
+                    </div>
+                `).join('') || '<p class="empty-state">Bu ay ödev yok</p>'}
+            </div>
+        `;
+    },
+
+    renderCalendar() {
+        const events = this.data.events || [];
+        const holidays = [
+            { date: '1/1/2026', name: 'Yılbaşı' },
+            { date: '23/4/2026', name: '23 Nisan' },
+            { date: '1/5/2026', name: 'İşçi Bayramı' },
+            { date: '19/5/2026', name: 'Atatürk\'ü Anma' },
+            { date: '15/7/2026', name: 'Demokrasi Bayramı' },
+            { date: '30/8/2026', name: 'Zafer Bayramı' },
+            { date: '29/10/2026', name: 'Cumhuriyet Bayramı' }
+        ];
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Okul Takvimi</h1>
+                ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                <button class="btn btn-primary" onclick="App.showEventModal()">
+                    <i class="fas fa-plus"></i> Etkinlik Ekle
+                </button>
+                ` : ''}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Yaklaşan Etkinlikler</span>
+                    </div>
+                    ${events.length > 0 ? events.filter(e => new Date(e.date) >= new Date()).sort((a, b) => new Date(a.date) - new Date(b.date)).map(e => `
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                            <div style="text-align: center; padding: 10px; background: ${e.color || 'var(--primary)'}; border-radius: 8px; color: white; min-width: 60px;">
+                                <div style="font-size: 20px; font-weight: bold;">${new Date(e.date).getDate()}</div>
+                                <div style="font-size: 10px;">${['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'][new Date(e.date).getMonth()]}</div>
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>${e.title}</h4>
+                                <p style="font-size: 12px; color: var(--gray-500);">${e.description || ''}</p>
+                            </div>
+                        </div>
+                    `).join('') : '<p class="empty-state">Henüz etkinlik yok</p>'}
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Tatiller ve Özel Günler</span>
+                    </div>
+                    ${holidays.map(h => `
+                        <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--gray-200);">
+                            <span>${h.name}</span>
+                            <span class="badge badge-info">${h.date}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    },
+
+    showEventModal() {
+        const content = `
+            <form id="eventForm">
+                <div class="form-group">
+                    <label>Etkinlik Adı *</label>
+                    <input type="text" name="title" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Renk</label>
+                        <select name="color">
+                            <option value="#4f46e5">Mor</option>
+                            <option value="#10b981">Yeşil</option>
+                            <option value="#f59e0b">Turuncu</option>
+                            <option value="#ef4444">Kırmızı</option>
+                            <option value="#ec4899">Pembe</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Etkinlik Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveEvent()' }
+        ]);
+    },
+
+    saveEvent() {
+        const form = document.getElementById('eventForm');
+        const formData = new FormData(form);
+        const event = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            date: formData.get('date'),
+            color: formData.get('color'),
+            description: formData.get('description'),
+            createdBy: this.currentUser.name
+        };
+        if (!this.data.events) this.data.events = [];
+        this.data.events.push(event);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Etkinlik eklendi!');
+    },
+
+    renderEvents() { return this.renderCalendar(); },
+    renderMyEvents() { return this.renderCalendar(); },
+
+    renderParentMeetings() {
+        const meetings = this.data.parentMeetings || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Veli Toplantıları</h1>
+                <button class="btn btn-primary" onclick="App.showMeetingModal()">
+                    <i class="fas fa-plus"></i> Toplantı Oluştur
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Planlanan Toplantılar</span>
+                </div>
+                ${meetings.length > 0 ? meetings.sort((a, b) => new Date(a.date) - new Date(b.date)).map(m => `
+                    <div style="padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4>${m.title}</h4>
+                                <p style="font-size: 13px; color: var(--gray-500);">${m.description || ''}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: var(--primary);">${new Date(m.date).toLocaleDateString('tr-TR')}</div>
+                                <div style="font-size: 12px; color: var(--gray-500);">${m.time || ''}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz toplantı planlanmadı</p>'}
+            </div>
+        `;
+    },
+
+    showMeetingModal() {
+        const content = `
+            <form id="meetingForm">
+                <div class="form-group">
+                    <label>Toplantı Konusu *</label>
+                    <input type="text" name="title" required placeholder="örn: Veli bilgilendirme toplantısı">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih *</label>
+                        <input type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Saat</label>
+                        <input type="time" name="time" value="17:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3" placeholder="Toplantı hakkında bilgi..."></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Veli Toplantısı Oluştur', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Oluştur', class: 'btn-primary', action: 'App.saveMeeting()' }
+        ]);
+    },
+
+    saveMeeting() {
+        const form = document.getElementById('meetingForm');
+        const formData = new FormData(form);
+        const meeting = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            date: formData.get('date'),
+            time: formData.get('time'),
+            description: formData.get('description'),
+            createdBy: this.currentUser.name
+        };
+        if (!this.data.parentMeetings) this.data.parentMeetings = [];
+        this.data.parentMeetings.push(meeting);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Toplantı oluşturuldu!');
+    },
+
+    renderBehavior() {
+        const behaviors = this.data.behaviors || [];
+        const students = this.data.students;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Davranış Takip Kartı</h1>
+                <button class="btn btn-primary" onclick="App.showBehaviorModal()">
+                    <i class="fas fa-plus"></i> Kayıt Ekle
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <select id="behaviorStudent" onchange="App.filterBehaviors()">
+                    <option value="">Tüm Öğrenciler</option>
+                    ${students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                </select>
+            </div>
+
+            <div id="behaviorsList">
+                ${this.renderBehaviorsList(behaviors)}
+            </div>
+        `;
+    },
+
+    renderBehaviorsList(behaviors) {
+        if (behaviors.length === 0) return '<p class="empty-state">Henüz kayıt yok</p>';
+        return behaviors.sort((a, b) => new Date(b.date) - new Date(a.date)).map(b => {
+            const student = this.data.students.find(s => s.id === b.studentId);
+            return `
+                <div class="card" style="margin-bottom: 15px; border-left: 4px solid ${b.type === 'positive' ? '#10b981' : b.type === 'negative' ? '#ef4444' : '#f59e0b'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4>${student?.name || 'Öğrenci'}</h4>
+                            <p style="font-size: 13px; color: var(--gray-500);">${b.note}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="badge badge-${b.type === 'positive' ? 'success' : b.type === 'negative' ? 'danger' : 'warning'}">
+                                ${b.type === 'positive' ? 'Olumlu' : b.type === 'negative' ? 'Olumsuz' : 'Not'}
+                            </span>
+                            <div style="font-size: 11px; color: var(--gray-400); margin-top: 5px;">${b.date}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    filterBehaviors() {
+        const studentId = document.getElementById('behaviorStudent')?.value || '';
+        let behaviors = this.data.behaviors || [];
+        if (studentId) behaviors = behaviors.filter(b => b.studentId === studentId);
+        document.getElementById('behaviorsList').innerHTML = this.renderBehaviorsList(behaviors);
+    },
+
+    showBehaviorModal() {
+        const content = `
+            <form id="behaviorForm">
+                <div class="form-group">
+                    <label>Öğrenci *</label>
+                    <select name="studentId" required>
+                        <option value="">Seçin...</option>
+                        ${this.data.students.map(s => `<option value="${s.id}">${s.name} (${s.number})</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tür *</label>
+                    <select name="type" required>
+                        <option value="positive">Olumlu Davranış</option>
+                        <option value="negative">Olumsuz Davranış</option>
+                        <option value="note">Genel Not</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Not *</label>
+                    <textarea name="note" rows="3" required placeholder="Davranış hakkında not..."></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Davranış Kaydı Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveBehavior()' }
+        ]);
+    },
+
+    saveBehavior() {
+        const form = document.getElementById('behaviorForm');
+        const formData = new FormData(form);
+        const behavior = {
+            id: this.generateId(),
+            studentId: formData.get('studentId'),
+            type: formData.get('type'),
+            note: formData.get('note'),
+            date: new Date().toLocaleDateString('tr-TR'),
+            recordedBy: this.currentUser.name
+        };
+        if (!this.data.behaviors) this.data.behaviors = [];
+        this.data.behaviors.push(behavior);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Kayıt eklendi!');
+    },
+
+    renderMyBehavior() {
+        const studentId = this.currentUser.studentId;
+        const behaviors = (this.data.behaviors || []).filter(b => b.studentId === studentId);
+        const positives = behaviors.filter(b => b.type === 'positive').length;
+        const negatives = behaviors.filter(b => b.type === 'negative').length;
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Davranış Kartım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-thumbs-up"></i></div>
+                    <div class="stat-info">
+                        <h4>${positives}</h4>
+                        <p>Olumlu</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-thumbs-down"></i></div>
+                    <div class="stat-info">
+                        <h4>${negatives}</h4>
+                        <p>Olumsuz</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Davranış Geçmişim</span>
+                </div>
+                ${behaviors.length > 0 ? behaviors.sort((a, b) => new Date(b.date) - new Date(a.date)).map(b => `
+                    <div style="padding: 12px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="font-size: 13px;">${b.note}</p>
+                            <p style="font-size: 11px; color: var(--gray-400);">${b.recordedBy} - ${b.date}</p>
+                        </div>
+                        <span class="badge badge-${b.type === 'positive' ? 'success' : b.type === 'negative' ? 'danger' : 'warning'}">
+                            ${b.type === 'positive' ? 'Olumlu' : b.type === 'negative' ? 'Olumsuz' : 'Not'}
+                        </span>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz kayıt yok</p>'}
+            </div>
+        `;
+    },
+
+    renderChildBehavior() {
+        const studentId = this.currentUser.studentId;
+        const behaviors = (this.data.behaviors || []).filter(b => b.studentId === studentId);
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Çocuğumun Davranışı</h1>
+            </div>
+            ${this.renderBehaviorsList(behaviors)}
+        `;
+    },
+
+    renderWeeklyReport() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Haftalık Performans Raporu</h1>
+                <button class="btn btn-secondary" onclick="App.exportCurrentViewAsPDF()">
+                    <i class="fas fa-download"></i> PDF İndir
+                </button>
+            </div>
+
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <h1 style="color: var(--primary);">${this.data.settings.className || 'Sınıf'} Haftalık Rapor</h1>
+                    <p style="color: var(--gray-500);">${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}</p>
+                </div>
+
+                <div style="padding: 30px;">
+                    <h3 style="margin-bottom: 15px;">📊 Sınıf Özeti</h3>
+                    <div class="stats-grid" style="margin-bottom: 30px;">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h4>${this.data.students.length}</h4>
+                                <p>Öğrenci Sayısı</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h4>${(this.data.grades || []).length}</h4>
+                                <p>Girilen Not</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">📅 Bu Hafta Yapılanlar</h3>
+                    <div style="margin-bottom: 30px;">
+                        ${(this.data.announcements || []).slice(-5).map(a => `
+                            <div style="padding: 10px; border-left: 3px solid var(--primary); margin-bottom: 10px; background: var(--gray-100);">
+                                <strong>${a.title}</strong>
+                                <p style="font-size: 12px; color: var(--gray-500);">${a.date}</p>
+                            </div>
+                        `).join('') || '<p>Bu hafta duyuru yok</p>'}
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">📚 Yaklaşan Ödevler</h3>
+                    <div>
+                        ${(this.data.assignments || []).filter(a => a.status === 'pending').slice(0, 5).map(a => `
+                            <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                                <span>${a.title}</span>
+                                <span class="badge badge-warning">${a.dueDate}</span>
+                            </div>
+                        `).join('') || '<p>Yaklaşan ödev yok</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderMyReport() {
+        const studentId = this.currentUser.studentId;
+        const grades = (this.data.grades || []).filter(g => g.studentId === studentId);
+        const myBadges = (this.data.badges || []).filter(b => b.studentId === studentId);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Haftalık Raporum</h1>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; padding: 30px; border-bottom: 2px solid var(--gray-200);">
+                    <h2 style="color: var(--primary);">${this.currentUser.name}</h2>
+                    <p style="color: var(--gray-500);">${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}</p>
+                </div>
+
+                <div style="padding: 30px;">
+                    <h3 style="margin-bottom: 15px;">📈 Haftalık Özet</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                        <div style="padding: 20px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 12px; color: white; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold;">${grades.length > 0 ? (grades.reduce((a, g) => a + parseFloat(g.score), 0) / grades.length).toFixed(1) : '-'}</div>
+                            <div style="font-size: 12px;">Ortalama</div>
+                        </div>
+                        <div style="padding: 20px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 12px; color: white; text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold;">${myBadges.length}</div>
+                            <div style="font-size: 12px;">Rozet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderDiaries() {
+        const diaries = this.data.diaries || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Öğrenci Günlüğü</h1>
+                <button class="btn btn-primary" onclick="App.showDiaryModal()">
+                    <i class="fas fa-plus"></i> Günlük Ekle
+                </button>
+            </div>
+
+            <div id="diariesList">
+                ${this.renderDiariesList(diaries)}
+            </div>
+        `;
+    },
+
+    renderDiariesList(diaries) {
+        if (diaries.length === 0) return '<p class="empty-state">Henüz günlük yok</p>';
+        return diaries.sort((a, b) => new Date(b.date) - new Date(a.date)).map(d => `
+            <div class="card" style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                        <h4>${d.title}</h4>
+                        <p style="font-size: 12px; color: var(--gray-500);">${d.studentName || 'Öğrenci'} - ${d.date}</p>
+                    </div>
+                    <span class="badge badge-info">${d.mood || 'Normal'}</span>
+                </div>
+                <p style="font-size: 14px; color: var(--gray-600);">${d.content}</p>
+            </div>
+        `).join('');
+    },
+
+    showDiaryModal() {
+        const content = `
+            <form id="diaryForm">
+                <div class="form-group">
+                    <label>Başlık *</label>
+                    <input type="text" name="title" required placeholder="Bugün ne oldu?">
+                </div>
+                <div class="form-group">
+                    <label>Ruh Halim</label>
+                    <select name="mood">
+                        <option value="Mutlu">Mutlu 😊</option>
+                        <option value="Normal">Normal 😐</option>
+                        <option value="Üzgün">Üzgün 😢</option>
+                        <option value="Heyecanlı">Heyecanlı 🤩</option>
+                        <option value="Yorgun">Yorgun 😴</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Günlük *</label>
+                    <textarea name="content" rows="5" required placeholder="Bugün neler yaptın? Nasıl hissettin?"></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Günlük Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveDiary()' }
+        ]);
+    },
+
+    saveDiary() {
+        const form = document.getElementById('diaryForm');
+        const formData = new FormData(form);
+        const diary = {
+            id: this.generateId(),
+            studentId: this.currentUser.studentId,
+            studentName: this.currentUser.name,
+            title: formData.get('title'),
+            mood: formData.get('mood'),
+            content: formData.get('content'),
+            date: new Date().toLocaleDateString('tr-TR')
+        };
+        if (!this.data.diaries) this.data.diaries = [];
+        this.data.diaries.push(diary);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Günlük kaydedildi!');
+    },
+
+    renderMyDiary() {
+        const studentId = this.currentUser.studentId;
+        const diaries = (this.data.diaries || []).filter(d => d.studentId === studentId);
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Günlüğüm</h1>
+                <button class="btn btn-primary" onclick="App.showDiaryModal()">
+                    <i class="fas fa-plus"></i> Yeni Günlük
+                </button>
+            </div>
+            ${this.renderDiariesList(diaries)}
+        `;
+    },
+
+    renderMeals() {
+        const meals = this.data.meals || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Beslenme Takibi</h1>
+                <button class="btn btn-primary" onclick="App.showMealModal()">
+                    <i class="fas fa-plus"></i> Kayıt Ekle
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <select id="mealStudent" onchange="App.filterMeals()">
+                    <option value="">Tüm Öğrenciler</option>
+                    ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                </select>
+            </div>
+
+            <div id="mealsList">
+                ${this.renderMealsList(meals)}
+            </div>
+        `;
+    },
+
+    renderMealsList(meals) {
+        if (meals.length === 0) return '<p class="empty-state">Henüz kayıt yok</p>';
+        return meals.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20).map(m => {
+            const student = this.data.students.find(s => s.id === m.studentId);
+            return `
+                <div class="card" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4>${student?.name || 'Öğrenci'}</h4>
+                        <p style="font-size: 12px; color: var(--gray-500);">${m.date}</p>
+                    </div>
+                    <span class="badge badge-${m.status === 'yes' ? 'success' : m.status === 'no' ? 'danger' : 'warning'}">
+                        ${m.status === 'yes' ? 'Yiyecek' : m.status === 'no' ? 'Yemedi' : 'Kısmen'}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    },
+
+    filterMeals() {
+        const studentId = document.getElementById('mealStudent')?.value || '';
+        let meals = this.data.meals || [];
+        if (studentId) meals = meals.filter(m => m.studentId === studentId);
+        document.getElementById('mealsList').innerHTML = this.renderMealsList(meals);
+    },
+
+    showMealModal() {
+        const content = `
+            <form id="mealForm">
+                <div class="form-group">
+                    <label>Öğrenci *</label>
+                    <select name="studentId" required>
+                        <option value="">Seçin...</option>
+                        ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Durum</label>
+                    <select name="status">
+                        <option value="yes">Yiyecek Getirdi</option>
+                        <option value="partial">Kısmen Yedi</option>
+                        <option value="no">Yemedi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Not</label>
+                    <textarea name="note" rows="2" placeholder="Örn: Ekmek kaldı, meyve yedi..."></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Beslenme Kaydı', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Kaydet', class: 'btn-primary', action: 'App.saveMeal()' }
+        ]);
+    },
+
+    saveMeal() {
+        const form = document.getElementById('mealForm');
+        const formData = new FormData(form);
+        const meal = {
+            id: this.generateId(),
+            studentId: formData.get('studentId'),
+            status: formData.get('status'),
+            note: formData.get('note'),
+            date: new Date().toLocaleDateString('tr-TR'),
+            recordedBy: this.currentUser.name
+        };
+        if (!this.data.meals) this.data.meals = [];
+        this.data.meals.push(meal);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Kayıt eklendi!');
+    },
+
+    renderChildMeals() {
+        const studentId = this.currentUser.studentId;
+        const meals = (this.data.meals || []).filter(m => m.studentId === studentId);
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Beslenme Takibi</h1>
+            </div>
+            ${this.renderMealsList(meals)}
+        `;
+    },
+
+    renderAchievements() {
+        const achievements = this.data.achievements || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Başarı Panosu</h1>
+                <button class="btn btn-primary" onclick="App.showAchievementModal()">
+                    <i class="fas fa-plus"></i> Başarı Ekle
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🏆 Haftalık En İyiler</span>
+                </div>
+                ${achievements.length > 0 ? achievements.sort((a, b) => b.points - a.points).slice(0, 10).map((a, i) => {
+                    const student = this.data.students.find(s => s.id === a.studentId);
+                    return `
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                            <div style="width: 30px; height: 30px; background: ${i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : 'var(--gray-200)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: ${i < 3 ? 'white' : 'var(--gray-500)'}; font-weight: bold;">
+                                ${i + 1}
+                            </div>
+                            <div style="flex: 1;">
+                                <h4>${student?.name || 'Öğrenci'}</h4>
+                                <p style="font-size: 12px; color: var(--gray-500);">${a.title}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge badge-success">+${a.points} puan</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p class="empty-state">Henüz başarı eklenmedi</p>'}
+            </div>
+        `;
+    },
+
+    showAchievementModal() {
+        const content = `
+            <form id="achievementForm">
+                <div class="form-group">
+                    <label>Öğrenci *</label>
+                    <select name="studentId" required>
+                        <option value="">Seçin...</option>
+                        ${this.data.students.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Başarı *</label>
+                    <input type="text" name="title" required placeholder="örn: Matematik olimpiyatında 1. oldu">
+                </div>
+                <div class="form-group">
+                    <label>Puan</label>
+                    <input type="number" name="points" value="10" min="1">
+                </div>
+            </form>
+        `;
+        this.showModal('Başarı Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveAchievement()' }
+        ]);
+    },
+
+    saveAchievement() {
+        const form = document.getElementById('achievementForm');
+        const formData = new FormData(form);
+        const achievement = {
+            id: this.generateId(),
+            studentId: formData.get('studentId'),
+            title: formData.get('title'),
+            points: parseInt(formData.get('points')) || 10,
+            date: new Date().toLocaleDateString('tr-TR'),
+            recordedBy: this.currentUser.name
+        };
+        if (!this.data.achievements) this.data.achievements = [];
+        this.data.achievements.push(achievement);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Başarı eklendi!');
+    },
+
+    renderMyAchievements() {
+        const studentId = this.currentUser.studentId;
+        const achievements = (this.data.achievements || []).filter(a => a.studentId === studentId);
+        const totalPoints = achievements.reduce((a, b) => a + b.points, 0);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Başarılarım</h1>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon gold"><i class="fas fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <h4>${totalPoints}</h4>
+                        <p>Toplam Puan</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-medal"></i></div>
+                    <div class="stat-info">
+                        <h4>${achievements.length}</h4>
+                        <p>Başarı Sayısı</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Başarı Geçmişim</span>
+                </div>
+                ${achievements.length > 0 ? achievements.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => `
+                    <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--gray-200);">
+                        <div>
+                            <h4 style="font-size: 14px;">${a.title}</h4>
+                            <p style="font-size: 11px; color: var(--gray-400);">${a.date}</p>
+                        </div>
+                        <span class="badge badge-success">+${a.points} puan</span>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz başarı yok</p>'}
+            </div>
+        `;
+    },
+
+    renderBirthdays() {
+        const students = this.data.students || [];
+        const today = new Date();
+        const thisMonth = today.getMonth();
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Doğum Günleri</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🎂 Bu Ayki Doğum Günleri</span>
+                </div>
+                ${students.filter(s => {
+                    if (!s.birthDate) return false;
+                    const month = new Date(s.birthDate).getMonth();
+                    return month === thisMonth;
+                }).map(s => `
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid var(--gray-200);">
+                        <div class="student-avatar" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h4>${s.name}</h4>
+                            <p style="font-size: 12px; color: var(--gray-500);">${new Date(s.birthDate).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long'})}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="empty-state">Bu ay doğum günü yok</p>'}
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Tüm Doğum Günleri</h3>
+            <div class="card">
+                ${students.filter(s => s.birthDate).sort((a, b) => new Date(a.birthDate).getMonth() - new Date(b.birthDate).getMonth()).map(s => `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                        <span>${s.name}</span>
+                        <span style="color: var(--gray-500);">${new Date(s.birthDate).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long'})}</span>
+                    </div>
+                `).join('') || '<p class="empty-state">Doğum günü bilgisi yok</p>'}
+            </div>
+        `;
+    },
+
+    renderMyBirthday() {
+        const studentId = this.currentUser.studentId;
+        const student = this.data.students.find(s => s.id === studentId);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Doğum Günüm 🎂</h1>
+            </div>
+
+            <div class="card" style="text-align: center; max-width: 400px; margin: 0 auto;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #ec4899, #db2777); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 40px;">
+                    <i class="fas fa-birthday-cake"></i>
+                </div>
+                <h2>${this.currentUser.name}</h2>
+                <p style="font-size: 24px; color: var(--primary); margin: 15px 0;">
+                    ${student?.birthDate ? new Date(student.birthDate).toLocaleDateString('tr-TR', {day: 'numeric', month: 'long'}) : 'Bilgi yok'}
+                </p>
+                <p style="color: var(--gray-500);">${this.getDaysUntilBirthday(student?.birthDate)}</p>
+            </div>
+        `;
+    },
+
+    getDaysUntilBirthday(birthDate) {
+        if (!birthDate) return '';
+        const today = new Date();
+        const birth = new Date(birthDate);
+        birth.setFullYear(today.getFullYear());
+        if (birth < today) birth.setFullYear(today.getFullYear() + 1);
+        const days = Math.ceil((birth - today) / (1000 * 60 * 60 * 24));
+        if (days === 0) return '🎉 Bugün doğum günün!';
+        if (days === 1) return '🎈 Yarın doğum günün!';
+        return `${days} gün sonra doğum günün!`;
+    },
+
+    renderTournaments() {
+        const tournaments = this.data.tournaments || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Spor Turnuvaları</h1>
+                <button class="btn btn-primary" onclick="App.showTournamentModal()">
+                    <i class="fas fa-plus"></i> Turnuva Ekle
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                ${tournaments.length > 0 ? tournaments.map(t => `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h4>${t.title}</h4>
+                            <span class="badge badge-${t.status === 'active' ? 'success' : t.status === 'completed' ? 'info' : 'warning'}">
+                                ${t.status === 'active' ? 'Aktif' : t.status === 'completed' ? 'Tamamlandı' : 'Yaklaşan'}
+                            </span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 10px;">${t.description || ''}</p>
+                        <div style="display: flex; gap: 10px; font-size: 12px; color: var(--gray-400);">
+                            <span><i class="fas fa-calendar"></i> ${t.date}</span>
+                            <span><i class="fas fa-users"></i> ${t.participants?.length || 0} katılımcı</span>
+                        </div>
+                    </div>
+                `).join('') : '<p class="empty-state">Henüz turnuva yok</p>'}
+            </div>
+        `;
+    },
+
+    showTournamentModal() {
+        const content = `
+            <form id="tournamentForm">
+                <div class="form-group">
+                    <label>Turnuva Adı *</label>
+                    <input type="text" name="title" required placeholder="örn: Futbol Turnuvası">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" name="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Durum</label>
+                        <select name="status">
+                            <option value="upcoming">Yaklaşan</option>
+                            <option value="active">Aktif</option>
+                            <option value="completed">Tamamlandı</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="3"></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Turnuva Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveTournament()' }
+        ]);
+    },
+
+    saveTournament() {
+        const form = document.getElementById('tournamentForm');
+        const formData = new FormData(form);
+        const tournament = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            date: formData.get('date'),
+            status: formData.get('status'),
+            description: formData.get('description'),
+            participants: [],
+            createdBy: this.currentUser.name
+        };
+        if (!this.data.tournaments) this.data.tournaments = [];
+        this.data.tournaments.push(tournament);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Turnuva eklendi!');
+    },
+
+    renderMyTournaments() { return this.renderTournaments(); },
+
+    renderGallery() {
+        const galleries = this.data.galleries || [];
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Galeri</h1>
+                <button class="btn btn-primary" onclick="App.showGalleryModal()">
+                    <i class="fas fa-plus"></i> Fotoğraf Ekle
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                ${galleries.length > 0 ? galleries.map(g => `
+                    <div class="card" style="padding: 10px; text-align: center;">
+                        <div style="width: 100%; height: 150px; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; overflow: hidden;">
+                            ${g.image ? `<img src="${g.image}" style="max-width: 100%; max-height: 100%; object-fit: cover;">` : '<i class="fas fa-image" style="font-size: 48px; color: var(--gray-300);"></i>'}
+                        </div>
+                        <h4 style="font-size: 14px;">${g.title}</h4>
+                        <p style="font-size: 11px; color: var(--gray-500);">${g.date}</p>
+                    </div>
+                `).join('') : '<p class="empty-state">Galeri boş</p>'}
+            </div>
+        `;
+    },
+
+    showGalleryModal() {
+        const content = `
+            <form id="galleryForm">
+                <div class="form-group">
+                    <label>Başlık *</label>
+                    <input type="text" name="title" required placeholder="Fotoğraf başlığı">
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea name="description" rows="2"></textarea>
+                </div>
+            </form>
+        `;
+        this.showModal('Fotoğraf Ekle', content, [
+            { text: 'İptal', action: 'App.closeModal()' },
+            { text: 'Ekle', class: 'btn-primary', action: 'App.saveGallery()' }
+        ]);
+    },
+
+    saveGallery() {
+        const form = document.getElementById('galleryForm');
+        const formData = new FormData(form);
+        const gallery = {
+            id: this.generateId(),
+            title: formData.get('title'),
+            description: formData.get('description'),
+            date: new Date().toLocaleDateString('tr-TR'),
+            uploadedBy: this.currentUser.name
+        };
+        if (!this.data.galleries) this.data.galleries = [];
+        this.data.galleries.push(gallery);
+        this.saveData();
+        this.closeModal();
+        this.renderPage(this.currentPage);
+        this.showToast('Fotoğraf eklendi!');
+    },
+
+    renderMyGallery() { return this.renderGallery(); },
+
+    renderQuote() {
+        const quotes = this.data.quotes || [];
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)] || 'Başarı, azimle gelir!';
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Günün Sözü</h1>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 50px auto; text-align: center; padding: 50px;">
+                <i class="fas fa-quote-left" style="font-size: 48px; color: var(--primary); opacity: 0.3; margin-bottom: 20px;"></i>
+                <p style="font-size: 24px; font-style: italic; color: var(--dark); line-height: 1.6; margin-bottom: 30px;">
+                    "${randomQuote}"
+                </p>
+                <button class="btn btn-secondary" onclick="App.renderPage('quote')">
+                    <i class="fas fa-sync-alt"></i> Yeni Söz
+                </button>
+            </div>
+        `;
+    },
+
+    renderGames() {
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Zeka Oyunları</h1>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <div class="card" style="text-align: center; cursor: pointer;" onclick="App.playMathGame()">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 32px;">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Matematik Oyunu</h3>
+                    <p style="color: var(--gray-500); font-size: 13px;">Hızlı matematik soruları</p>
+                </div>
+
+                <div class="card" style="text-align: center; cursor: pointer;" onclick="App.playWordGame()">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 32px;">
+                        <i class="fas fa-spell-check"></i>
+                    </div>
+                    <h3>Kelime Oyunu</h3>
+                    <p style="color: var(--gray-500); font-size: 13px;">Kelime bilginizi test edin</p>
+                </div>
+
+                <div class="card" style="text-align: center; cursor: pointer;" onclick="App.playMemoryGame()">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 32px;">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Hafıza Oyunu</h3>
+                    <p style="color: var(--gray-500); font-size: 13px;">Eşleştirme oyunu</p>
+                </div>
+            </div>
+
+            <div id="gameArea" style="margin-top: 30px;"></div>
+        `;
+    },
+
+    playMathGame() {
+        const num1 = Math.floor(Math.random() * 20) + 1;
+        const num2 = Math.floor(Math.random() * 20) + 1;
+        const operators = ['+', '-', '*'];
+        const op = operators[Math.floor(Math.random() * operators.length)];
+        let answer;
+        switch(op) {
+            case '+': answer = num1 + num2; break;
+            case '-': answer = num1 - num2; break;
+            case '*': answer = num1 * num2; break;
+        }
+
+        const content = `
+            <div style="text-align: center; padding: 30px;">
+                <h2 style="margin-bottom: 30px;">${num1} ${op} ${num2} = ?</h2>
+                <input type="number" id="mathAnswer" style="padding: 15px; font-size: 24px; text-align: center; width: 150px; border: 2px solid var(--primary); border-radius: 8px;">
+                <button class="btn btn-primary" onclick="App.checkMathAnswer(${answer})" style="margin-left: 10px;">Kontrol Et</button>
+                <div id="mathResult" style="margin-top: 20px; font-size: 18px;"></div>
+            </div>
+        `;
+        document.getElementById('gameArea').innerHTML = content;
+    },
+
+    checkMathAnswer(correct) {
+        const userAnswer = parseInt(document.getElementById('mathAnswer').value);
+        const result = document.getElementById('mathResult');
+        if (userAnswer === correct) {
+            result.innerHTML = '<span style="color: green;">Doğru! 🎉</span>';
+        } else {
+            result.innerHTML = `<span style="color: red;">Yanlış! Doğru cevap: ${correct}</span>`;
+        }
+    },
+
+    playWordGame() {
+        const words = ['EDEBİYAT', 'MATEMATİK', 'FEN BİLİMLERİ', 'SOSYAL', 'TÜRKÇE', 'İNGİLİZCE'];
+        const word = words[Math.floor(Math.random() * words.length)];
+        const hint = word[0] + '_'.repeat(word.length - 1);
+
+        const content = `
+            <div style="text-align: center; padding: 30px;">
+                <h2>Kelime Oyunu</h2>
+                <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 20px;">Ders adını tahmin edin</p>
+                <p style="font-size: 36px; letter-spacing: 8px; margin-bottom: 20px;">${hint}</p>
+                <input type="text" id="wordAnswer" style="padding: 15px; font-size: 18px; text-align: center; text-transform: uppercase;" placeholder="Tahmininiz">
+                <button class="btn btn-primary" onclick="App.checkWordAnswer('${word}')" style="margin-left: 10px;">Tahmin Et</button>
+                <div id="wordResult" style="margin-top: 20px; font-size: 18px;"></div>
+            </div>
+        `;
+        document.getElementById('gameArea').innerHTML = content;
+    },
+
+    checkWordAnswer(correct) {
+        const userAnswer = document.getElementById('wordAnswer').value.toUpperCase();
+        const result = document.getElementById('wordResult');
+        if (userAnswer === correct) {
+            result.innerHTML = '<span style="color: green;">Doğru! 🎉</span>';
+        } else {
+            result.innerHTML = '<span style="color: red;">Yanlış! Tekrar deneyin.</span>';
+        }
+    },
+
+    playMemoryGame() {
+        const content = `
+            <div style="text-align: center; padding: 30px;">
+                <h2>Hafıza Oyunu</h2>
+                <p style="color: var(--gray-500); margin-bottom: 20px;">Yakında...</p>
+                <div style="display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; justify-content: center;">
+                    ${Array(8).fill(0).map((_, i) => `
+                        <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 8px; cursor: pointer;" onclick="this.style.background='var(--secondary)';">
+                            ?
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        document.getElementById('gameArea').innerHTML = content;
+    },
+
+    renderLoginLogs() {
+        const logs = (this.data.loginLogs || []).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 50);
+
+        return `
+            <div class="page-header">
+                <h1 class="page-title">Giriş Logları</h1>
+                <button class="btn btn-secondary" onclick="App.exportLoginLogs()">
+                    <i class="fas fa-download"></i> Dışa Aktar
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Rol</th>
+                                <th>İşlem</th>
+                                <th>Tarih/Saat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${logs.map(log => `
+                                <tr>
+                                    <td>${log.user}</td>
+                                    <td><span class="badge badge-info">${this.getRoleName(log.role)}</span></td>
+                                    <td><span class="badge badge-${log.action === 'login' ? 'success' : 'warning'}">${log.action}</span></td>
+                                    <td>${new Date(log.time).toLocaleString('tr-TR')}</td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="4" style="text-align: center;">Log yok</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    },
+
+    exportLoginLogs() {
+        const logs = this.data.loginLogs || [];
+        const dataStr = JSON.stringify(logs, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `login-logs-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        this.showToast('Loglar dışa aktarıldı!');
     }
 };
 
