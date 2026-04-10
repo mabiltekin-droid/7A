@@ -32,6 +32,11 @@
             font-size: 50px;
             color: #4f46e5;
             margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         .login-logo h1 {
             font-size: 24px;
@@ -96,6 +101,99 @@
             border-radius: 4px;
             font-family: monospace;
         }
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s;
+        }
+        .toggle-password:hover {
+            color: #4f46e5;
+        }
+        .login-success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+        .login-success-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .success-content {
+            text-align: center;
+            color: white;
+        }
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: successPop 0.5s ease;
+        }
+        @keyframes successPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .success-icon i {
+            font-size: 60px;
+            animation: checkBounce 0.5s ease 0.3s both;
+        }
+        @keyframes checkBounce {
+            0% { transform: scale(0) rotate(-45deg); }
+            50% { transform: scale(1.2) rotate(0deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .success-content h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            animation: slideUp 0.5s ease 0.4s both;
+        }
+        .success-content p {
+            font-size: 18px;
+            opacity: 0.9;
+            animation: slideUp 0.5s ease 0.5s both;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confettiFall 3s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -128,7 +226,12 @@
             </div>
             <div class="form-group">
                 <label>Şifre</label>
-                <input type="password" id="password" placeholder="Şifre" required>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Şifre" required>
+                    <span class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="passwordIcon"></i>
+                    </span>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
                 <i class="fas fa-sign-in-alt"></i> Giriş Yap
@@ -152,7 +255,29 @@
                     location.reload();
                 }
             }
+            
+            function togglePassword() {
+                const passwordInput = document.getElementById('password');
+                const passwordIcon = document.getElementById('passwordIcon');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordIcon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    passwordIcon.className = 'fas fa-eye';
+                }
+            }
         </script>
+    </div>
+
+    <div class="login-success-overlay" id="successOverlay">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2>Hoş Geldin!</h2>
+            <p>Yönlendiriliyorsunuz...</p>
+        </div>
     </div>
 
     <script>
@@ -193,6 +318,20 @@
             });
         });
 
+        function createConfetti() {
+            const overlay = document.getElementById('successOverlay');
+            const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ff9ff3', '#54a0ff'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                overlay.appendChild(confetti);
+            }
+        }
+
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
@@ -211,11 +350,17 @@
             
             if (user) {
                 localStorage.setItem('currentUser', JSON.stringify(user));
-                window.location.href = 'dashboard.html';
+                const overlay = document.getElementById('successOverlay');
+                overlay.classList.add('show');
+                createConfetti();
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
             } else {
                 const error = document.getElementById('loginError');
                 error.textContent = 'Kullanıcı adı veya şifre hatalı!';
                 error.style.display = 'block';
+                document.getElementById('password').value = '';
             }
         });
     </script>

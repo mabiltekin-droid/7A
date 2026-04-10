@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Sayfa Bulunamadı</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .error-container {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+        .error-code {
+            font-size: 150px;
+            font-weight: bold;
+            opacity: 0.3;
+            line-height: 1;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .error-icon {
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .error-icon i {
+            font-size: 80px;
+            opacity: 0.8;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        .sub-text {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 40px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: white;
+            color: #4f46e5;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .btn i {
+            font-size: 18px;
+        }
+        .funny-message {
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .funny-message p {
+            font-size: 14px;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        .emoji {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            margin-top: 30px;
+        }
+        .search-box input {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            width: 300px;
+            outline: none;
+        }
+        .search-box button {
+            padding: 15px 25px;
+            border: none;
+            background: white;
+            color: #4f46e5;
+            border-radius: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .search-box button:hover {
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <div class="error-icon">
+            <i class="fas fa-map-signs"></i>
+        </div>
+        <div class="emoji">🤔</div>
+        <h1>Eyvah, yolunu mu kaybettin?</h1>
+        <p>Aradığın sayfa burada değil gibi görünüyor.</p>
+        <p class="sub-text">Belki adresi yanlış yazdın, belki de sayfa taşındı?</p>
+        
+        <a href="index.html" class="btn">
+            <i class="fas fa-home"></i>
+            Ana Sayfaya Dön
+        </a>
+
+        <div class="funny-message">
+            <p>"Hata yapmak insanidir, ama tamamen kaybolmak sadece ortaokul öğrencisine özgüdür!" 😄</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Ne arıyordun?">
+            <button onclick="goHome()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+        
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                goHome();
+            }
+        });
+    </script>
+</body>
+</html>
