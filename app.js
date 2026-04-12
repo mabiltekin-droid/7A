@@ -8,6 +8,11 @@ const App = {
             theme: 'default'
         },
         students: [],
+    },
+
+    t(key) {
+        return i18n.t(key);
+    },
         teachers: [],
         subjects: [],
         grades: [],
@@ -106,7 +111,7 @@ const App = {
         document.getElementById('langMenu').style.display = 'none';
         this.renderNavMenu();
         this.navigate(this.currentPage);
-        this.showToast(i18n.t('settingsSaved'));
+        this.showToast(this.t('settingsSaved'));
     },
 
     checkAuth() {
@@ -826,10 +831,10 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Admin Ana Panel</h1>
+                <h1 class="page-title">${this.t('dashboard')} - Admin</h1>
                 <div style="display: flex; gap: 10px;">
                     <span style="display: flex; align-items: center; gap: 5px; color: var(--gray-500); font-size: 14px;">
-                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString('tr-TR', {weekday: 'long', day: 'numeric', month: 'long'})}
+                        <i class="fas fa-clock"></i> ${new Date().toLocaleDateString(i18n.currentLang === 'tr' ? 'tr-TR' : i18n.currentLang === 'en' ? 'en-GB' : 'es-ES', {weekday: 'long', day: 'numeric', month: 'long'})}
                     </span>
                 </div>
             </div>
@@ -839,42 +844,42 @@ const App = {
                     <div class="stat-icon blue"><i class="fas fa-users"></i></div>
                     <div class="stat-info">
                         <h4>${users.length}</h4>
-                        <p>Toplam Kullanıcı</p>
+                        <p>${this.t('totalUsers') || 'Toplam Kullanıcı'}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
                     <div class="stat-info">
                         <h4>${totalStudents}</h4>
-                        <p>Toplam Öğrenci</p>
+                        <p>${this.t('totalStudents') || 'Toplam Öğrenci'}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon green"><i class="fas fa-chalkboard-teacher"></i></div>
                     <div class="stat-info">
                         <h4>${totalTeachers}</h4>
-                        <p>Öğretmen Sayısı</p>
+                        <p>${this.t('teachers')}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange"><i class="fas fa-file-alt"></i></div>
                     <div class="stat-info">
                         <h4>${upcomingExams}</h4>
-                        <p>Yaklaşan Deneme</p>
+                        <p>${this.t('upcomingExams') || 'Yaklaşan Sınavlar'}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon purple"><i class="fas fa-chart-line"></i></div>
                     <div class="stat-info">
                         <h4>${avgGrade}</h4>
-                        <p>Sınıf Ortalaması</p>
+                        <p>${this.t('classAverage') || 'Sınıf Ortalaması'}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon red"><i class="fas fa-bell"></i></div>
                     <div class="stat-info">
                         <h4>${unreadNotifications > 0 ? unreadNotifications : '-'}</h4>
-                        <p>Okunmamış Bildirim</p>
+                        <p>${this.t('unreadNotifications') || 'Okunmamış Bildirim'}</p>
                     </div>
                 </div>
             </div>
@@ -882,49 +887,49 @@ const App = {
             <div class="quick-actions-grid">
                 <button class="quick-action-btn" onclick="App.navigate('students')">
                     <i class="fas fa-user-plus"></i>
-                    <span>Öğrenci Ekle</span>
+                    <span>${this.t('addStudent') || 'Öğrenci Ekle'}</span>
                 </button>
                 <button class="quick-action-btn" onclick="App.navigate('grades')">
                     <i class="fas fa-pen"></i>
-                    <span>Not Girişi</span>
+                    <span>${this.t('enterGrades') || 'Not Girişi'}</span>
                 </button>
                 <button class="quick-action-btn" onclick="App.navigate('attendance')">
                     <i class="fas fa-clipboard-check"></i>
-                    <span>Yoklama Al</span>
+                    <span>${this.t('takeAttendance') || 'Yoklama Al'}</span>
                 </button>
                 <button class="quick-action-btn" onclick="App.navigate('announcements')">
                     <i class="fas fa-bullhorn"></i>
-                    <span>Duyuru Yap</span>
+                    <span>${this.t('makeAnnouncement') || 'Duyuru Yap'}</span>
                 </button>
                 <button class="quick-action-btn" onclick="App.navigate('messages')">
                     <i class="fas fa-paper-plane"></i>
-                    <span>Mesaj Gönder</span>
+                    <span>${this.t('sendMessage') || 'Mesaj Gönder'}</span>
                 </button>
                 <button class="quick-action-btn" onclick="App.navigate('report')">
                     <i class="fas fa-file-pdf"></i>
-                    <span>Karne Oluştur</span>
+                    <span>${this.t('createReport') || 'Karne Oluştur'}</span>
                 </button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-user-graduate"></i> Son Eklenen Öğrenciler</span>
-                        <button class="btn btn-sm" onclick="App.navigate('students')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
+                        <span class="card-title"><i class="fas fa-user-graduate"></i> ${this.t('recentStudents') || 'Son Eklenen Öğrenciler'}</span>
+                        <button class="btn btn-sm" onclick="App.navigate('students')" style="padding: 5px 10px; font-size: 12px;">${this.t('all') || 'Tümü'}</button>
                     </div>
                     ${this.renderRecentStudents()}
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-chalkboard-teacher"></i> Son Eklenen Öğretmenler</span>
-                        <button class="btn btn-sm" onclick="App.navigate('teachers')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
+                        <span class="card-title"><i class="fas fa-chalkboard-teacher"></i> ${this.t('recentTeachers') || 'Son Eklenen Öğretmenler'}</span>
+                        <button class="btn btn-sm" onclick="App.navigate('teachers')" style="padding: 5px 10px; font-size: 12px;">${this.t('all') || 'Tümü'}</button>
                     </div>
                     ${this.renderRecentTeachers()}
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-bullhorn"></i> Son Duyurular</span>
-                        <button class="btn btn-sm" onclick="App.navigate('announcements')" style="padding: 5px 10px; font-size: 12px;">Tümü</button>
+                        <span class="card-title"><i class="fas fa-bullhorn"></i> ${this.t('recentAnnouncements')}</span>
+                        <button class="btn btn-sm" onclick="App.navigate('announcements')" style="padding: 5px 10px; font-size: 12px;">${this.t('all') || 'Tümü'}</button>
                     </div>
                     ${this.renderRecentAnnouncements()}
                 </div>
@@ -933,13 +938,13 @@ const App = {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-calendar-alt"></i> Yaklaşan Etkinlikler</span>
+                        <span class="card-title"><i class="fas fa-calendar-alt"></i> ${this.t('upcomingEvents')}</span>
                     </div>
                     ${this.renderUpcomingEvents()}
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <span class="card-title"><i class="fas fa-chart-pie"></i> Sınıf Özeti</span>
+                        <span class="card-title"><i class="fas fa-chart-pie"></i> ${this.t('classSummary')}</span>
                     </div>
                     ${this.renderClassSummary()}
                 </div>
