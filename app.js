@@ -66,6 +66,14 @@ const App = {
     init() {
         this.checkAuth();
         this.initDarkMode();
+        this.initLanguage();
+    },
+
+    initLanguage() {
+        const langDisplay = document.getElementById('currentLang');
+        if (langDisplay) {
+            langDisplay.textContent = i18n.currentLang.toUpperCase();
+        }
     },
 
     initDarkMode() {
@@ -87,9 +95,18 @@ const App = {
         const toggle = document.getElementById('darkModeToggle');
         if (toggle) {
             toggle.innerHTML = isDark 
-                ? '<i class="fas fa-sun"></i><span>Aydınlık</span>'
-                : '<i class="fas fa-moon"></i><span>Karanlık</span>';
+                ? '<i class="fas fa-sun"></i><span>' + i18n.t('lightMode') + '</span>'
+                : '<i class="fas fa-moon"></i><span>' + i18n.t('darkMode') + '</span>';
         }
+    },
+
+    changeLanguage(lang) {
+        i18n.setLang(lang);
+        document.getElementById('currentLang').textContent = lang.toUpperCase();
+        document.getElementById('langMenu').style.display = 'none';
+        this.renderNavMenu();
+        this.navigate(this.currentPage);
+        this.showToast(i18n.t('settingsSaved'));
     },
 
     checkAuth() {

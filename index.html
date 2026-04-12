@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş - Sınıf Yönetim Sistemi</title>
+    <title>Sınıf ve Okul Platformu - <span data-i18n="login">Giriş</span></title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="i18n.js"></script>
     <style>
         body {
             min-height: 100vh;
@@ -200,8 +201,14 @@
     <div class="login-container">
         <div class="login-logo">
             <i class="fas fa-graduation-cap"></i>
-            <h1>Sınıf Yönetim Sistemi</h1>
-            <p>7-A Sınıfı</p>
+            <h1 data-i18n="appTitle">Sınıf ve Okul Platformu</h1>
+            <p>7-A <span data-i18n="class">Sınıf</span></p>
+        </div>
+
+        <div class="language-selector" style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: center;">
+            <button type="button" class="lang-btn" onclick="setLanguage('tr')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">🇹🇷 TR</button>
+            <button type="button" class="lang-btn" onclick="setLanguage('en')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇬🇧 EN</button>
+            <button type="button" class="lang-btn" onclick="setLanguage('es')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇪🇸 ES</button>
         </div>
 
         <div class="login-tabs">
@@ -248,8 +255,31 @@
             </a>
         </p>
         <script>
+            function setLanguage(lang) {
+                i18n.setLang(lang);
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.style.fontWeight = '400';
+                });
+                event.target.style.fontWeight = '600';
+                updateLoginTexts();
+            }
+            
+            function updateLoginTexts() {
+                const t = i18n.t.bind(i18n);
+                document.querySelector('.demo-info strong').textContent = t('login') + ':';
+                document.querySelectorAll('.login-tab')[0].textContent = 'Admin';
+                document.querySelectorAll('.login-tab')[1].textContent = t('teachers');
+                document.querySelectorAll('.login-tab')[2].textContent = t('students');
+                document.querySelectorAll('.login-tab')[3].textContent = t('parents');
+                document.querySelector('label[for="username"]').textContent = t('username');
+                document.querySelector('label[for="password"]').textContent = t('password');
+                document.querySelector('#username').placeholder = t('username');
+                document.querySelector('#password').placeholder = t('password');
+                document.querySelector('#loginForm button').innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + t('login');
+            }
+            
             function resetUsers() {
-                if (confirm('Tüm kullanıcıları varsayılan hale getirmek istediğinize emin misiniz?')) {
+                if (confirm(i18n.t('confirm') + '?')) {
                     localStorage.removeItem('schoolUsers');
                     localStorage.removeItem('currentUser');
                     location.reload();
@@ -275,7 +305,7 @@
             <div class="success-icon">
                 <i class="fas fa-check"></i>
             </div>
-            <h2>Hoş Geldin!</h2>
+            <h2 data-i18n="welcome">Hoş Geldin</h2>
             <p>Yönlendiriliyorsunuz...</p>
         </div>
     </div>
