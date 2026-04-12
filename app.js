@@ -8,11 +8,6 @@ const App = {
             theme: 'default'
         },
         students: [],
-    },
-
-    t(key) {
-        return i18n.t(key);
-    },
         teachers: [],
         subjects: [],
         grades: [],
@@ -67,6 +62,10 @@ const App = {
     },
     currentUser: null,
     currentPage: 'dashboard',
+
+    t(key) {
+        return i18n.t(key);
+    },
 
     init() {
         this.checkAuth();
