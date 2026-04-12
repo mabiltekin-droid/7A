@@ -1596,17 +1596,17 @@ const App = {
     renderStudents() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Öğrenci Yönetimi</h1>
+                <h1 class="page-title">${this.t('studentManagement') || 'Öğrenci Yönetimi'}</h1>
                 <button class="btn btn-primary" onclick="App.showStudentModal()">
-                    <i class="fas fa-plus"></i> Yeni Öğrenci
+                    <i class="fas fa-plus"></i> ${this.t('addStudent')}
                 </button>
             </div>
 
             <div class="search-filter">
-                <input type="text" id="studentSearch" placeholder="Öğrenci ara..." oninput="App.filterStudents()">
+                <input type="text" id="studentSearch" placeholder="${this.t('searchStudent') || 'Öğrenci ara...'}" oninput="App.filterStudents()">
                 <select id="studentSort">
-                    <option value="number">Numara</option>
-                    <option value="name">İsim</option>
+                    <option value="number">${this.t('number') || 'Numara'}</option>
+                    <option value="name">${this.t('name')}</option>
                 </select>
             </div>
 
@@ -1615,12 +1615,12 @@ const App = {
                     <table>
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Ad Soyad</th>
-                                <th>Cinsiyet</th>
-                                <th>Doğum Tarihi</th>
-                                <th>Veli</th>
-                                <th>İşlemler</th>
+                                <th>${this.t('number') || 'No'}</th>
+                                <th>${this.t('fullName') || 'Ad Soyad'}</th>
+                                <th>${this.t('gender') || 'Cinsiyet'}</th>
+                                <th>${this.t('birthDate') || 'Doğum Tarihi'}</th>
+                                <th>${this.t('parent') || 'Veli'}</th>
+                                <th>${this.t('actions') || 'İşlemler'}</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTable">
@@ -1635,7 +1635,7 @@ const App = {
     renderStudentsTable(students = null) {
         const list = students || this.data.students.sort((a, b) => a.number - b.number);
         if (list.length === 0) {
-            return '<tr><td colspan="6" style="text-align: center; padding: 30px;">Henüz öğrenci eklenmedi</td></tr>';
+            return '<tr><td colspan="6" style="text-align: center; padding: 30px;">' + (this.t('noStudents') || 'Henüz öğrenci eklenmedi') + '</td></tr>';
         }
         return list.map(s => `
             <tr>
@@ -1646,7 +1646,7 @@ const App = {
                         ${s.name}
                     </div>
                 </td>
-                <td>${s.gender === 'male' ? 'Erkek' : 'Kız'}</td>
+                <td>${s.gender === 'male' ? (this.t('male') || 'Erkek') : (this.t('female') || 'Kız')}</td>
                 <td>${s.birthDate || '-'}</td>
                 <td>${s.parentName || '-'}</td>
                 <td>
@@ -1917,36 +1917,36 @@ const App = {
         
         return `
             <div class="page-header">
-                <h1 class="page-title">Not Sistemi</h1>
+                <h1 class="page-title">${this.t('grades')}</h1>
                 <button class="btn btn-primary" onclick="App.showGradeModal()">
-                    <i class="fas fa-plus"></i> Not Ekle
+                    <i class="fas fa-plus"></i> ${this.t('addGrade') || 'Not Ekle'}
                 </button>
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Not İstatistikleri</span>
+                    <span class="card-title">${this.t('gradeStats') || 'Not İstatistikleri'}</span>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
                         <div class="stat-info">
                             <h4>${this.data.grades.length}</h4>
-                            <p>Toplam Not</p>
+                            <p>${this.t('totalGrades') || 'Toplam Not'}</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
                         <div class="stat-info">
                             <h4>${this.data.grades.filter(g => parseFloat(g.score) >= 50).length}</h4>
-                            <p>Geçen Öğrenci</p>
+                            <p>${this.t('passedStudents') || 'Geçen Öğrenci'}</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
                         <div class="stat-info">
                             <h4>${this.data.grades.filter(g => parseFloat(g.score) < 50).length}</h4>
-                            <p>Kalan Öğrenci</p>
+                            <p>${this.t('failedStudents') || 'Kalan Öğrenci'}</p>
                         </div>
                     </div>
                 </div>
@@ -1954,9 +1954,9 @@ const App = {
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Not Listesi</span>
+                    <span class="card-title">${this.t('gradeList') || 'Not Listesi'}</span>
                     <select id="gradeFilterSubject" onchange="App.filterGrades()" style="padding: 5px 10px; border: 1px solid var(--gray-300); border-radius: var(--radius);">
-                        <option value="">Tüm Dersler</option>
+                        <option value="">${this.t('allSubjects') || 'Tüm Dersler'}</option>
                         ${subjects.map(s => `<option value="${s}">${s}</option>`).join('')}
                     </select>
                 </div>
@@ -1964,12 +1964,12 @@ const App = {
                     <table>
                         <thead>
                             <tr>
-                                <th>Öğrenci</th>
-                                <th>Ders</th>
-                                <th>Sınav Türü</th>
-                                <th>Puan</th>
-                                <th>Tarih</th>
-                                <th>İşlemler</th>
+                                <th>${this.t('students')}</th>
+                                <th>${this.t('subject')}</th>
+                                <th>${this.t('examType') || 'Sınav Türü'}</th>
+                                <th>${this.t('score') || 'Puan'}</th>
+                                <th>${this.t('date')}</th>
+                                <th>${this.t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody id="gradesTable">
@@ -1984,7 +1984,7 @@ const App = {
     renderGradesTable(grades = null) {
         const list = grades || this.data.grades.sort((a, b) => new Date(b.date) - new Date(a.date));
         if (list.length === 0) {
-            return '<tr><td colspan="6" style="text-align: center; padding: 30px;">Henüz not eklenmedi</td></tr>';
+            return '<tr><td colspan="6" style="text-align: center; padding: 30px;">' + (this.t('noGrades') || 'Henüz not eklenmedi') + '</td></tr>';
         }
         return list.map(g => {
             const student = this.data.students.find(s => s.id === g.studentId);
@@ -1992,7 +1992,7 @@ const App = {
             const badge = score >= 85 ? 'badge-success' : score >= 50 ? 'badge-warning' : 'badge-danger';
             return `
                 <tr>
-                    <td>${student?.name || 'Bilinmiyor'}</td>
+                    <td>${student?.name || (this.t('unknown') || 'Bilinmiyor')}</td>
                     <td>${g.subject}</td>
                     <td>${g.examType}</td>
                     <td><span class="badge ${badge}">${score}</span></td>
@@ -2155,22 +2155,22 @@ const App = {
     },
 
     renderSchedule() {
-        const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
-        const timeSlots = ['08:00-08:40', '08:50-09:30', '09:40-10:20', '10:30-11:10', '11:20-12:00', '13:00-13:40', '13:50-14:30', '14:40-15:20'];
+        const days = this.t('days') || ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+        const timeSlots = this.t('timeSlots') || ['08:00-08:40', '08:50-09:30', '09:40-10:20', '10:30-11:10', '11:20-12:00', '13:00-13:40', '13:50-14:30', '14:40-15:20'];
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Ders Programı</h1>
+                <h1 class="page-title">${this.t('schedule')}</h1>
                 ${this.currentUser.role === 'admin' ? `
                     <button class="btn btn-primary" onclick="App.showScheduleModal()">
-                        <i class="fas fa-plus"></i> Ders Ekle
+                        <i class="fas fa-plus"></i> ${this.t('addLesson') || 'Ders Ekle'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="card">
                 <div class="schedule-grid">
-                    <div class="schedule-header">Saat</div>
+                    <div class="schedule-header">${this.t('time') || 'Saat'}</div>
                     ${days.map(d => `<div class="schedule-header">${d}</div>`).join('')}
                     
                     ${timeSlots.map((slot, i) => `
@@ -2197,36 +2197,36 @@ const App = {
     },
 
     showScheduleModal() {
-        const days = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
-        const timeSlots = ['08:00-08:40', '08:50-09:30', '09:40-10:20', '10:30-11:10', '11:20-12:00', '13:00-13:40', '13:50-14:30', '14:40-15:20'];
+        const days = this.t('days') || ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
+        const timeSlots = this.t('timeSlots') || ['08:00-08:40', '08:50-09:30', '09:40-10:20', '10:30-11:10', '11:20-12:00', '13:00-13:40', '13:50-14:30', '14:40-15:20'];
 
         const content = `
             <form id="scheduleForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Gün *</label>
+                        <label>${this.t('day') || 'Gün'} *</label>
                         <select name="day" required>
-                            <option value="">Seçin...</option>
+                            <option value="">${this.t('select') || 'Seçin...'}</option>
                             ${days.map((d, i) => `<option value="${i}">${d}</option>`).join('')}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Saat *</label>
+                        <label>${this.t('time') || 'Saat'} *</label>
                         <select name="hour" required>
-                            <option value="">Seçin...</option>
+                            <option value="">${this.t('select') || 'Seçin...'}</option>
                             ${timeSlots.map((t, i) => `<option value="${i}">${t}</option>`).join('')}
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Ders *</label>
+                        <label>${this.t('subject')} *</label>
                         <input type="text" name="subject" required>
                     </div>
                     <div class="form-group">
-                        <label>Öğretmen</label>
+                        <label>${this.t('teachers')}</label>
                         <select name="teacherId">
-                            <option value="">Seçin...</option>
+                            <option value="">${this.t('select') || 'Seçin...'}</option>
                             ${this.data.teachers.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
                         </select>
                     </div>
@@ -2401,26 +2401,26 @@ const App = {
     renderAttendance() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Devamsızlık Takibi</h1>
+                <h1 class="page-title">${this.t('attendance')}</h1>
                 ${this.currentUser.role !== 'student' && this.currentUser.role !== 'parent' ? `
                     <button class="btn btn-primary" onclick="App.showAttendanceModal()">
-                        <i class="fas fa-plus"></i> Yoklama Ekle
+                        <i class="fas fa-plus"></i> ${this.t('addAttendance') || 'Yoklama Ekle'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Öğrenci Devamsızlık Özeti</span>
+                    <span class="card-title">${this.t('attendanceSummary') || 'Öğrenci Devamsızlık Özeti'}</span>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Öğrenci</th>
-                                <th>Devamsız (Gün)</th>
-                                <th>Geç (Gün)</th>
-                                <th>Detay</th>
+                                <th>${this.t('students')}</th>
+                                <th>${this.t('absentDays') || 'Devamsız (Gün)'}</th>
+                                <th>${this.t('lateDays') || 'Geç (Gün)'}</th>
+                                <th>${this.t('details') || 'Detay'}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2440,7 +2440,7 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Devamsızlığım</h1>
+                <h1 class="page-title">${this.t('myAttendance') || 'Devamsızlığım'}</h1>
             </div>
 
             <div class="stats-grid" style="margin-bottom: 20px;">
@@ -2448,35 +2448,35 @@ const App = {
                     <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
                     <div class="stat-info">
                         <h4>${absentDays}</h4>
-                        <p>Devamsız Gün</p>
+                        <p>${this.t('absentDays') || 'Devamsız Gün'}</p>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
                     <div class="stat-info">
                         <h4>${lateDays}</h4>
-                        <p>Geç Kaldığım Gün</p>
+                        <p>${this.t('lateDaysMine') || 'Geç Kaldığım Gün'}</p>
                     </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Tüm Yoklama Kayıtlarım</span>
+                    <span class="card-title">${this.t('allAttendanceRecords') || 'Tüm Yoklama Kayıtlarım'}</span>
                 </div>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Tarih</th>
-                                <th>Durum</th>
-                                <th>Açıklama</th>
+                                <th>${this.t('date')}</th>
+                                <th>${this.t('status')}</th>
+                                <th>${this.t('description')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${myAttendance.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => {
                                 const statusClass = a.status === 'present' ? 'badge-success' : a.status === 'absent' ? 'badge-danger' : 'badge-warning';
-                                const statusText = a.status === 'present' ? 'Var' : a.status === 'absent' ? 'Yok' : 'Geç';
+                                const statusText = a.status === 'present' ? (this.t('present') || 'Var') : a.status === 'absent' ? (this.t('absent') || 'Yok') : (this.t('late') || 'Geç');
                                 return `
                                     <tr>
                                         <td>${a.date}</td>
@@ -2610,10 +2610,10 @@ const App = {
     renderTeachers() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Öğretmenler</h1>
+                <h1 class="page-title">${this.t('teachers')}</h1>
                 ${this.currentUser.role === 'admin' ? `
                     <button class="btn btn-primary" onclick="App.showTeacherModal()">
-                        <i class="fas fa-plus"></i> Öğretmen Ekle
+                        <i class="fas fa-plus"></i> ${this.t('addTeacher') || 'Öğretmen Ekle'}
                     </button>
                 ` : ''}
             </div>
@@ -2623,11 +2623,11 @@ const App = {
                     <table>
                         <thead>
                             <tr>
-                                <th>Ad Soyad</th>
-                                <th>Brans</th>
-                                <th>Telefon</th>
-                                <th>E-posta</th>
-                                ${this.currentUser.role === 'admin' ? '<th>İşlemler</th>' : ''}
+                                <th>${this.t('fullName')}</th>
+                                <th>${this.t('branch') || 'Branş'}</th>
+                                <th>${this.t('phone') || 'Telefon'}</th>
+                                <th>${this.t('email') || 'E-posta'}</th>
+                                ${this.currentUser.role === 'admin' ? '<th>' + (this.t('actions') || 'İşlemler') + '</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>
@@ -2641,7 +2641,7 @@ const App = {
 
     renderTeachersTable() {
         if (this.data.teachers.length === 0) {
-            return '<tr><td colspan="5" style="text-align: center; padding: 30px;">Henüz öğretmen eklenmedi</td></tr>';
+            return '<tr><td colspan="5" style="text-align: center; padding: 30px;">' + (this.t('noTeachers') || 'Henüz öğretmen eklenmedi') + '</td></tr>';
         }
         return this.data.teachers.map(t => `
             <tr>
@@ -2889,26 +2889,26 @@ const App = {
         
         return `
             <div class="page-header">
-                <h1 class="page-title">Duyurular</h1>
+                <h1 class="page-title">${this.t('announcements')}</h1>
                 ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
                     <button class="btn btn-primary" onclick="App.showAnnouncementModal()">
-                        <i class="fas fa-plus"></i> Yeni Duyuru
+                        <i class="fas fa-plus"></i> ${this.t('newAnnouncement') || 'Yeni Duyuru'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Önemli Duyurular</span>
+                    <span class="card-title">${this.t('importantAnnouncements') || 'Önemli Duyurular'}</span>
                 </div>
-                ${announcements.filter(a => a.priority === 'high').map(a => this.renderAnnouncementCard(a)).join('') || '<p class="empty-state">Önemli duyuru yok</p>'}
+                ${announcements.filter(a => a.priority === 'high').map(a => this.renderAnnouncementCard(a)).join('') || '<p class="empty-state">' + (this.t('noImportantAnnouncements') || 'Önemli duyuru yok') + '</p>'}
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Tüm Duyurular</span>
+                    <span class="card-title">${this.t('allAnnouncements') || 'Tüm Duyurular'}</span>
                 </div>
-                ${announcements.length > 0 ? announcements.map(a => this.renderAnnouncementCard(a)).join('') : '<p class="empty-state">Henüz duyuru eklenmedi</p>'}
+                ${announcements.length > 0 ? announcements.map(a => this.renderAnnouncementCard(a)).join('') : '<p class="empty-state">' + (this.t('noAnnouncements') || 'Henüz duyuru eklenmedi') + '</p>'}
             </div>
         `;
     },
@@ -2921,14 +2921,14 @@ const App = {
             <div class="announcement-card" onclick="App.viewAnnouncement('${announcement.id}')">
                 <div class="announcement-header">
                     <div>
-                        <span class="announcement-priority ${announcement.priority}">${announcement.priority === 'high' ? 'Önemli' : announcement.priority === 'normal' ? 'Normal' : 'Bilgi'}</span>
-                        ${isNew ? '<span class="badge badge-success" style="margin-left: 8px;">Yeni</span>' : ''}
+                        <span class="announcement-priority ${announcement.priority}">${announcement.priority === 'high' ? (this.t('important') || 'Önemli') : announcement.priority === 'normal' ? (this.t('normal') || 'Normal') : (this.t('info') || 'Bilgi')}</span>
+                        ${isNew ? '<span class="badge badge-success" style="margin-left: 8px;">' + (this.t('new') || 'Yeni') + '</span>' : ''}
                     </div>
-                    <span class="announcement-date">${date.toLocaleDateString('tr-TR')}</span>
+                    <span class="announcement-date">${date.toLocaleDateString(i18n.currentLang === 'tr' ? 'tr-TR' : i18n.currentLang === 'en' ? 'en-GB' : 'es-ES')}</span>
                 </div>
                 <h3 class="announcement-title">${announcement.title}</h3>
                 <p class="announcement-content">${announcement.content.substring(0, 150)}${announcement.content.length > 150 ? '...' : ''}</p>
-                ${announcement.author ? `<p style="font-size: 12px; color: var(--gray-400); margin-top: 10px;">Yazar: ${announcement.author}</p>` : ''}
+                ${announcement.author ? `<p style="font-size: 12px; color: var(--gray-400); margin-top: 10px;">${this.t('author') || 'Yazar'}: ${announcement.author}</p>` : ''}
             </div>
         `;
     },
@@ -3203,21 +3203,63 @@ const App = {
     renderAssignments() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Ödev Yönetimi</h1>
+                <h1 class="page-title">${this.t('assignments')}</h1>
                 ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
                     <button class="btn btn-primary" onclick="App.showAssignmentModal()">
-                        <i class="fas fa-plus"></i> Yeni Ödev
+                        <i class="fas fa-plus"></i> ${this.t('newAssignment') || 'Yeni Ödev'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Ödevler</span>
+                    <span class="card-title">${this.t('assignments')}</span>
                 </div>
                 ${this.renderAssignmentsList()}
             </div>
         `;
+    },
+
+    renderAssignmentsList() {
+        const assignments = (this.data.assignments || []).sort((a, b) => new Date(b.dueDate) - new Date(a.date));
+        
+        if (assignments.length === 0) {
+            return '<p class="empty-state">' + (this.t('noAssignments') || 'Henüz ödev eklenmedi') + '</p>';
+        }
+
+        return assignments.map(a => {
+            const isOverdue = new Date(a.dueDate) < new Date() && a.status !== 'submitted';
+            const statusClass = a.status === 'submitted' ? 'submitted' : isOverdue ? 'pending' : 'pending';
+            
+            return `
+                <div class="assignment-card">
+                    <div class="assignment-header">
+                        <div class="assignment-title">
+                            <i class="fas fa-tasks"></i>
+                            ${a.title}
+                        </div>
+                        <span class="assignment-status ${statusClass}">
+                            ${a.status === 'submitted' ? (this.t('submitted') || 'Teslim Edildi') : isOverdue ? (this.t('overdue') || 'Süresi Geçti') : (this.t('pending') || 'Bekliyor')}
+                        </span>
+                    </div>
+                    <p style="color: var(--gray-500); font-size: 14px; margin-bottom: 10px;">${a.description}</p>
+                    <div class="assignment-meta">
+                        <span><i class="fas fa-book"></i> ${a.subject}</span>
+                        <span><i class="fas fa-calendar"></i> ${new Date(a.dueDate).toLocaleDateString(i18n.currentLang === 'tr' ? 'tr-TR' : i18n.currentLang === 'en' ? 'en-GB' : 'es-ES')}</span>
+                        ${a.grade !== null ? `<span><i class="fas fa-star"></i> ${a.grade}/100</span>` : ''}
+                    </div>
+                    ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
+                        <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="App.showAssignmentModal('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
+                                <i class="fas fa-edit"></i> ${this.t('edit')}
+                            </button>
+                            <button class="btn btn-danger" onclick="App.deleteAssignment('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
+                                <i class="fas fa-trash"></i> ${this.t('delete')}
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
     },
 
     renderAssignmentsList() {
@@ -3349,10 +3391,10 @@ const App = {
     renderClubs() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Kulüpler</h1>
+                <h1 class="page-title">${this.t('clubs')}</h1>
                 ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
                     <button class="btn btn-primary" onclick="App.showClubModal()">
-                        <i class="fas fa-plus"></i> Yeni Kulüp
+                        <i class="fas fa-plus"></i> ${this.t('newClub') || 'Yeni Kulüp'}
                     </button>
                 ` : ''}
             </div>
@@ -3365,7 +3407,7 @@ const App = {
 
     renderClubsList() {
         if (!this.data.clubs || this.data.clubs.length === 0) {
-            return '<div class="card" style="grid-column: 1/-1;"><p class="empty-state">Henüz kulüp eklenmedi</p></div>';
+            return '<div class="card" style="grid-column: 1/-1;"><p class="empty-state">' + (this.t('noClubs') || 'Henüz kulüp eklenmedi') + '</p></div>';
         }
 
         return this.data.clubs.map((club, i) => `
@@ -3374,7 +3416,7 @@ const App = {
                     <i class="fas fa-${club.icon || 'users'}"></i>
                 </div>
                 <h3 class="club-name">${club.name}</h3>
-                <p class="club-members">${club.members?.length || 0} üye</p>
+                <p class="club-members">${club.members?.length || 0} ${this.t('members') || 'üye'}</p>
                 ${club.description ? `<p style="font-size: 12px; color: var(--gray-500); margin-top: 10px;">${club.description.substring(0, 60)}...</p>` : ''}
             </div>
         `).join('');
@@ -3491,21 +3533,21 @@ const App = {
     renderLibrary() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Kütüphane</h1>
+                <h1 class="page-title">${this.t('library')}</h1>
                 ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
                     <button class="btn btn-primary" onclick="App.showBookModal()">
-                        <i class="fas fa-plus"></i> Kitap Ekle
+                        <i class="fas fa-plus"></i> ${this.t('addBook') || 'Kitap Ekle'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="search-filter" style="margin-bottom: 20px;">
-                <input type="text" id="bookSearch" placeholder="Kitap veya yazar ara..." oninput="App.filterBooks()">
+                <input type="text" id="bookSearch" placeholder="${this.t('searchBook') || 'Kitap veya yazar ara...'}" oninput="App.filterBooks()">
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Mevcut Kitaplar</span>
+                    <span class="card-title">${this.t('availableBooks') || 'Mevcut Kitaplar'}</span>
                 </div>
                 <div id="booksList">
                     ${this.renderBooksList()}
@@ -3516,7 +3558,7 @@ const App = {
 
     renderBooksList() {
         if (!this.data.library || this.data.library.length === 0) {
-            return '<p class="empty-state">Henüz kitap eklenmedi</p>';
+            return '<p class="empty-state">' + (this.t('noBooks') || 'Henüz kitap eklenmedi') + '</p>';
         }
 
         return this.data.library.map(book => `
@@ -3529,15 +3571,15 @@ const App = {
                     <p class="library-book-author">${book.author} - ${book.publisher || ''}</p>
                 </div>
                 <span class="library-status ${book.borrower ? 'borrowed' : 'available'}">
-                    ${book.borrower ? 'Ödünçte' : 'Mevcut'}
+                    ${book.borrower ? (this.t('borrowed') || 'Ödünçte') : (this.t('available') || 'Mevcut')}
                 </span>
                 ${!book.borrower && this.currentUser.role === 'student' ? `
                     <button class="btn btn-secondary" style="padding: 5px 15px; margin-left: 10px;" onclick="App.borrowBook('${book.id}')">
-                        Ödünç Al
+                        ${this.t('borrow') || 'Ödünç Al'}
                     </button>
                 ` : book.borrower === this.currentUser.id ? `
                     <button class="btn btn-success" style="padding: 5px 15px; margin-left: 10px;" onclick="App.returnBook('${book.id}')">
-                        İade Et
+                        ${this.t('return') || 'İade Et'}
                     </button>
                 ` : ''}
                 ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
@@ -3669,31 +3711,34 @@ const App = {
 
     renderBadges() {
         const badges = [
-            { id: 'bookworm', name: 'Kitap Kurdu', icon: 'fa-book-open', color: '#8b5cf6', desc: '10 kitap oku' },
-            { id: 'homework', name: 'Ödev Canavarı', icon: 'fa-tasks', color: '#10b981', desc: '10 ödevi zamanında teslim et' },
-            { id: 'punctual', name: 'Dakik Öğrenci', icon: 'fa-clock', color: '#f59e0b', desc: 'Bir ay boyunca geç kalma' },
-            { id: 'star', name: 'Yıldız Öğrenci', icon: 'fa-star', color: '#fbbf24', desc: '50 yıldız puan topla' },
-            { id: 'helper', name: 'Süper Yardımcı', icon: 'fa-hands-helping', color: '#3b82f6', desc: '10 kez arkadaşlarına yardım et' },
-            { id: 'reader', name: 'Okuma Ustası', icon: 'fa-glasses', color: '#ec4899', desc: '20 kitap oku' },
-            { id: 'scientist', name: 'Bilim İnsanı', icon: 'fa-flask', color: '#06b6d4', desc: 'Fen dersinde 5 ödev yap' },
-            { id: 'math', name: 'Matematik Dehası', icon: 'fa-calculator', color: '#ef4444', desc: 'Matematik notunu 90 üzerine çıkar' },
-            { id: 'perfect', name: 'Mükemmel Ay', icon: 'fa-crown', color: '#fbbf24', desc: 'Bir ay boyunca hiç devamsızlık yapma' },
-            { id: 'social', name: 'Sosyal Kelebek', icon: 'fa-comments', color: '#a855f7', desc: '10 soru sor veya cevapla' }
+            { id: 'bookworm', name: this.t('badgeBookworm') || 'Kitap Kurdu', icon: 'fa-book-open', color: '#8b5cf6', desc: this.t('badgeBookwormDesc') || '10 kitap oku' },
+            { id: 'homework', name: this.t('badgeHomework') || 'Ödev Canavarı', icon: 'fa-tasks', color: '#10b981', desc: this.t('badgeHomeworkDesc') || '10 ödevi zamanında teslim et' },
+            { id: 'punctual', name: this.t('badgePunctual') || 'Dakik Öğrenci', icon: 'fa-clock', color: '#f59e0b', desc: this.t('badgePunctualDesc') || 'Bir ay boyunca geç kalma' },
+            { id: 'star', name: this.t('badgeStar') || 'Yıldız Öğrenci', icon: 'fa-star', color: '#fbbf24', desc: this.t('badgeStarDesc') || '50 yıldız puan topla' },
+            { id: 'helper', name: this.t('badgeHelper') || 'Süper Yardımcı', icon: 'fa-hands-helping', color: '#3b82f6', desc: this.t('badgeHelperDesc') || '10 kez arkadaşlarına yardım et' },
+            { id: 'reader', name: this.t('badgeReader') || 'Okuma Ustası', icon: 'fa-glasses', color: '#ec4899', desc: this.t('badgeReaderDesc') || '20 kitap oku' },
+            { id: 'scientist', name: this.t('badgeScientist') || 'Bilim İnsanı', icon: 'fa-flask', color: '#06b6d4', desc: this.t('badgeScientistDesc') || 'Fen dersinde 5 ödev yap' },
+            { id: 'math', name: this.t('badgeMath') || 'Matematik Dehası', icon: 'fa-calculator', color: '#ef4444', desc: this.t('badgeMathDesc') || 'Matematik notunu 90 üzerine çıkar' },
+            { id: 'perfect', name: this.t('badgePerfect') || 'Mükemmel Ay', icon: 'fa-crown', color: '#fbbf24', desc: this.t('badgePerfectDesc') || 'Bir ay boyunca hiç devamsızlık yapma' },
+            { id: 'social', name: this.t('badgeSocial') || 'Sosyal Kelebek', icon: 'fa-comments', color: '#a855f7', desc: this.t('badgeSocialDesc') || '10 soru sor veya cevapla' }
         ];
-        this.data.badges = badges;
-        this.saveData();
+        
+        if (!this.data.badges || this.data.badges.length === 0) {
+            this.data.badges = badges;
+            this.saveData();
+        }
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Rozet Sistemi</h1>
+                <h1 class="page-title">${this.t('badges')}</h1>
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Kazanılabilecek Rozetler</span>
+                    <span class="card-title">${this.t('earnableBadges') || 'Kazanılabilecek Rozetler'}</span>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 15px;">
-                    ${badges.map(b => `
+                    ${(this.data.badges || badges).map(b => `
                         <div style="text-align: center; padding: 20px; background: var(--gray-100); border-radius: var(--radius); transition: all 0.3s;">
                             <div style="width: 60px; height: 60px; background: ${b.color}; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;">
                                 <i class="fas ${b.icon}" style="color: white; font-size: 24px;"></i>
