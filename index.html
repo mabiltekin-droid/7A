@@ -205,10 +205,14 @@
             <p>7-A <span data-i18n="class">Sınıf</span></p>
         </div>
 
-        <div class="language-selector" style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: center;">
+        <div class="language-selector" style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;">
             <button type="button" class="lang-btn" onclick="googleTranslateLanguage('tr')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">🇹🇷 TR</button>
             <button type="button" class="lang-btn" onclick="googleTranslateLanguage('en')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇬🇧 EN</button>
             <button type="button" class="lang-btn" onclick="googleTranslateLanguage('es')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇪🇸 ES</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('de')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇩🇪 DE</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('fr')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇫🇷 FR</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('it')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇮🇹 IT</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('ja')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇯🇵 JA</button>
         </div>
 
         <div class="login-tabs">
@@ -396,7 +400,7 @@
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {
-            new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'tr,en,es'}, 'google_translate_element');
+            new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'tr,en,es,de,fr,it,ja'}, 'google_translate_element');
         }
         function googleTranslateLanguage(lang) {
             var selectField = document.querySelector('.goog-te-combo');
