@@ -198,7 +198,6 @@
     </style>
 </head>
 <body>
-    <div id="google_translate_element" style="position: absolute; top: 10px; right: 10px; z-index: 9999;"></div>
     <div class="login-container">
         <div class="login-logo">
             <i class="fas fa-graduation-cap"></i>
@@ -207,9 +206,9 @@
         </div>
 
         <div class="language-selector" style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: center;">
-            <button type="button" class="lang-btn" onclick="setLanguage('tr')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">🇹🇷 TR</button>
-            <button type="button" class="lang-btn" onclick="setLanguage('en')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇬🇧 EN</button>
-            <button type="button" class="lang-btn" onclick="setLanguage('es')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇪🇸 ES</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('tr')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-weight: 600;">🇹🇷 TR</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('en')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇬🇧 EN</button>
+            <button type="button" class="lang-btn" onclick="googleTranslateLanguage('es')" style="padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer;">🇪🇸 ES</button>
         </div>
 
         <div class="login-tabs">
@@ -397,13 +396,20 @@
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'tr',
-                includedLanguages: 'tr,en,es',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
+            new google.translate.TranslateElement({pageLanguage: 'tr', includedLanguages: 'tr,en,es'}, 'google_translate_element');
+        }
+        function googleTranslateLanguage(lang) {
+            var selectField = document.querySelector('.goog-te-combo');
+            if (selectField) {
+                selectField.value = lang;
+                selectField.dispatchEvent(new Event('change'));
+            }
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.style.fontWeight = '400');
+            event.target.style.fontWeight = '600';
+            localStorage.setItem('appLang', lang);
         }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <div id="google_translate_element" style="display:none;"></div>
 </body>
 </html>
