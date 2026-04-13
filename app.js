@@ -2269,26 +2269,26 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">Deneme Çizelgesi</h1>
+                <h1 class="page-title">${this.t('exams')}</h1>
                 ${this.currentUser.role === 'admin' ? `
                     <button class="btn btn-primary" onclick="App.showExamModal()">
-                        <i class="fas fa-plus"></i> Deneme Ekle
+                        <i class="fas fa-plus"></i> ${this.t('addExam') || 'Deneme Ekle'}
                     </button>
                 ` : ''}
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Yaklaşan Denemeler</span>
+                    <span class="card-title">${this.t('upcomingExams')}</span>
                 </div>
-                ${upcoming.length > 0 ? upcoming.map(exam => this.renderExamCard(exam)).join('') : '<p class="empty-state">Yaklaşan deneme yok</p>'}
+                ${upcoming.length > 0 ? upcoming.map(exam => this.renderExamCard(exam)).join('') : '<p class="empty-state">' + (this.t('noUpcomingExams') || 'Yaklaşan deneme yok') + '</p>'}
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Geçmiş Denemeler</span>
+                    <span class="card-title">${this.t('pastExams') || 'Geçmiş Denemeler'}</span>
                 </div>
-                ${past.length > 0 ? past.map(exam => this.renderExamCard(exam)).join('') : '<p class="empty-state">Geçmiş deneme yok</p>'}
+                ${past.length > 0 ? past.map(exam => this.renderExamCard(exam)).join('') : '<p class="empty-state">' + (this.t('noPastExams') || 'Geçmiş deneme yok') + '</p>'}
             </div>
         `;
     },
@@ -2299,17 +2299,18 @@ const App = {
 
     renderExamCard(exam) {
         const date = new Date(exam.date);
+        const months = this.t('months') || ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
         const isPast = date < new Date();
         return `
             <div class="exam-card">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <div class="exam-date">
                         <div class="day">${date.getDate()}</div>
-                        <div class="month">${['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'][date.getMonth()]}</div>
+                        <div class="month">${months[date.getMonth()]}</div>
                     </div>
                     <div class="exam-info">
                         <h4>${exam.name}</h4>
-                        <p>${exam.subject || 'Genel'} - ${exam.duration || '-'} dk - ${exam.location || '-'}</p>
+                        <p>${exam.subject || (this.t('general') || 'Genel')} - ${exam.duration || '-'} ${this.t('minutes') || 'dk'} - ${exam.location || '-'}</p>
                     </div>
                 </div>
                 ${this.currentUser.role === 'admin' ? `
@@ -2322,7 +2323,7 @@ const App = {
         `;
     },
 
-    showExamModal(id = null) {
+    showExamModal(id) {
         const exam = id ? this.data.exams.find(e => e.id === id) : null;
         const content = `
             <form id="examForm">
@@ -2796,55 +2797,55 @@ const App = {
     renderSettings() {
         return `
             <div class="page-header">
-                <h1 class="page-title">Ayarlar</h1>
+                <h1 class="page-title">${this.t('settings')}</h1>
             </div>
 
             <div class="card" style="max-width: 600px;">
                 <div class="card-header">
-                    <span class="card-title">Sınıf Bilgileri</span>
+                    <span class="card-title">${this.t('classInfo') || 'Sınıf Bilgileri'}</span>
                 </div>
                 <form id="settingsForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Sınıf Adı</label>
+                            <label>${this.t('className') || 'Sınıf Adı'}</label>
                             <input type="text" name="className" value="${this.data.settings.className || ''}" placeholder="örn: 7-A">
                         </div>
                         <div class="form-group">
-                            <label>Sınıf Seviyesi</label>
+                            <label>${this.t('classLevel') || 'Sınıf Seviyesi'}</label>
                             <select name="classLevel">
-                                <option value="">Seçin...</option>
-                                ${[5,6,7,8,9,10,11,12].map(l => `<option value="${l}" ${this.data.settings.classLevel == l ? 'selected' : ''}>${l}. Sınıf</option>`).join('')}
+                                <option value="">${this.t('select')}</option>
+                                ${[5,6,7,8,9,10,11,12].map(l => `<option value="${l}" ${this.data.settings.classLevel == l ? 'selected' : ''}>${l}. ${this.t('grade') || 'Sınıf'}</option>`).join('')}
                             </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Dönem</label>
+                            <label>${this.t('term') || 'Dönem'}</label>
                             <select name="term">
-                                <option value="">Seçin...</option>
-                                <option value="1" ${this.data.settings.term === '1' ? 'selected' : ''}>1. Dönem</option>
-                                <option value="2" ${this.data.settings.term === '2' ? 'selected' : ''}>2. Dönem</option>
+                                <option value="">${this.t('select')}</option>
+                                <option value="1" ${this.data.settings.term === '1' ? 'selected' : ''}>${this.t('term1') || '1. Dönem'}</option>
+                                <option value="2" ${this.data.settings.term === '2' ? 'selected' : ''}>${this.t('term2') || '2. Dönem'}</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Öğretim Yılı</label>
+                            <label>${this.t('schoolYear') || 'Öğretim Yılı'}</label>
                             <input type="text" name="schoolYear" value="${this.data.settings.schoolYear || ''}" placeholder="örn: 2025-2026">
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                    <button type="submit" class="btn btn-primary">${this.t('save')}</button>
                 </form>
             </div>
 
             <div class="card" style="max-width: 600px; margin-top: 20px;">
                 <div class="card-header">
-                    <span class="card-title">Veri Yönetimi</span>
+                    <span class="card-title">${this.t('dataManagement') || 'Veri Yönetimi'}</span>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-secondary" onclick="App.exportData()">
-                        <i class="fas fa-download"></i> Verileri Dışa Aktar
+                        <i class="fas fa-download"></i> ${this.t('exportData')}
                     </button>
                     <button class="btn btn-danger" onclick="App.clearAllData()">
-                        <i class="fas fa-trash"></i> Tüm Verileri Sil
+                        <i class="fas fa-trash"></i> ${this.t('clearAllData') || 'Tüm Verileri Sil'}
                     </button>
                 </div>
             </div>
@@ -5069,17 +5070,17 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">💬 Mesajlar</h1>
+                <h1 class="page-title">💬 ${this.t('messages')}</h1>
                 <button class="btn btn-primary" onclick="App.showNewMessageModal()">
-                    <i class="fas fa-plus"></i> Yeni Mesaj
+                    <i class="fas fa-plus"></i> ${this.t('newMessage') || 'Yeni Mesaj'}
                 </button>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Tüm Mesajlar</span>
+                    <span class="card-title">${this.t('allMessages') || 'Tüm Mesajlar'}</span>
                 </div>
-                ${messages.length > 0 ? messages.map(m => this.renderMessageCard(m)).join('') : '<p class="empty-state">Henüz mesaj yok. İlk mesajı siz gönderin!</p>'}
+                ${messages.length > 0 ? messages.map(m => this.renderMessageCard(m)).join('') : '<p class="empty-state">' + (this.t('noMessages') || 'Henüz mesaj yok') + '</p>'}
             </div>
         `;
     },
@@ -5214,26 +5215,26 @@ const App = {
 
         return `
             <div class="page-header">
-                <h1 class="page-title">📁 Dosya Yönetimi</h1>
+                <h1 class="page-title">📁 ${this.t('files')}</h1>
                 <button class="btn btn-primary" onclick="App.showUploadModal()">
-                    <i class="fas fa-upload"></i> Dosya Yükle
+                    <i class="fas fa-upload"></i> ${this.t('uploadFile') || 'Dosya Yükle'}
                 </button>
             </div>
 
             <div class="search-filter" style="margin-bottom: 20px;">
-                <input type="text" id="fileSearch" placeholder="Dosya ara..." oninput="App.filterFiles()">
+                <input type="text" id="fileSearch" placeholder="${this.t('searchFile') || 'Dosya ara...'}" oninput="App.filterFiles()">
                 <select id="fileType" onchange="App.filterFiles()">
-                    <option value="">Tüm Dosyalar</option>
-                    <option value="homework">Ödev</option>
-                    <option value="material">Ders Materyali</option>
-                    <option value="exam">Sınav</option>
-                    <option value="other">Diğer</option>
+                    <option value="">${this.t('allFiles') || 'Tüm Dosyalar'}</option>
+                    <option value="homework">${this.t('homework')}</option>
+                    <option value="material">${this.t('materials')}</option>
+                    <option value="exam">${this.t('exams')}</option>
+                    <option value="other">${this.t('other') || 'Diğer'}</option>
                 </select>
             </div>
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Yüklenen Dosyalar</span>
+                    <span class="card-title">${this.t('uploadedFiles') || 'Yüklenen Dosyalar'}</span>
                 </div>
                 <div id="filesList">
                     ${this.renderFilesList(files)}
@@ -5244,7 +5245,7 @@ const App = {
 
     renderFilesList(files) {
         if (files.length === 0) {
-            return '<p class="empty-state">Henüz dosya yüklenmedi</p>';
+            return '<p class="empty-state">' + (this.t('noFiles') || 'Henüz dosya yüklenmedi') + '</p>';
         }
 
         return files.map(f => `
