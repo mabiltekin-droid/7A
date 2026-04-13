@@ -3259,52 +3259,10 @@ const App = {
                     ` : ''}
                 </div>
             `;
-    },
-
-    renderAssignmentsList() {
-        const assignments = (this.data.assignments || []).sort((a, b) => new Date(b.dueDate) - new Date(a.dueDate));
-        
-        if (assignments.length === 0) {
-            return '<p class="empty-state">Henüz ödev eklenmedi</p>';
-        }
-
-        return assignments.map(a => {
-            const isOverdue = new Date(a.dueDate) < new Date() && a.status !== 'submitted';
-            const statusClass = a.status === 'submitted' ? 'submitted' : isOverdue ? 'pending' : 'pending';
-            
-            return `
-                <div class="assignment-card">
-                    <div class="assignment-header">
-                        <div class="assignment-title">
-                            <i class="fas fa-tasks"></i>
-                            ${a.title}
-                        </div>
-                        <span class="assignment-status ${statusClass}">
-                            ${a.status === 'submitted' ? 'Teslim Edildi' : isOverdue ? 'Süresi Geçti' : 'Bekliyor'}
-                        </span>
-                    </div>
-                    <p style="color: var(--gray-500); font-size: 14px; margin-bottom: 10px;">${a.description}</p>
-                    <div class="assignment-meta">
-                        <span><i class="fas fa-book"></i> ${a.subject}</span>
-                        <span><i class="fas fa-calendar"></i> ${new Date(a.dueDate).toLocaleDateString('tr-TR')}</span>
-                        ${a.grade !== null ? `<span><i class="fas fa-star"></i> ${a.grade}/100</span>` : ''}
-                    </div>
-                    ${this.currentUser.role === 'admin' || this.currentUser.role === 'teacher' ? `
-                        <div style="margin-top: 15px; display: flex; gap: 10px;">
-                            <button class="btn btn-secondary" onclick="App.showAssignmentModal('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
-                                <i class="fas fa-edit"></i> Düzenle
-                            </button>
-                            <button class="btn btn-danger" onclick="App.deleteAssignment('${a.id}')" style="padding: 5px 15px; font-size: 12px;">
-                                <i class="fas fa-trash"></i> Sil
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
         }).join('');
     },
 
-    showAssignmentModal(id = null) {
+    showAssignmentModal(id) {
         const assignment = id ? this.data.assignments.find(a => a.id === id) : null;
         
         const content = `
