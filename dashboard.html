@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div id="google_translate_element" style="position: fixed; top: 60px; right: 10px; z-index: 9999;"></div>
     <div class="app-container">
         <aside class="sidebar">
             <div class="logo">
@@ -94,5 +95,15 @@
     <input type="file" id="importFile" accept=".json" style="display:none">
 
     <script src="app.js"></script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'tr',
+                includedLanguages: 'tr,en,es',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
